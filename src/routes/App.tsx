@@ -8,7 +8,6 @@ import { OfflineBanner } from '../components/OfflineBanner';
 import { useAuthState } from '../features/auth/AuthContext';
 import { CompleteSignupPage } from '../features/auth/CompleteSignupPage';
 import { LoginPage } from '../features/auth/LoginPage';
-import { MockAuthProvider, installMockSession } from '../features/auth/MockAuthProvider';
 import { CheckoutPage } from '../features/checkout/CheckoutPage';
 import { CorrectionPage } from '../features/correcao/CorrectionPage';
 import { CameraPage } from '../features/envio/CameraPage';
@@ -19,9 +18,10 @@ import { ProfilePage } from '../features/perfil/ProfilePage';
 import { ReviewPage } from '../features/revisao/ReviewPage';
 import { ThemesPage } from '../features/temas/ThemesPage';
 import { ApiError } from '../lib/api';
-import { clerkKey, mocksEnabled } from '../lib/env';
 
-// O SDK do Clerk só entra no pacote de quem usa o login real.
+const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
+
+// O SDK do Clerk só é carregado quando a chave está configurada.
 const ClerkAuthProvider = lazy(() => import('../features/auth/ClerkAuthProvider'));
 const SsoCallbackPage = lazy(() => import('../features/auth/ClerkCallbacks').then((m) => ({ default: m.SsoCallbackPage })));
 const VerifyEmailLinkPage = lazy(() =>
@@ -31,10 +31,6 @@ const VerifyEmailLinkPage = lazy(() =>
 const ExampleCorrectionPage = lazy(() => import('../features/correcao/ExampleCorrectionPage'));
 // Mostruário dos componentes: só existe em desenvolvimento.
 const ComponentsPage = import.meta.env.DEV ? lazy(() => import('./ComponentsPage')) : null;
-
-if (mocksEnabled) {
-  installMockSession();
-}
 
 function createQueryClient() {
   return new QueryClient({
@@ -77,9 +73,6 @@ function NotFoundPage() {
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
-  if (mocksEnabled) {
-    return <MockAuthProvider>{children}</MockAuthProvider>;
-  }
   // Sem a chave do Clerk, as telas públicas funcionam e o login fica indisponível.
   return clerkKey ? (
     <Suspense fallback={null}>

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { Correction, FeedbackRating } from '../../api/mock-types';
+import type { Correction, FeedbackRating } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { CriterionCard, ScoreSummary } from '../../components/CriterionCard';
 import { EssaySheet } from '../../components/EssaySheet';

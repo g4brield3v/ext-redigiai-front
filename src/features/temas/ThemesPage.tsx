@@ -4,7 +4,7 @@ import { Nav } from '../../components/Nav';
 import { Chip, ErrorState, Field, Skeleton, StepBar } from '../../components/primitives';
 import { ApiError } from '../../lib/api';
 import type { Schemas } from '../../lib/api';
-import type { EssaySummary } from '../../api/mock-types';
+import type { EssaySummary } from '../../api/provisional-types';
 import { useEssays, useExams, useRubric, useThemes } from '../../lib/queries';
 import { useAuthState } from '../auth/AuthContext';
 import { statusChip } from '../painel/DashboardPage';

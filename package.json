@@ -10,9 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "e2e": "playwright test",
-    "dev:mock": "vite",
-    "e2e:design": "playwright test design-compare --project=desktop-1440",
-    "build:e2e": "tsc --noEmit && vite build --mode e2e --outDir dist-e2e",
+    "build:e2e": "tsc --noEmit && vite build --outDir dist-e2e",
     "preview:e2e": "vite preview --outDir dist-e2e --port 4173 --strictPort"
   },
   "type": "module",
@@ -41,17 +39,11 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
     "jsdom": "^29.1.1",
-    "msw": "^2.15.0",
     "openapi-typescript": "^7.13.0",
     "typescript": "~5.9",
     "typescript-eslint": "^8.71.1",
     "vite": "^8.3.4",
     "vitest": "^5.0.3"
   },
-  "private": true,
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
-  }
+  "private": true
 }

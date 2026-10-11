@@ -57,7 +57,8 @@ export function mockApi(handlers: Record<string, Handler | Response>) {
   const requests: { method: string; url: URL; body: unknown; headers: Headers }[] = [];
   vi.stubGlobal(
     'fetch',
-    vi.fn(async (request: Request) => {
+    vi.fn(async (input: Request | string, init?: RequestInit) => {
+      const request = input instanceof Request ? input : new Request(input, init);
       const url = new URL(request.url);
       const text = await request.clone().text();
       requests.push({ method: request.method, url, body: text ? JSON.parse(text) : null, headers: request.headers });

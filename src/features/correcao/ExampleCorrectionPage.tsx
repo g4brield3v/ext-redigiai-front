@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Nav } from '../../components/Nav';
-import { correction } from '../../mocks/data';
 import { CorrectionView } from './CorrectionPage';
+import { exampleCorrection } from './example';
 import styles from './CorrectionPage.module.css';
 
 /** Correção de exemplo, pública, para quem chega pela página inicial. Conteúdo fixo e fictício. */
@@ -13,7 +13,7 @@ export default function ExampleCorrectionPage() {
         <Link className={styles.back} to="/">
           ← Início
         </Link>
-        <CorrectionView correction={correction} example />
+        <CorrectionView correction={exampleCorrection} example />
       </main>
     </>
   );

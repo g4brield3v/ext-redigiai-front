@@ -1,4 +1,4 @@
-import type { CorrectionMark, IllegibleWord, TranscriptionLine } from '../../api/mock-types';
+import type { CorrectionMark, IllegibleWord, TranscriptionLine } from '../../api/provisional-types';
 import type { SheetLine, SheetMark, SheetSegment } from '../../components/EssaySheet';
 
 type Range = { start: number; end: number; mark: SheetMark; criterion?: number };

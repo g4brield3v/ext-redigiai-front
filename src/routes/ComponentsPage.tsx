@@ -8,7 +8,7 @@ import { LogoMark } from '../components/Logo';
 import { Nav } from '../components/Nav';
 import { Card, Chip, Dots, ErrorState, Field, Modal, Notice, SheetThumb, Skeleton, StepBar, Window } from '../components/primitives';
 import { toSheetLines } from '../features/correcao/sheet';
-import { correction, illegibleWords } from '../mocks/data';
+import { exampleCorrection as correction, exampleIllegibleWords as illegibleWords } from '../features/correcao/example';
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import type { EssayDetail, IllegibleAnswer } from '../../api/mock-types';
+import type { EssayDetail, IllegibleAnswer } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { EssaySheet } from '../../components/EssaySheet';
 import { Nav } from '../../components/Nav';

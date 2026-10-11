@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { CheckoutResponse, Payment, PixCheckout } from '../../api/mock-types';
+import type { CheckoutResponse, Payment, PixCheckout } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
 import { CheckIcon, ErrorState, Skeleton } from '../../components/primitives';

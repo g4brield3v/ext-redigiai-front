@@ -8,21 +8,11 @@ import '@fontsource/caveat/500.css';
 import '@fontsource/caveat/600.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { mocksEnabled } from './lib/env';
 import { App } from './routes/App';
 import './styles/global.css';
 
-async function start() {
-  if (mocksEnabled) {
-    const { startMocks } = await import('./mocks/browser');
-    await startMocks();
-  }
-
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  );
-}
-
-void start();
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);

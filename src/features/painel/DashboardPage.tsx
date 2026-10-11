@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import type { EssayStatus, EssaySummary, Progress } from '../../api/mock-types';
+import type { EssayStatus, EssaySummary, Progress } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
 import { AlertIcon, Chip, ErrorState, Skeleton } from '../../components/primitives';

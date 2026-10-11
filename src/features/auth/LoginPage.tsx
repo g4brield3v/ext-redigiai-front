@@ -187,10 +187,10 @@ export function LoginPage() {
       ) : (
         <LoginFields
           next={next}
-          ready={auth.mode === 'mock'}
-          error={auth.mode === 'off' ? 'O login não está configurado neste ambiente.' : null}
-          onGoogle={() => auth.mockSignIn?.()}
-          onEmail={() => auth.mockSignIn?.()}
+          ready={false}
+          error="O login não está configurado neste ambiente."
+          onGoogle={() => {}}
+          onEmail={() => {}}
         />
       )}
       <TermsNotice />

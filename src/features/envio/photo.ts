@@ -1,4 +1,4 @@
-import type { UploadSignature } from '../../api/mock-types';
+import type { UploadSignature } from '../../api/provisional-types';
 import { ApiError, request } from '../../lib/api';
 import type { DraftPhoto } from './draft';
 

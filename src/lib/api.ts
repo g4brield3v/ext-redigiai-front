@@ -67,7 +67,7 @@ export async function unwrap<T>(call: Promise<ApiResult<T>>): Promise<T> {
 const baseUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5080';
 
 /**
- * Chamada direta para endpoints que ainda não estão no cliente gerado (tipos em `api/mock-types.ts`).
+ * Chamada direta para endpoints que ainda não estão no cliente gerado (tipos em `api/provisional-types.ts`).
  * Mesmo token e mesmo formato de erro do cliente gerado.
  */
 export async function request<T>(

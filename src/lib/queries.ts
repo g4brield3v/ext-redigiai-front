@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import type { Account, Correction, EssayDetail, EssayList, EssayStatus, Payment, Progress } from '../api/mock-types';
+import type { Account, Correction, EssayDetail, EssayList, EssayStatus, Payment, Progress } from '../api/provisional-types';
 import { api, request, unwrap } from './api';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
@@ -35,7 +35,7 @@ export function useRubric(versionId: string | null | undefined) {
   });
 }
 
-// Endpoints que ainda não estão no cliente gerado: tipos provisórios em api/mock-types.ts.
+// Endpoints que ainda não estão no cliente gerado: tipos provisórios em api/provisional-types.ts.
 
 const IN_PROGRESS: EssayStatus[] = ['uploaded', 'queued', 'processing'];
 

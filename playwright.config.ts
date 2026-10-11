@@ -1,7 +1,8 @@
 import { defineConfig } from '@playwright/test';
 
 // As telas precisam funcionar de 360 px a 1440 px (docs/02-frontend.md, princípio 9).
-// Os testes rodam sobre um build de teste (--mode e2e) com os dados simulados (MSW) no lugar da API.
+// Os testes cobrem as telas públicas sobre um build próprio (dist-e2e); as respostas da API são
+// interceptadas dentro de cada teste. As telas logadas são testadas com o Vitest (src/**/*.test.tsx).
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -10,9 +11,6 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
-  // Os testes @local (comparação com as telas e regressão visual) dependem das fontes e do antialiasing da máquina.
-  grepInvert: process.env.CI ? /@local/ : undefined,
-  snapshotPathTemplate: '{testDir}/snapshots/{arg}{ext}',
   use: {
     baseURL: 'http://localhost:4173',
     locale: 'pt-BR',
@@ -28,6 +26,7 @@ export default defineConfig({
     command: 'npm run build:e2e && npm run preview:e2e',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
-    env: { VITE_USE_MOCKS: 'true' },
+    // Sem chave do Clerk: os testes não dependem de um serviço externo de login.
+    env: { VITE_CLERK_PUBLISHABLE_KEY: '', VITE_API_URL: 'http://localhost:5080' },
   },
 });

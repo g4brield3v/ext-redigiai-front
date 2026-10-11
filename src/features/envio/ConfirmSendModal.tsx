@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import type { BatchEssayRequest, BatchEssayResponse } from '../../api/mock-types';
+import type { BatchEssayRequest, BatchEssayResponse } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { Modal, Notice, SheetThumb, Skeleton } from '../../components/primitives';
 import { errorMessage, request } from '../../lib/api';
