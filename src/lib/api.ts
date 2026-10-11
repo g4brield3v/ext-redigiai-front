@@ -26,6 +26,25 @@ export function setTokenSource(source: TokenSource) {
   tokenSource = source;
 }
 
+let devUser: string | null = null;
+
+/** Só no ambiente de desenvolvimento: o aluno de teste que entra no lugar do login (cabeçalho `X-Dev-User`). */
+export function setDevUser(key: string | null) {
+  devUser = key;
+}
+
+/** Identifica quem chama: o token da sessão ou, em desenvolvimento, o aluno de teste. */
+async function authorize(headers: Headers) {
+  if (devUser) {
+    headers.set('X-Dev-User', devUser);
+    return;
+  }
+  const token = await tokenSource();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+}
+
 export const api = createClient<paths>({
   baseUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5080',
   // Resolvido a cada chamada, para os testes poderem trocar o fetch global.
@@ -34,10 +53,7 @@ export const api = createClient<paths>({
 
 api.use({
   async onRequest({ request }) {
-    const token = await tokenSource();
-    if (token) {
-      request.headers.set('Authorization', `Bearer ${token}`);
-    }
+    await authorize(request.headers);
     return request;
   },
   onError() {
@@ -76,10 +92,7 @@ export async function request<T>(
   options: { body?: unknown; idempotencyKey?: string } = {},
 ): Promise<T> {
   const headers = new Headers();
-  const token = await tokenSource();
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
+  await authorize(headers);
   if (options.body !== undefined) {
     headers.set('Content-Type', 'application/json');
   }

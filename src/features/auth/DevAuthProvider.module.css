@@ -1,0 +1,38 @@
+/* Barra do ambiente de teste: não faz parte das telas aprovadas e nunca entra no build de produção. */
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  padding: 6px 16px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 13px;
+}
+
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 11.5px;
+  color: #ffd98a;
+}
+
+.picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.picker select {
+  max-width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid #46536b;
+  background: #16264a;
+  color: #fff;
+  font: inherit;
+}
