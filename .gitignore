@@ -1,0 +1,15 @@
+node_modules/
+dist/
+dist-e2e/
+test-results/
+playwright-report/
+
+# Configuração local: nunca vai para o repositório.
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+.vs/
+.vscode/

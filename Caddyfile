@@ -1,0 +1,32 @@
+# Servidor do front-end em produção (Railway): arquivos estáticos, rotas do React e cabeçalhos de segurança.
+# API_ORIGIN e CLERK_ORIGIN são variáveis do serviço, por exemplo:
+#   API_ORIGIN=https://api.redigiai.com.br      CLERK_ORIGIN=https://clerk.redigiai.com.br
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode zstd gzip
+
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self' {$CLERK_ORIGIN} https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://img.clerk.com https://res.cloudinary.com; connect-src 'self' {$API_ORIGIN} {$CLERK_ORIGIN} https://api.cloudinary.com https://*.client.protect.clerk.com; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# Os arquivos de /assets têm hash no nome e podem ficar em cache; o index.html não.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+	@pages not path /assets/*
+	header @pages Cache-Control "no-cache"
+
+	# Qualquer rota que não seja um arquivo cai no index.html (rotas do React Router).
+	try_files {path} /index.html
+	file_server
+}

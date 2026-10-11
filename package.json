@@ -5,13 +5,14 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "gen:api": "openapi-typescript ../api/openapi.json -o src/api/schema.d.ts",
+    "gen:api": "openapi-typescript openapi.json -o src/api/schema.d.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "e2e": "playwright test",
     "build:e2e": "tsc --noEmit && vite build --outDir dist-e2e",
-    "preview:e2e": "vite preview --outDir dist-e2e --port 4173 --strictPort"
+    "preview:e2e": "vite preview --outDir dist-e2e --port 4173 --strictPort",
+    "sync:api": "node scripts/sync-api.mjs"
   },
   "type": "module",
   "dependencies": {

@@ -11,6 +11,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  // Folga para a primeira carga de cada navegador em máquinas lentas.
+  expect: { timeout: 10_000 },
   use: {
     baseURL: 'http://localhost:4173',
     locale: 'pt-BR',

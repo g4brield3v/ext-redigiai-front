@@ -1,0 +1,12 @@
+.git
+.github
+.claude
+node_modules
+dist
+dist-e2e
+test-results
+playwright-report
+docs
+e2e
+.env
+.env.*
