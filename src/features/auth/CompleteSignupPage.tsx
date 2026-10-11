@@ -6,6 +6,7 @@ import { Button } from '../../components/Button';
 import { ErrorState, Field, Skeleton } from '../../components/primitives';
 import { ApiError, api, unwrap } from '../../lib/api';
 import { useAuthState } from './AuthContext';
+import { useSignOut } from './useSignOut';
 import { LoginShell, TermsNotice } from './LoginPage';
 import styles from './LoginPage.module.css';
 import { clearPendingSignup, maskBirthDate, parseBirthDate, readPendingSignup, safeNext } from './signup';
@@ -16,6 +17,7 @@ import { clearPendingSignup, maskBirthDate, parseBirthDate, readPendingSignup, s
  */
 export function CompleteSignupPage() {
   const auth = useAuthState();
+  const signOut = useSignOut();
   const queryClient = useQueryClient();
   const [pending] = useState(readPendingSignup);
   const [birth, setBirth] = useState('');
@@ -81,7 +83,7 @@ export function CompleteSignupPage() {
         <p className={styles.error} role="alert">
           {underAge.message}
         </p>
-        <Button variant="ghost" block onClick={() => void auth.signOut()}>
+        <Button variant="ghost" block onClick={() => void signOut()}>
           Sair
         </Button>
       </div>

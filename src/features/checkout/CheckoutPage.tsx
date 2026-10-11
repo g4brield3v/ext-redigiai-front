@@ -17,14 +17,56 @@ const SINGLE_CENTS = 1600;
 type Product = 'plan' | 'single';
 type Method = 'pix' | 'card';
 
-/** Pix: QR code e copia-e-cola vindos da API, consultando o pagamento a cada 3 s até aprovar. */
-function PixPayment({ pix, onApproved }: { pix: PixCheckout; onApproved: () => void }) {
-  const [copied, setCopied] = useState(false);
-  const payment = useQuery({
-    queryKey: ['payment', pix.paymentId],
-    queryFn: () => request<Payment>('GET', `/v1/payments/${pix.paymentId}`),
+/** O checkout do cartão é do Mercado Pago; qualquer outro destino é recusado. */
+function isCheckoutUrl(url: string) {
+  try {
+    const target = new URL(url, window.location.origin);
+    return (
+      target.origin === window.location.origin ||
+      (target.protocol === 'https:' && /(^|\.)mercadopago\.com(\.br)?$/.test(target.hostname))
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Situação do pagamento, sempre perguntada ao backend (que consulta o Mercado Pago): a tela nunca
+ * mostra "aprovado" por conta própria. Consulta a cada 3 s enquanto estiver pendente.
+ */
+function usePaymentStatus(paymentId: string) {
+  return useQuery({
+    queryKey: ['payment', paymentId],
+    queryFn: () => request<Payment>('GET', `/v1/payments/${encodeURIComponent(paymentId)}`),
     refetchInterval: (query) => (query.state.data?.status === 'pending' || !query.state.data ? 3000 : false),
   });
+}
+
+/** Volta do checkout do cartão: mostra o resultado que o backend confirmar. */
+function ReturnedPayment({ paymentId, onApproved }: { paymentId: string; onApproved: () => void }) {
+  const payment = usePaymentStatus(paymentId);
+
+  if (payment.error) {
+    return <ErrorState message={errorMessage(payment.error)} onRetry={() => void payment.refetch()} />;
+  }
+  if (payment.data?.status === 'approved') {
+    return <Approved onContinue={onApproved} />;
+  }
+  if (payment.data && payment.data.status !== 'pending') {
+    return <ErrorState message="O pagamento não foi aprovado. Tente outro meio de pagamento." />;
+  }
+  return (
+    <section className={styles.card} aria-live="polite" aria-busy="true">
+      <h2 className="h3">Confirmando o pagamento</h2>
+      <span className="muted">Isso leva alguns segundos. A página avisa assim que o pagamento for aprovado.</span>
+    </section>
+  );
+}
+
+/** Pix: QR code e copia-e-cola vindos da API. */
+function PixPayment({ pix, onApproved }: { pix: PixCheckout; onApproved: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const payment = usePaymentStatus(pix.paymentId);
 
   if (payment.data?.status === 'approved') {
     return <Approved onContinue={onApproved} />;
@@ -87,23 +129,33 @@ export function CheckoutPage() {
 
   const needsGuardian = account.data?.needsGuardianAuthorization ?? false;
   const hasPlan = account.data?.subscription?.status === 'active';
-  const returned = params.get('pagamento') === 'aprovado';
+  const returnedPaymentId = params.get('pagamento');
+  // Uma chave por intenção de compra: repetir o clique (ou a tentativa) não cria um segundo pagamento.
+  // Ela só muda quando muda o que está sendo comprado.
+  const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
+  const [redirectError, setRedirectError] = useState(false);
+
+  function change<T>(setter: (value: T) => void, value: T) {
+    setter(value);
+    setIdempotencyKey(crypto.randomUUID());
+  }
 
   const checkout = useMutation({
     mutationFn: () =>
       product === 'plan'
-        ? request<CheckoutResponse>('POST', '/v1/checkout/plan', {
-            idempotencyKey: crypto.randomUUID(),
-            body: { guardianAuthorized },
-          })
+        ? request<CheckoutResponse>('POST', '/v1/checkout/plan', { idempotencyKey, body: { guardianAuthorized } })
         : request<CheckoutResponse>('POST', '/v1/checkout/single', {
-            idempotencyKey: crypto.randomUUID(),
+            idempotencyKey,
             body: { quantity, method, guardianAuthorized },
           }),
     onSuccess: (response) => {
       // Cartão: o pagamento acontece na página do Mercado Pago; o número do cartão nunca passa por aqui.
       if (response.method === 'card') {
-        window.location.assign(response.checkoutUrl);
+        if (isCheckoutUrl(response.checkoutUrl)) {
+          window.location.assign(response.checkoutUrl);
+        } else {
+          setRedirectError(true);
+        }
       }
     },
   });
@@ -129,8 +181,8 @@ export function CheckoutPage() {
           <h1 className="serif h1">Escolha como quer corrigir</h1>
         </div>
 
-        {returned ? (
-          <Approved onContinue={() => void finish()} />
+        {returnedPaymentId ? (
+          <ReturnedPayment paymentId={returnedPaymentId} onApproved={() => void finish()} />
         ) : pix ? (
           <PixPayment pix={pix} onApproved={() => void finish()} />
         ) : !account.data ? (
@@ -150,7 +202,7 @@ export function CheckoutPage() {
             <fieldset className={styles.options}>
               <legend className="visually-hidden">O que você quer comprar</legend>
               <label className={product === 'single' ? styles.optionOn : undefined}>
-                <input type="radio" name="produto" checked={product === 'single'} onChange={() => setProduct('single')} />
+                <input type="radio" name="produto" checked={product === 'single'} onChange={() => change(setProduct, 'single')} />
                 <span>
                   <span className={styles.strong}>Correção avulsa</span>
                   <span className="muted">R$ 16 por correção · Pix ou cartão · não vence</span>
@@ -162,7 +214,7 @@ export function CheckoutPage() {
                   name="produto"
                   checked={product === 'plan'}
                   disabled={hasPlan}
-                  onChange={() => setProduct('plan')}
+                  onChange={() => change(setProduct, 'plan')}
                 />
                 <span>
                   <span className={styles.strong}>Plano semanal{hasPlan ? ' · você já assina' : ''}</span>
@@ -178,7 +230,7 @@ export function CheckoutPage() {
                     <label htmlFor="quantidade" className={styles.label}>
                       Quantidade
                     </label>
-                    <select id="quantidade" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))}>
+                    <select id="quantidade" value={quantity} onChange={(event) => change(setQuantity, Number(event.target.value))}>
                       {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
                         <option key={value} value={value}>
                           {value}
@@ -189,11 +241,11 @@ export function CheckoutPage() {
                   <fieldset className={styles.methods}>
                     <legend className={styles.label}>Forma de pagamento</legend>
                     <label>
-                      <input type="radio" name="metodo" checked={method === 'pix'} onChange={() => setMethod('pix')} />
+                      <input type="radio" name="metodo" checked={method === 'pix'} onChange={() => change(setMethod, 'pix')} />
                       Pix
                     </label>
                     <label>
-                      <input type="radio" name="metodo" checked={method === 'card'} onChange={() => setMethod('card')} />
+                      <input type="radio" name="metodo" checked={method === 'card'} onChange={() => change(setMethod, 'card')} />
                       Cartão de crédito
                     </label>
                   </fieldset>
@@ -226,6 +278,7 @@ export function CheckoutPage() {
               </p>
 
               {checkout.error && <ErrorState message={errorMessage(checkout.error)} />}
+              {redirectError && <ErrorState message="Algo deu errado do nosso lado. Tente novamente em instantes." />}
 
               <Button type="submit" block disabled={checkout.isPending || (needsGuardian && !guardianAuthorized)}>
                 {product === 'plan' ? 'Assinar o plano semanal' : method === 'pix' ? 'Gerar Pix' : 'Pagar com cartão'}

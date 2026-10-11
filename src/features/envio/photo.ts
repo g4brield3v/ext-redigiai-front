@@ -48,6 +48,10 @@ export async function preparePhoto(file: File): Promise<DraftPhoto> {
 /** Envia a foto direto ao Cloudinary com a assinatura do backend e devolve o id do arquivo. */
 export async function uploadPhoto(photo: DraftPhoto): Promise<string> {
   const signature = await request<UploadSignature>('POST', '/v1/uploads/sign');
+  // A foto só sai do navegador para o Cloudinary, mesmo que a resposta da API venha adulterada.
+  if (!signature.uploadUrl.startsWith('https://api.cloudinary.com/')) {
+    throw new ApiError('INTERNAL_ERROR', 'Algo deu errado do nosso lado. Tente novamente em instantes.', false, 0);
+  }
   const form = new FormData();
   for (const [key, value] of Object.entries(signature.fields)) {
     form.append(key, value);

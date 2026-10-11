@@ -13,11 +13,16 @@ export type Draft = {
   parentEssayId?: string;
 };
 
+type StoredDraft = Draft & { savedAt: number };
+
+/** Um rascunho esquecido (login abandonado, computador compartilhado) não fica guardado além disso. */
+const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
 const DATABASE = 'redigiai';
 const STORE = 'draft';
 const KEY = 'current';
 
-let memory: Draft | null = null;
+let memory: StoredDraft | null = null;
 
 function open(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -42,20 +47,28 @@ async function run<T>(mode: IDBTransactionMode, action: (store: IDBObjectStore) 
 }
 
 export async function saveDraft(draft: Draft) {
-  memory = draft;
+  const stored: StoredDraft = { ...draft, savedAt: Date.now() };
+  memory = stored;
   try {
-    await run('readwrite', (store) => store.put(draft, KEY));
+    await run('readwrite', (store) => store.put(stored, KEY));
   } catch {
     // Sem IndexedDB (modo privado): o rascunho vale enquanto a página não for recarregada.
   }
 }
 
 export async function loadDraft(): Promise<Draft | null> {
+  let stored = memory;
   try {
-    return ((await run('readonly', (store) => store.get(KEY))) as Draft | undefined) ?? memory;
+    stored = ((await run('readonly', (store) => store.get(KEY))) as StoredDraft | undefined) ?? memory;
   } catch {
-    return memory;
+    // Sem IndexedDB: vale o que está na memória da página.
   }
+
+  if (stored && Date.now() - (stored.savedAt ?? 0) > MAX_AGE_MS) {
+    await clearDraft();
+    return null;
+  }
+  return stored;
 }
 
 export async function clearDraft() {

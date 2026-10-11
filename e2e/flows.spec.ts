@@ -249,6 +249,51 @@ test.describe('checkout', () => {
   });
 });
 
+test.describe('segurança no navegador', () => {
+  test('a tela só mostra "aprovado" quando o backend confirma o pagamento', async ({ page }) => {
+    await signIn(page);
+    await page.goto('/comprar?pagamento=aprovado');
+
+    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByText('Pagamento aprovado')).toHaveCount(0);
+  });
+
+  test('cartão: volta do checkout e mostra o resultado confirmado pelo backend', async ({ page }) => {
+    await signIn(page);
+    await page.goto('/comprar');
+    await page.getByRole('radio', { name: 'Cartão de crédito', exact: true }).check();
+    await page.getByRole('button', { name: 'Pagar com cartão' }).click();
+
+    await expect(page).toHaveURL(/\/comprar\?pagamento=payment-/);
+    await expect(page.getByText('Pagamento aprovado')).toBeVisible();
+  });
+
+  test('sair apaga a foto guardada e os dados do aluno', async ({ page }) => {
+    await page.goto(`/temas/${THEME_ID}`);
+    await choosePhoto(page);
+    await page.getByRole('button', { name: 'Enviar para correção' }).click();
+    await page.getByRole('dialog', { name: 'Entre para enviar sua redação' }).getByRole('button', { name: 'Continuar com Google' }).click();
+    await page.getByRole('dialog', { name: 'Confirme o envio' }).getByRole('button', { name: 'Voltar e revisar' }).click();
+
+    await page.getByRole('link', { name: 'Meu perfil' }).click();
+    await expect(page.getByLabel('Nome')).toHaveValue('Ana Souza');
+    await page.getByRole('button', { name: 'Sair' }).click();
+    await expect(page.getByRole('link', { name: 'Entrar' })).toBeVisible();
+
+    // A próxima pessoa no mesmo navegador não encontra a foto nem o rascunho.
+    await page.goto(`/temas/${THEME_ID}`);
+    await expect(page.getByText('Tire a foto ou arraste o arquivo')).toBeVisible();
+    await expect(page.getByText('foto-redacao.jpg')).toHaveCount(0);
+  });
+
+  test('destino depois do login nunca sai do site', async ({ page }) => {
+    await page.goto('/entrar?next=//evil.test/roubo');
+    await page.getByRole('button', { name: 'Continuar com Google' }).click();
+
+    await expect(page).toHaveURL(/localhost:4173\/temas$/);
+  });
+});
+
 test.describe('largura da página', () => {
   for (const screen of screens) {
     test(`${screen.name} não rola para os lados`, async ({ page }) => {

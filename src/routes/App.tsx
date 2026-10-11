@@ -10,7 +10,7 @@ import { CompleteSignupPage } from '../features/auth/CompleteSignupPage';
 import { LoginPage } from '../features/auth/LoginPage';
 import { MockAuthProvider, installMockSession } from '../features/auth/MockAuthProvider';
 import { CheckoutPage } from '../features/checkout/CheckoutPage';
-import { CorrectionPage, ExampleCorrectionPage } from '../features/correcao/CorrectionPage';
+import { CorrectionPage } from '../features/correcao/CorrectionPage';
 import { CameraPage } from '../features/envio/CameraPage';
 import { ThemePage } from '../features/envio/ThemePage';
 import { HomePage } from '../features/home/HomePage';
@@ -27,6 +27,8 @@ const SsoCallbackPage = lazy(() => import('../features/auth/ClerkCallbacks').the
 const VerifyEmailLinkPage = lazy(() =>
   import('../features/auth/ClerkCallbacks').then((m) => ({ default: m.VerifyEmailLinkPage })),
 );
+// A correção de exemplo traz os próprios dados e só é carregada por quem abre /exemplo.
+const ExampleCorrectionPage = lazy(() => import('../features/correcao/ExampleCorrectionPage'));
 // Mostruário dos componentes: só existe em desenvolvimento.
 const ComponentsPage = import.meta.env.DEV ? lazy(() => import('./ComponentsPage')) : null;
 
@@ -52,7 +54,8 @@ function ScrollManager() {
 
   useEffect(() => {
     if (hash) {
-      document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView();
+      // As âncoras do site são ASCII; o id vai direto, sem decodificar o que veio da URL.
+      document.getElementById(hash.slice(1))?.scrollIntoView();
     } else {
       window.scrollTo(0, 0);
     }

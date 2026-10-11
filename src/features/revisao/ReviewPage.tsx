@@ -35,11 +35,17 @@ function ConfirmWordsModal({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const send = useMutation({
-    mutationFn: () => request<void>('PUT', `/v1/essays/${essay.id}/illegible`, { body: answers }),
+    mutationFn: () => request<void>('PUT', `/v1/essays/${encodeURIComponent(essay.id)}/illegible`, { body: answers }),
     onSuccess: async () => {
       localStorage.removeItem(draftKey(essay.id));
       await queryClient.invalidateQueries();
       navigate('/painel');
+    },
+    onError: (error) => {
+      // Prazo vencido: a redação foi cancelada e o que estava digitado não serve mais.
+      if (error instanceof ApiError && error.code === 'REVIEW_EXPIRED') {
+        localStorage.removeItem(draftKey(essay.id));
+      }
     },
   });
   const expired = send.error instanceof ApiError && send.error.code === 'REVIEW_EXPIRED';

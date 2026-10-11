@@ -64,7 +64,7 @@ export function useEssays(enabled = true) {
 export function useEssay(id: string | undefined) {
   return useQuery({
     queryKey: ['essay', id],
-    queryFn: () => request<EssayDetail>('GET', `/v1/essays/${id}`),
+    queryFn: () => request<EssayDetail>('GET', `/v1/essays/${encodeURIComponent(id!)}`),
     enabled: !!id,
   });
 }
@@ -72,7 +72,7 @@ export function useEssay(id: string | undefined) {
 export function useCorrection(id: string | undefined) {
   return useQuery({
     queryKey: ['correction', id],
-    queryFn: () => request<Correction>('GET', `/v1/essays/${id}/correction`),
+    queryFn: () => request<Correction>('GET', `/v1/essays/${encodeURIComponent(id!)}/correction`),
     enabled: !!id,
   });
 }

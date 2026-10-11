@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
 // As telas precisam funcionar de 360 px a 1440 px (docs/02-frontend.md, princípio 9).
-// Os testes rodam sobre o build de produção com os dados simulados (MSW) no lugar da API.
+// Os testes rodam sobre um build de teste (--mode e2e) com os dados simulados (MSW) no lugar da API.
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -24,7 +24,8 @@ export default defineConfig({
     { name: 'mobile-360', use: { viewport: { width: 360, height: 740 }, hasTouch: true } },
   ],
   webServer: {
-    command: 'npm run build && npm run preview -- --port 4173 --strictPort',
+    // Build próprio dos testes (dist-e2e), separado do build de produção (dist).
+    command: 'npm run build:e2e && npm run preview:e2e',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     env: { VITE_USE_MOCKS: 'true' },

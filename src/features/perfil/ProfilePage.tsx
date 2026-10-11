@@ -9,7 +9,7 @@ import { ErrorState, Field, Modal, Skeleton } from '../../components/primitives'
 import { errorMessage, request } from '../../lib/api';
 import { formatDay, formatFullDate, formatMoney } from '../../lib/format';
 import { useAccount, useExams, usePayments } from '../../lib/queries';
-import { useAuthState } from '../auth/AuthContext';
+import { useSignOut } from '../auth/useSignOut';
 import styles from './ProfilePage.module.css';
 
 const sections = [
@@ -130,7 +130,7 @@ function PurchasesSection({ account }: { account: Account }) {
   const queryClient = useQueryClient();
   const [managing, setManaging] = useState(false);
   const refund = useMutation({
-    mutationFn: (paymentId: string) => request<void>('POST', `/v1/payments/${paymentId}/refund-request`),
+    mutationFn: (paymentId: string) => request<void>('POST', `/v1/payments/${encodeURIComponent(paymentId)}/refund-request`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payments'] }),
   });
   const { subscription } = account;
@@ -180,7 +180,11 @@ function PurchasesSection({ account }: { account: Account }) {
                     Desistir da compra
                   </button>
                 )}
-                {payment.receiptUrl && <a href={payment.receiptUrl}>Recibo</a>}
+                {payment.receiptUrl && (
+                  <a href={payment.receiptUrl} rel="noopener noreferrer">
+                    Recibo
+                  </a>
+                )}
               </span>
             </li>
           ))}
@@ -224,14 +228,14 @@ function NoticesSection({ account }: { account: Account }) {
 }
 
 function DeleteAccountModal({ onClose }: { onClose: () => void }) {
-  const auth = useAuthState();
+  const signOut = useSignOut();
   const navigate = useNavigate();
   const [confirmation, setConfirmation] = useState('');
   const remove = useMutation({
     mutationFn: () => request<void>('DELETE', '/v1/me'),
     onSuccess: async () => {
-      await auth.signOut();
       navigate('/');
+      await signOut();
     },
   });
 
@@ -301,7 +305,7 @@ function PrivacySection() {
 /** 10 · Meu perfil. */
 export function ProfilePage() {
   const account = useAccount();
-  const auth = useAuthState();
+  const signOut = useSignOut();
   const navigate = useNavigate();
   const { hash } = useLocation();
   const current = sections.some((section) => `#${section.id}` === hash) ? hash.slice(1) : 'dados';
@@ -338,7 +342,11 @@ export function ProfilePage() {
             <Button
               variant="ghost"
               className={styles.signOut}
-              onClick={() => void auth.signOut().then(() => navigate('/'))}
+              onClick={() => {
+                // Sai da rota logada antes de encerrar a sessão, para não passar pela tela de login.
+                navigate('/');
+                void signOut();
+              }}
             >
               Sair
             </Button>

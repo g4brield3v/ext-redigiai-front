@@ -10,7 +10,6 @@ import { ErrorState, Modal, Skeleton } from '../../components/primitives';
 import { errorMessage, request } from '../../lib/api';
 import { formatDay } from '../../lib/format';
 import { useCorrection } from '../../lib/queries';
-import { correction as exampleCorrection } from '../../mocks/data';
 import styles from './CorrectionPage.module.css';
 import { blankLines, toSheetLines } from './sheet';
 
@@ -21,14 +20,15 @@ const ratings: { value: FeedbackRating; label: string }[] = [
 ];
 
 function rewriteLink(correction: Correction) {
-  return `/temas/${correction.themeId}?tipo=${correction.essayTypeId}&reescrever=${correction.essayId}`;
+  const [theme, type, essay] = [correction.themeId, correction.essayTypeId, correction.essayId].map(encodeURIComponent);
+  return `/temas/${theme}?tipo=${type}&reescrever=${essay}`;
 }
 
 function PhotoModal({ essayId, onClose }: { essayId: string; onClose: () => void }) {
   // A URL assinada vale 5 minutos: pedida de novo a cada abertura, sem cache.
   const photo = useQuery({
     queryKey: ['photo', essayId],
-    queryFn: () => request<{ url: string }>('GET', `/v1/essays/${essayId}/photo`),
+    queryFn: () => request<{ url: string }>('GET', `/v1/essays/${encodeURIComponent(essayId)}/photo`),
     staleTime: 0,
     gcTime: 0,
   });
@@ -53,7 +53,7 @@ function Feedback({ correction }: { correction: Correction }) {
   const [missing, setMissing] = useState(false);
   const send = useMutation({
     mutationFn: () =>
-      request<void>('POST', `/v1/corrections/${correction.id}/feedback`, {
+      request<void>('POST', `/v1/corrections/${encodeURIComponent(correction.id)}/feedback`, {
         body: { rating, comment: comment.trim() || null },
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['correction'] }),
@@ -286,21 +286,6 @@ export function CorrectionPage() {
         ) : (
           <CorrectionSkeleton />
         )}
-      </main>
-    </>
-  );
-}
-
-/** Correção de exemplo, pública, para quem chega pela página inicial. */
-export function ExampleCorrectionPage() {
-  return (
-    <>
-      <Nav />
-      <main className={`container ${styles.page}`}>
-        <Link className={styles.back} to="/">
-          ← Início
-        </Link>
-        <CorrectionView correction={exampleCorrection} example />
       </main>
     </>
   );

@@ -146,7 +146,8 @@ export function ThemePage() {
     }
     if (!auth.isSignedIn) {
       await saveDraft({ themeId, essayTypeId: typeId, title: title!, photos, parentEssayId });
-      const next = `/temas/${themeId}?continuar=1${parentEssayId ? `&reescrever=${parentEssayId}` : ''}`;
+      const rewrite = parentEssayId ? `&reescrever=${encodeURIComponent(parentEssayId)}` : '';
+      const next = `/temas/${encodeURIComponent(themeId)}?continuar=1${rewrite}`;
       navigate(`/entrar?next=${encodeURIComponent(next)}`);
       return;
     }
@@ -157,7 +158,7 @@ export function ThemePage() {
     if (themeId && typeId && title) {
       await saveDraft({ themeId, essayTypeId: typeId, title, photos, parentEssayId });
     }
-    navigate(`/enviar/foto?tema=${themeId}`);
+    navigate(`/enviar/foto?tema=${encodeURIComponent(themeId ?? '')}`);
   }
 
   const notAvailable = theme.error instanceof ApiError && theme.error.code === 'THEME_NOT_AVAILABLE';

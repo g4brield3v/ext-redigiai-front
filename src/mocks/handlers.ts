@@ -32,7 +32,27 @@ const internal = () => error('INTERNAL_ERROR', 'Algo deu errado do nosso lado. T
 // Estado em memória: volta ao inicial ao recarregar a página.
 let account: Account = structuredClone(data.account);
 let essays: EssaySummary[] = structuredClone(data.initialEssays);
-const payments: Payment[] = structuredClone(data.payments);
+// O checkout do cartão recarrega a página ao voltar: os pagamentos criados sobrevivem na aba.
+const PAYMENTS_KEY = 'redigiai.mock.payments';
+
+function loadCreatedPayments(): Payment[] {
+  try {
+    return JSON.parse(sessionStorage.getItem(PAYMENTS_KEY) ?? '[]') as Payment[];
+  } catch {
+    return [];
+  }
+}
+
+function rememberPayment(payment: Payment) {
+  payments.unshift(payment);
+  try {
+    sessionStorage.setItem(PAYMENTS_KEY, JSON.stringify([payment, ...loadCreatedPayments()]));
+  } catch {
+    // Sem armazenamento: o pagamento vale até recarregar a página.
+  }
+}
+
+const payments: Payment[] = [...loadCreatedPayments(), ...structuredClone(data.payments)];
 const correction = structuredClone(data.correction);
 const idempotency = new Map<string, { essayIds: string[] }>();
 let sequence = 0;
@@ -258,7 +278,7 @@ export const handlers = [
       receiptUrl: null,
       refundable: true,
     };
-    payments.unshift(payment);
+    rememberPayment(payment);
     if (payment.status === 'approved') {
       account = { ...account, credits: { ...account.credits, total: account.credits.total + body.quantity } };
     }
@@ -271,13 +291,26 @@ export const handlers = [
             copyPaste: '00020126580014br.gov.bcb.pix0136redigiai-mock-0000-0000-000000000000520400005303986540516.005802BR6304ABCD',
             expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
           }
-        : { method: 'card', paymentId: payment.id, checkoutUrl: '/comprar?pagamento=aprovado' };
+        : { method: 'card', paymentId: payment.id, checkoutUrl: `/comprar?pagamento=${payment.id}` };
     return HttpResponse.json(response, { status: 201 });
   }),
 
-  http.post(api('/checkout/plan'), () =>
-    HttpResponse.json({ method: 'card', paymentId: 'payment-plan-new', checkoutUrl: '/comprar?pagamento=aprovado' } satisfies CheckoutResponse, { status: 201 }),
-  ),
+  http.post(api('/checkout/plan'), () => {
+    const payment: Payment = {
+      id: `payment-${++sequence}`,
+      kind: 'plan',
+      method: 'card',
+      amountCents: 3990,
+      quantity: 1,
+      status: 'approved',
+      createdAt: new Date().toISOString(),
+      receiptUrl: null,
+      refundable: true,
+    };
+    rememberPayment(payment);
+    const response: CheckoutResponse = { method: 'card', paymentId: payment.id, checkoutUrl: `/comprar?pagamento=${payment.id}` };
+    return HttpResponse.json(response, { status: 201 });
+  }),
 
   http.post(api('/subscription/cancel'), () => {
     account = { ...account, subscription: account.subscription && { ...account.subscription, status: 'cancelled' } };
