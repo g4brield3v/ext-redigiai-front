@@ -281,7 +281,10 @@ describe('Confirmação do envio', () => {
     expect(await screen.findByTestId('location')).toHaveTextContent('/painel');
     const post = requests.find((r) => r.method === 'POST')!;
     expect(post.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
-    expect(post.body).toEqual({ essays: [{ themeId: 'theme-1', essayTypeId: 'type-1', assetId: 'asset-1' }] });
+    expect(post.body).toEqual({
+      essays: [{ themeId: 'theme-1', essayTypeId: 'type-1', assetId: 'asset-1', parentEssayId: null }],
+      aiNoticeAccepted: null,
+    });
   });
 
   it('sem saldo suficiente, não deixa confirmar e oferece comprar', async () => {

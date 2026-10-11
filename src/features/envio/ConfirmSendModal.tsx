@@ -1,10 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import type { BatchEssayRequest, BatchEssayResponse } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { Modal, Notice, SheetThumb, Skeleton } from '../../components/primitives';
-import { errorMessage, request } from '../../lib/api';
+import { api, errorMessage, unwrap } from '../../lib/api';
 import { corrections } from '../../lib/format';
 import { useAccount } from '../../lib/queries';
 import { clearDraft } from './draft';
@@ -29,13 +28,20 @@ export function ConfirmSendModal({ essays, parentEssayId, onClose }: Props) {
 
   const send = useMutation({
     mutationFn: () =>
-      request<BatchEssayResponse>('POST', '/v1/essays/batch', {
-        idempotencyKey,
-        body: {
-          essays: essays.map(({ themeId, essayTypeId, assetId }) => ({ themeId, essayTypeId, assetId, parentEssayId })),
-          aiNoticeAccepted: needsAiNotice ? true : undefined,
-        } satisfies BatchEssayRequest,
-      }),
+      unwrap(
+        api.POST('/v1/essays/batch', {
+          params: { header: { 'Idempotency-Key': idempotencyKey } },
+          body: {
+            essays: essays.map(({ themeId, essayTypeId, assetId }) => ({
+              themeId,
+              essayTypeId,
+              assetId,
+              parentEssayId: parentEssayId ?? null,
+            })),
+            aiNoticeAccepted: needsAiNotice ? true : null,
+          },
+        }),
+      ),
     onSuccess: async () => {
       await clearDraft();
       await queryClient.invalidateQueries();

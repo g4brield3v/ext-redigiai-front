@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import type { Account, Correction, EssayDetail, EssayList, EssayStatus, Payment, Progress } from '../api/provisional-types';
+import type { Account, Correction, EssayStatus, Payment, Progress } from '../api/provisional-types';
 import { api, request, unwrap } from './api';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
@@ -53,7 +53,7 @@ export function useAccount(enabled = true) {
 export function useEssays(enabled = true) {
   return useQuery({
     queryKey: ['essays'],
-    queryFn: () => request<EssayList>('GET', '/v1/essays'),
+    queryFn: () => unwrap(api.GET('/v1/essays')),
     enabled,
     refetchInterval: (query) =>
       query.state.data?.items.some((essay) => IN_PROGRESS.includes(essay.status)) ? 5000 : false,
@@ -64,7 +64,7 @@ export function useEssays(enabled = true) {
 export function useEssay(id: string | undefined) {
   return useQuery({
     queryKey: ['essay', id],
-    queryFn: () => request<EssayDetail>('GET', `/v1/essays/${encodeURIComponent(id!)}`),
+    queryFn: () => unwrap(api.GET('/v1/essays/{id}', { params: { path: { id: id! } } })),
     enabled: !!id,
   });
 }

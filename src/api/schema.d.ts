@@ -111,6 +111,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/uploads/sign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assinatura para o navegador enviar 1 foto JPG direto ao Cloudinary, em área privada.
+         *     O `assetId` devolvido identifica a foto no envio da redação.
+         */
+        post: operations["signUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/essays/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirma o envio de uma ou várias redações (tudo ou nada): reserva 1 correção por redação e inicia a
+         *     transcrição. Exige `Idempotency-Key`; repetir a chave devolve as mesmas redações.
+         */
+        post: operations["submitEssays"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/essays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Redações do aluno, da mais recente para a mais antiga, com o título "Vestibular – Tipo – Tema".
+         *     `status` filtra por situação (como `completed`) e `cursor` é o `nextCursor` da página anterior.
+         */
+        get: operations["listEssays"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/essays/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Situação da redação, prazo de revisão e, se houver, as palavras ilegíveis. */
+        get: operations["getEssay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -149,6 +226,23 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        BatchEssayItem: {
+            /** Format: uuid */
+            themeId: string;
+            /** Format: uuid */
+            essayTypeId: string;
+            /** Format: uuid */
+            assetId: string;
+            /** Format: uuid */
+            parentEssayId: null | string;
+        };
+        BatchEssayRequest: {
+            essays: null | components["schemas"]["BatchEssayItem"][];
+            aiNoticeAccepted: null | boolean;
+        };
+        BatchEssayResponseDto: {
+            essayIds: string[];
+        };
         CreditBalanceDto: {
             /** Format: int32 */
             total: number;
@@ -175,6 +269,64 @@ export interface components {
             retryable: boolean;
             traceId: string;
         };
+        EssayDetailDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: uuid */
+            themeId: string;
+            /** Format: uuid */
+            essayTypeId: string;
+            status: components["schemas"]["EssayStatus"];
+            /** Format: int32 */
+            version: number;
+            hasVersions: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            reviewDeadlineAt: null | string;
+            /** Format: int32 */
+            illegibleCount: number;
+            /** Format: int32 */
+            score: null | number;
+            /** Format: int32 */
+            maxScore: null | number;
+            failureCode: null | string;
+            /** Format: int32 */
+            sheetLines: number;
+            lines: components["schemas"]["TranscriptionLineDto"][];
+            illegibleWords: components["schemas"]["IllegibleWordDto"][];
+        };
+        EssayListDto: {
+            items: components["schemas"]["EssaySummaryDto"][];
+            nextCursor: null | string;
+        };
+        /** @enum {unknown} */
+        EssayStatus: "uploaded" | "awaiting_review" | "queued" | "processing" | "completed" | "failed" | "cancelled";
+        EssaySummaryDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: uuid */
+            themeId: string;
+            /** Format: uuid */
+            essayTypeId: string;
+            status: components["schemas"]["EssayStatus"];
+            /** Format: int32 */
+            version: number;
+            hasVersions: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            reviewDeadlineAt: null | string;
+            /** Format: int32 */
+            illegibleCount: number;
+            /** Format: int32 */
+            score: null | number;
+            /** Format: int32 */
+            maxScore: null | number;
+            failureCode: null | string;
+        };
         EssayTypeDto: {
             /** Format: uuid */
             id: string;
@@ -198,6 +350,18 @@ export interface components {
         ExamStatus: "active" | "coming_soon";
         HealthResponse: {
             status: string;
+        };
+        IllegibleWordDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            lineNumber: number;
+            /** Format: int32 */
+            start: number;
+            /** Format: int32 */
+            end: number;
+            contextBefore: string;
+            contextAfter: string;
         };
         ProfileDto: {
             /** Format: uuid */
@@ -273,6 +437,12 @@ export interface components {
         };
         /** @enum {unknown} */
         ThemeTextKind: "text" | "image";
+        TranscriptionLineDto: {
+            /** Format: int32 */
+            number: number;
+            text: string;
+            indent: boolean;
+        };
         UpdateEmailPreferences: {
             correctionReady: null | boolean;
             illegibleReminder: null | boolean;
@@ -281,6 +451,14 @@ export interface components {
         UpdateProfileRequest: {
             name: null | string;
             emailPreferences: null | components["schemas"]["UpdateEmailPreferences"];
+        };
+        UploadSignatureDto: {
+            /** Format: uuid */
+            assetId: string;
+            uploadUrl: string;
+            fields: {
+                [key: string]: string;
+            };
         };
         ZeroRuleDto: {
             code: string;
@@ -579,6 +757,198 @@ export interface operations {
                     "text/plain": components["schemas"]["ErrorResponse"];
                     "application/json": components["schemas"]["ErrorResponse"];
                     "text/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    signUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadSignatureDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitEssays: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchEssayRequest"];
+                "text/json": components["schemas"]["BatchEssayRequest"];
+                "application/*+json": components["schemas"]["BatchEssayRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchEssayResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listEssays: {
+        parameters: {
+            query?: {
+                status?: string;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EssayListDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getEssay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EssayDetailDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
