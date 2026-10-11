@@ -1,0 +1,98 @@
+.nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav.home {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(246, 248, 252, 0.94);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  height: 68px;
+}
+
+.home .inner {
+  height: 72px;
+}
+
+.links {
+  display: flex;
+  gap: 28px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.links a {
+  color: var(--muted-2);
+  text-decoration: none;
+  padding: 6px 0;
+}
+
+.links a:hover {
+  color: var(--navy);
+}
+
+.links a.current {
+  color: var(--navy);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--blue);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.signIn,
+.signOut {
+  font: inherit;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .links {
+    display: none;
+  }
+}
+
+/* Em 360 px, logo, Entrar e o botão precisam caber na mesma linha. */
+@media (max-width: 420px) {
+  .inner {
+    gap: 10px;
+  }
+
+  .actions {
+    gap: 12px;
+  }
+
+  .actions a:last-child:not(.signIn) {
+    padding: 0 14px;
+    font-size: 14px;
+  }
+}

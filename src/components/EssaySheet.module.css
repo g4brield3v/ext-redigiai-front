@@ -1,0 +1,145 @@
+.sheet {
+  --number-column: 36px;
+  --margin-column: 170px;
+  display: grid;
+  grid-template-columns: var(--number-column) minmax(0, 1fr);
+  background: #ffffff;
+}
+
+.sheet.compact {
+  --number-column: 34px;
+  --margin-column: 150px;
+}
+
+.sheet.withMargin {
+  grid-template-columns: var(--number-column) minmax(0, 1fr) var(--margin-column);
+}
+
+.number,
+.text,
+.margin {
+  height: 36px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: flex-end;
+}
+
+.number {
+  justify-content: flex-end;
+  padding: 0 8px 7px 0;
+  font-size: 11px;
+  color: #9aa6bc;
+  border-right: 1px solid var(--margin-red);
+  font-variant-numeric: tabular-nums;
+}
+
+/* O texto fica sentado na pauta: alinhado embaixo, numa linha só. */
+.text {
+  display: block;
+  padding: 10px 10px 4px 12px;
+  font-family: var(--font-hand);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.indent {
+  padding-left: 36px;
+}
+
+.compact .indent {
+  padding-left: 34px;
+}
+
+.margin {
+  padding: 0 10px 5px;
+  border-left: 1px dashed #e3e8f1;
+  font-family: var(--font-hand);
+  font-size: 19px;
+  line-height: 1;
+  color: var(--correction);
+  white-space: nowrap;
+}
+
+.below {
+  display: none;
+}
+
+.circle {
+  border: 2px solid var(--correction);
+  border-radius: 50% 45% 52% 48%;
+  padding: 0 4px;
+  margin: 0 -2px;
+}
+
+.wavy {
+  text-decoration: underline wavy var(--correction);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 5px;
+}
+
+.good {
+  background: var(--good-bg);
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.illegible {
+  filter: blur(2px);
+  background: var(--illegible-bg);
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--correction);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--correction);
+}
+
+.tagGood {
+  border-color: var(--good);
+  color: var(--good);
+}
+
+@media (max-width: 620px) {
+  .sheet,
+  .sheet.compact {
+    --number-column: 30px;
+  }
+
+  .sheet.withMargin {
+    grid-template-columns: var(--number-column) minmax(0, 1fr);
+  }
+
+  .margin {
+    display: none;
+  }
+
+  /* Sem a margem, o comentário aparece logo abaixo da linha marcada. */
+  .below {
+    display: flex;
+    align-items: center;
+    grid-column: 2;
+    min-height: 30px;
+    padding: 4px 10px 4px 12px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-hand);
+    font-size: 19px;
+    line-height: 1.1;
+    color: var(--correction);
+  }
+}

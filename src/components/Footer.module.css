@@ -1,0 +1,24 @@
+.footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 28px;
+  padding-bottom: 28px;
+  font-size: 14px;
+}
+
+.links {
+  display: flex;
+  gap: 22px;
+}
+
+.company {
+  flex-basis: 100%;
+  font-size: 13px;
+}

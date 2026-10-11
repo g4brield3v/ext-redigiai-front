@@ -1,0 +1,131 @@
+/* Tokens do design system (docs/02-frontend.md, seção 2). */
+:root {
+  --blue: #2346c9;
+  --blue-hover: #1a37a6;
+  --blue-soft: #f1f5ff;
+  --link-hover: #16308f;
+  --navy: #0e1b33;
+  --muted: #56627a;
+  --muted-2: #46536b;
+  --muted-3: #7a869c;
+  --bg: #f6f8fc;
+  --surface: #ffffff;
+  --border: #e1e6f0;
+  --border-input: #d3dbea;
+  --border-window: #dce3ef;
+  --line: #d5deec;
+  --margin-red: #f0c9c4;
+  --ink: #1c2f6e;
+  --correction: #c8372d;
+  --good: #1f7a4c;
+  --good-bg: #e4f4ec;
+  --illegible-bg: #fff3c4;
+
+  --font-ui: 'Schibsted Grotesk', system-ui, -apple-system, sans-serif;
+  --font-serif: Newsreader, Georgia, serif;
+  --font-hand: Caveat, 'Segoe Print', cursive;
+
+  --shadow-window: 0 1px 0 #e9eef6, 0 24px 48px -28px rgba(14, 27, 51, 0.25);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--navy);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+a {
+  color: var(--blue);
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+.h1 {
+  font-size: 44px;
+  line-height: 1.06;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .h1 {
+    font-size: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

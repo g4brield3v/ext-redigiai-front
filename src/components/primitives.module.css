@@ -1,0 +1,170 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.window {
+  background: var(--surface);
+  border: 1px solid var(--border-window);
+  border-radius: 18px;
+  box-shadow: var(--shadow-window);
+  overflow: hidden;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ok {
+  background: #e5f5ec;
+  color: #17603b;
+}
+
+.review {
+  background: #fff1d6;
+  color: #6b4300;
+}
+
+.running {
+  background: #e8eeff;
+  color: #1a37a6;
+}
+
+.queued,
+.tag {
+  background: #eef1f6;
+  color: #3b4559;
+}
+
+.error {
+  background: #fdecea;
+  color: #9a2a20;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.input {
+  height: 48px;
+  width: 100%;
+  border: 1px solid var(--border-input);
+  border-radius: 12px;
+  padding: 0 14px;
+  font: inherit;
+  color: var(--navy);
+  background: #ffffff;
+}
+
+.input:focus {
+  border-color: var(--blue);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--correction);
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field .error {
+  font-size: 13px;
+  font-weight: 500;
+  background: none;
+  color: #9a2a20;
+}
+
+.modal {
+  width: calc(100% - 32px);
+  max-width: 448px;
+  border: 0;
+  border-radius: 22px;
+  padding: 32px;
+  background: #ffffff;
+  color: var(--navy);
+}
+
+.modal[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal::backdrop {
+  background: rgba(14, 27, 51, 0.5);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.skeleton {
+  display: block;
+  max-width: 100%;
+  background: #e8ecf3;
+}
+
+.errorState {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: #fdecea;
+  color: #9a2a20;
+  font-weight: 500;
+}
+
+.retry {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
