@@ -27,7 +27,7 @@ export function setTokenSource(source: TokenSource) {
 }
 
 export const api = createClient<paths>({
-  baseUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:5080',
+  baseUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5080',
   // Resolvido a cada chamada, para os testes poderem trocar o fetch global.
   fetch: (request) => globalThis.fetch(request),
 });
@@ -62,4 +62,58 @@ export async function unwrap<T>(call: Promise<ApiResult<T>>): Promise<T> {
     response.status,
     body?.traceId,
   );
+}
+
+const baseUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5080';
+
+/**
+ * Chamada direta para endpoints que ainda não estão no cliente gerado (tipos em `api/mock-types.ts`).
+ * Mesmo token e mesmo formato de erro do cliente gerado.
+ */
+export async function request<T>(
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+  path: string,
+  options: { body?: unknown; idempotencyKey?: string } = {},
+): Promise<T> {
+  const headers = new Headers();
+  const token = await tokenSource();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  if (options.body !== undefined) {
+    headers.set('Content-Type', 'application/json');
+  }
+  if (options.idempotencyKey) {
+    headers.set('Idempotency-Key', options.idempotencyKey);
+  }
+
+  let response: Response;
+  try {
+    response = await globalThis.fetch(`${baseUrl}${path}`, {
+      method,
+      headers,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    });
+  } catch {
+    throw new ApiError('NETWORK_ERROR', 'Não foi possível conectar. Confira a sua internet e tente de novo.', true, 0);
+  }
+
+  const text = await response.text();
+  const data: unknown = text ? JSON.parse(text) : undefined;
+  if (response.ok) {
+    return data as T;
+  }
+
+  const error = data as Partial<Schemas['ErrorResponse']> | undefined;
+  throw new ApiError(
+    error?.code ?? 'INTERNAL_ERROR',
+    error?.message ?? 'Algo deu errado do nosso lado. Tente novamente em instantes.',
+    error?.retryable ?? false,
+    response.status,
+    error?.traceId,
+  );
+}
+
+export function errorMessage(error: unknown) {
+  return error instanceof ApiError ? error.message : 'Algo deu errado do nosso lado. Tente novamente em instantes.';
 }

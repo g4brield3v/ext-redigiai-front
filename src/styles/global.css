@@ -22,7 +22,7 @@
   --illegible-bg: #fff3c4;
 
   --font-ui: 'Schibsted Grotesk', system-ui, -apple-system, sans-serif;
-  --font-serif: Newsreader, Georgia, serif;
+  --font-serif: 'Newsreader Variable', Newsreader, Georgia, serif;
   --font-hand: Caveat, 'Segoe Print', cursive;
 
   --shadow-window: 0 1px 0 #e9eef6, 0 24px 48px -28px rgba(14, 27, 51, 0.25);
@@ -36,6 +36,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* A Newsreader das telas aprovadas usa o tamanho óptico padrão (16) em todos os corpos, não o automático. */
+  font-variation-settings: 'opsz' 16;
 }
 
 body {
