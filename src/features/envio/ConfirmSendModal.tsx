@@ -8,7 +8,7 @@ import { errorMessage, request } from '../../lib/api';
 import { corrections } from '../../lib/format';
 import { useAccount } from '../../lib/queries';
 import { clearDraft } from './draft';
-import styles from './ThemePage.module.css';
+import styles from './SubmitPage.module.css';
 
 export type PendingEssay = { title: string; fileName: string; themeId: string; essayTypeId: string; assetId: string };
 

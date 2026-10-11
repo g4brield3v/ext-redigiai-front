@@ -11,11 +11,12 @@ import { LoginPage } from '../features/auth/LoginPage';
 import { CheckoutPage } from '../features/checkout/CheckoutPage';
 import { CorrectionPage } from '../features/correcao/CorrectionPage';
 import { CameraPage } from '../features/envio/CameraPage';
-import { ThemePage } from '../features/envio/ThemePage';
+import { SubmitPage } from '../features/envio/SubmitPage';
 import { HomePage } from '../features/home/HomePage';
 import { DashboardPage } from '../features/painel/DashboardPage';
 import { ProfilePage } from '../features/perfil/ProfilePage';
 import { ReviewPage } from '../features/revisao/ReviewPage';
+import { ProposalPage } from '../features/proposta/ProposalPage';
 import { ThemesPage } from '../features/temas/ThemesPage';
 import { ApiError } from '../lib/api';
 
@@ -105,7 +106,8 @@ export function AppRoutes() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/temas" element={<ThemesPage />} />
-        <Route path="/temas/:themeId" element={<ThemePage />} />
+        <Route path="/temas/:themeId" element={<ProposalPage />} />
+        <Route path="/temas/:themeId/enviar" element={<SubmitPage />} />
         <Route path="/enviar/foto" element={<CameraPage />} />
         <Route path="/exemplo" element={<ExampleCorrectionPage />} />
         <Route path="/entrar" element={<LoginPage />} />

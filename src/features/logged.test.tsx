@@ -113,7 +113,7 @@ describe('Minhas correções', () => {
     expect(rows[3]).toHaveTextContent('Na fila');
     expect(within(rows[3]!).queryByRole('link')).not.toBeInTheDocument();
     expect(rows[4]).toHaveTextContent('Não corrigida · crédito devolvido');
-    expect(within(rows[4]!).getByRole('link', { name: 'Reenviar' })).toHaveAttribute('href', '/temas/theme-1?tipo=type-1');
+    expect(within(rows[4]!).getByRole('link', { name: 'Reenviar' })).toHaveAttribute('href', '/temas/theme-1/enviar?tipo=type-1');
 
     expect(screen.getByText('+2 pontos na última correção')).toBeInTheDocument();
     expect(screen.getByText('3 · Coesão, coerência e progressão')).toBeInTheDocument();
@@ -217,7 +217,7 @@ describe('Correção', () => {
     expect(screen.getByText('Crase antes de verbo · linha 14')).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: 'Reescrever esta redação' })[0]).toHaveAttribute(
       'href',
-      '/temas/?tipo=&reescrever=exemplo',
+      '/temas/enviar?tipo=&reescrita=exemplo',
     );
   });
 

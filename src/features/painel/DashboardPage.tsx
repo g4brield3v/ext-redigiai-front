@@ -35,7 +35,7 @@ function EssayAction({ essay }: { essay: EssaySummary }) {
       );
     case 'failed':
       return (
-        <Button to={`/temas/${essay.themeId}?tipo=${essay.essayTypeId}`} size="xs" variant="ghost">
+        <Button to={`/temas/${encodeURIComponent(essay.themeId)}/enviar?tipo=${encodeURIComponent(essay.essayTypeId)}`} size="xs" variant="ghost">
           Reenviar
         </Button>
       );

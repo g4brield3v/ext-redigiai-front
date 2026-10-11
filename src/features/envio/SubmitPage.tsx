@@ -6,7 +6,6 @@ import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
 import { AlertIcon, CheckIcon, ErrorState, SheetThumb, Skeleton } from '../../components/primitives';
 import { ApiError, errorMessage } from '../../lib/api';
-import type { Schemas } from '../../lib/api';
 import { formatSize } from '../../lib/format';
 import { useTheme } from '../../lib/queries';
 import { useAuthState } from '../auth/AuthContext';
@@ -15,53 +14,27 @@ import type { PendingEssay } from './ConfirmSendModal';
 import { loadDraft, saveDraft } from './draft';
 import type { DraftPhoto } from './draft';
 import { preparePhoto, uploadPhoto } from './photo';
-import styles from './ThemePage.module.css';
-
-const apiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5080';
-
-function Collection({ texts }: { texts: Schemas['ThemeTextDto'][] }) {
-  return (
-    <section className={styles.collection}>
-      <span className="eyebrow">Coletânea</span>
-      {texts.map((text, index) => (
-        <details key={text.position} className={styles.text} open={index === 0}>
-          <summary>
-            <span>
-              Texto {text.position} · {text.title}
-            </span>
-            <span className={`muted ${styles.source}`}>{text.source}</span>
-          </summary>
-          {text.kind === 'image' ? (
-            <div className={`muted ${styles.image}`}>[Imagem]</div>
-          ) : (
-            <p className={index === 0 ? styles.firstBody : undefined}>{text.body}</p>
-          )}
-        </details>
-      ))}
-    </section>
-  );
-}
+import styles from './SubmitPage.module.css';
 
 function PageSkeleton() {
   return (
-    <div className={styles.columns} aria-busy="true" aria-label="Carregando o tema">
+    <div className={styles.columns} aria-busy="true" aria-label="Carregando o envio">
       <div className={styles.card}>
-        <Skeleton width={90} height={14} />
-        <Skeleton height={90} />
-        <Skeleton height={220} />
-      </div>
-      <div className={`${styles.card} ${styles.aside}`}>
         <Skeleton width={160} height={20} />
         <Skeleton height={70} radius={14} />
         <Skeleton height={70} radius={14} />
+        <Skeleton height={130} radius={14} />
+      </div>
+      <div className={`${styles.card} ${styles.aside}`}>
+        <Skeleton height={44} />
         <Skeleton height={48} radius={999} />
       </div>
     </div>
   );
 }
 
-/** 3 · Tipo de redação e envio da foto. */
-export function ThemePage() {
+/** 3 · Tipo de redação e envio da foto. A proposta e a coletânea ficam na página do tema. */
+export function SubmitPage() {
   const { themeId } = useParams();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -73,7 +46,8 @@ export function ThemePage() {
   const [photos, setPhotos] = useState<DraftPhoto[]>([]);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingEssay[] | null>(null);
-  const parentEssayId = params.get('reescrever') ?? undefined;
+  const [draftParentId, setDraftParentId] = useState<string>();
+  const parentEssayId = params.get('reescrita') ?? draftParentId;
   const continuing = params.get('continuar') === '1';
 
   const types = theme.data?.essayTypes ?? [];
@@ -91,6 +65,7 @@ export function ThemePage() {
       if (draft?.themeId === themeId) {
         setTypeId((current) => current ?? draft.essayTypeId);
         setPhotos(draft.photos);
+        setDraftParentId(draft.parentEssayId);
       }
     });
   }, [themeId]);
@@ -146,8 +121,8 @@ export function ThemePage() {
     }
     if (!auth.isSignedIn) {
       await saveDraft({ themeId, essayTypeId: typeId, title: title!, photos, parentEssayId });
-      const rewrite = parentEssayId ? `&reescrever=${encodeURIComponent(parentEssayId)}` : '';
-      const next = `/temas/${encodeURIComponent(themeId)}?continuar=1${rewrite}`;
+      const rewrite = parentEssayId ? `&reescrita=${encodeURIComponent(parentEssayId)}` : '';
+      const next = `/temas/${encodeURIComponent(themeId)}/enviar?continuar=1${rewrite}`;
       navigate(`/entrar?next=${encodeURIComponent(next)}`);
       return;
     }
@@ -162,6 +137,8 @@ export function ThemePage() {
   }
 
   const notAvailable = theme.error instanceof ApiError && theme.error.code === 'THEME_NOT_AVAILABLE';
+  const proposal = `/temas/${encodeURIComponent(themeId ?? '')}`;
+  const cost = Math.max(photos.length, 1);
 
   return (
     <>
@@ -169,9 +146,15 @@ export function ThemePage() {
       <main className={`container ${styles.page}`}>
         <div className={styles.heading}>
           <nav aria-label="Você está em" className={styles.crumbs}>
-            <Link to="/temas">{theme.data?.examName ?? 'Temas'}</Link> <span className="muted">/ Temas</span>
+            <Link to="/temas">{theme.data?.examName ?? 'Fuvest'}</Link> <span className="muted">/</span> <Link to="/temas">Temas</Link>{' '}
+            <span className="muted">/</span> <Link to={proposal}>{theme.data?.title ?? 'Tema'}</Link> <span className="muted">/ Envio</span>
           </nav>
-          <h1 className="serif h1">{theme.data ? theme.data.title : theme.error ? 'Tema' : <Skeleton width={420} height={46} />}</h1>
+          <h1 className="serif h1">Envie sua redação</h1>
+          {theme.data && (
+            <p className={`muted ${styles.themeLine}`}>
+              Tema: <strong>{theme.data.title}</strong> · <Link to={proposal}>Ver proposta e coletânea</Link>
+            </p>
+          )}
         </div>
 
         {theme.error ? (
@@ -183,21 +166,7 @@ export function ThemePage() {
           <PageSkeleton />
         ) : (
           <div className={styles.columns}>
-            <article className={styles.card}>
-              <section className={styles.statement}>
-                <span className="eyebrow">Proposta</span>
-                <p>{theme.data.statement}</p>
-              </section>
-              <Collection texts={theme.data.texts} />
-              <a className={styles.download} href={`${apiUrl}/v1/themes/${theme.data.id}/sheet.pdf`}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
-                </svg>
-                Baixar a folha pautada (PDF, {theme.data.sheetLines} linhas)
-              </a>
-            </article>
-
-            <aside className={`${styles.card} ${styles.aside}`} aria-label="Sua redação">
+            <div className={styles.card}>
               <fieldset className={styles.types}>
                 <legend className="h3">3. Tipo de redação</legend>
                 {types.map((type) => (
@@ -295,10 +264,11 @@ export function ThemePage() {
                   </li>
                 </ul>
               </section>
+            </div>
 
-              <div className={styles.summary}>
+            <aside className={`${styles.card} ${styles.aside}`} aria-label="Resumo do envio">
                 {title && (
-                  <div>
+                  <div className={styles.sending}>
                     <span className={`muted ${styles.small13}`}>Você vai enviar</span>
                     <span className={styles.strong}>
                       {photos.length > 1 ? `${photos.length} redações · ` : ''}
@@ -306,6 +276,12 @@ export function ThemePage() {
                     </span>
                   </div>
                 )}
+                <div className={title ? `${styles.cost} ${styles.costLine}` : styles.cost}>
+                  <span className="muted">Custo</span>
+                  <span className={styles.strong}>
+                    {cost} {cost === 1 ? 'correção' : 'correções'}
+                  </span>
+                </div>
                 <Button block disabled={!ready || uploading} onClick={() => void send()}>
                   Enviar para correção
                 </Button>
@@ -317,7 +293,6 @@ export function ThemePage() {
                 <span className={`muted ${styles.hint}`}>
                   Você confere tudo antes de confirmar. Se ainda não entrou, pedimos o login nesse momento.
                 </span>
-              </div>
             </aside>
           </div>
         )}

@@ -52,6 +52,7 @@ Chips de status:
 
 Fontes hospedadas no próprio site com `@fontsource/newsreader`, `@fontsource/schibsted-grotesk` e `@fontsource/caveat` (não carregar do Google Fonts: evita enviar o IP do aluno a terceiros). Os HTML de `docs/telas/html/` usam o Google Fonts só para pré-visualização.
 
+
 - **Schibsted Grotesk** (400, 500, 600, 700): interface e texto. Base 16 px, `line-height: 1.55`.
 - **Newsreader** (500, 600, itálico 500): títulos. `letter-spacing: -0.015em`. H1 44 px (34 px no celular), H2 28 px.
 - **Caveat** (500, 600): texto manuscrito na folha (22 px) e comentários de correção na margem (19 px).
@@ -92,7 +93,8 @@ Fontes hospedadas no próprio site com `@fontsource/newsreader`, `@fontsource/sc
 |---|---|---|
 | `/` | 1 · Início (`01-inicio.html`) | Público |
 | `/temas` | 2 · Vestibular e tema (`02-temas.html`) | Público |
-| `/temas/:themeId` | 3 · Tipo de redação e envio (`03-tema-envio.html`), modal 3b (`03b-modal-confirmar-envio.html`) | Público até enviar |
+| `/temas/:themeId` | 2b · Proposta e coletânea (`02b-proposta-coletanea.html`) | Público |
+| `/temas/:themeId/enviar` | 3 · Tipo de redação e envio (`03-tipo-envio.html`), modal 3b (`03b-modal-confirmar-envio.html`) | Público até enviar |
 | `/entrar` | 4 · Login (`04-login.html`) | Público |
 | `/enviar/foto` | 5 · Câmera no celular (`05-camera-celular.html`) | Público |
 | `/painel` | 8 · Minhas correções (`08-painel.html`) | Logado |
@@ -122,19 +124,30 @@ Seções, nesta ordem:
 ### 2 · Vestibular e tema (`/temas`)
 
 - Barra de etapas: 1 · Vestibular, 2 · Tema, 3 · Tipo de redação, 4 · Envio.
+- Clicar num tema abre a página da proposta (`/temas/:themeId`), não o envio.
 - Vestibulares de `GET /v1/exams`; `coming_soon` aparece desabilitado com "Em breve".
 - Grade de cartões de tema de `GET /v1/exams/{slug}/themes?q=`: título, tipos aceitos como chips, "Coletânea com N textos". Se o aluno logado já enviou redação do tema, chip com o status (ex.: "Corrigida · 23/30", "Em correção").
 - Busca por tema com atraso de 300 ms.
 
-### 3 · Tipo de redação e envio (`/temas/:themeId`)
+### 2b · Proposta e coletânea (`/temas/:themeId`)
 
-- Coluna principal: enunciado e coletânea (texto, fonte, imagens) de `GET /v1/themes/{id}`; link "Baixar a folha pautada (PDF, 30 linhas)".
-- Coluna lateral fixa: "3. Tipo de redação" (só os tipos aceitos, rádio em cartão) e "4. Envie a foto da folha".
+Página só de leitura, separada do envio: o aluno lê a proposta, escreve à mão e depois vai enviar.
+- Trilha "Fuvest / Temas / [tema]"; eyebrow "Proposta de redação · Fuvest"; H1 com o tema; chips dos tipos aceitos e "Coletânea com N textos".
+- Coluna principal (cartão de leitura, texto 17–18 px, `line-height` 1,75): "Proposta" com o enunciado e um quadro por tipo aceito com a instrução daquele tipo; "Coletânea" com todos os textos abertos, um abaixo do outro ("Texto N", título em Newsreader, corpo ou imagem, fonte em itálico). Sem acordeão.
+- Coluna lateral fixa: "Escreva à mão, como na prova", com 3 passos (imprimir a folha pautada com o link "Baixar a folha (PDF)"; escrever sem nome nem assinatura; fotografar e enviar), botão "Enviar minha redação" (→ `/temas/:themeId/enviar`) e a nota "Você escolhe o tipo de redação na próxima página."
+- No celular, a coluna lateral vai para depois da coletânea e o botão "Enviar minha redação" fica fixo no rodapé da tela.
+- Dados de `GET /v1/themes/{id}`. Tema inexistente ou inativo → erro `THEME_NOT_AVAILABLE` com link para `/temas`.
+
+### 3 · Tipo de redação e envio (`/temas/:themeId/enviar`)
+
+- Trilha "Fuvest / Temas / [tema] / Envio"; H1 "Envie sua redação"; linha "Tema: [tema] · Ver proposta e coletânea" (→ `/temas/:themeId`). A coletânea **não** aparece nesta página.
+- Cartão principal: "3. Tipo de redação" (só os tipos aceitos, rádio em cartão) e "4. Envie a foto da folha".
 - Upload: arrastar ou escolher arquivo; no celular, botão que abre `/enviar/foto`. Aceita só JPG; o front converte e comprime para JPG ≤ 10 MB (canvas) antes de enviar e mostra nome, tamanho e "Trocar foto".
 - Dicas: "Folha inteira, reta e com boa luz", "Uma face da folha por envio", "Não escreva seu nome na folha: na Fuvest, identificação zera a redação."
-- Resumo "Você vai enviar [título]" e botão "Enviar para correção", habilitado com tipo e foto escolhidos.
+- Coluna lateral fixa: "Você vai enviar [título]", "Custo: N correções", botão "Enviar para correção" (habilitado com tipo e foto escolhidos) e a nota "Você confere tudo antes de confirmar. Se ainda não entrou, pedimos o login nesse momento."
 - Envio em lote: "Adicionar outra foto" cria mais uma redação do mesmo tema e tipo (ver seção 15 da especificação).
 - Ao clicar: sem sessão → guarda rascunho e vai para `/entrar`; com sessão → `POST /v1/uploads/sign`, upload direto ao Cloudinary, depois abre o modal 3b.
+- "Reescrever esta redação" e "Reenviar" levam direto para esta página, com o tipo já escolhido.
 
 ### 3b · Modal de confirmação
 
@@ -188,13 +201,13 @@ Seções, nesta ordem:
 - Alerta amarelo quando há redação em `awaiting_review`: "Uma redação precisa de você", com título e prazo, e o botão "Preencher palavras".
 - "Sua evolução": gráfico de linha simples das notas (`GET /v1/me/progress`) e a variação da última.
 - "Seu foco agora": o critério que mais tirou pontos nas últimas 3 correções, com a orientação e "Ver na última correção →".
-- Tabela "Correções": Redação (título + "· Nª versão" quando houver reescrita), Enviada, Status (chip), Nota, Ação ("Preencher palavras", "Ver correção" ou "Reenviar" para `failed`, que leva ao tema com tipo pré-selecionado).
+- Tabela "Correções": Redação (título + "· Nª versão" quando houver reescrita), Enviada, Status (chip), Nota, Ação ("Preencher palavras", "Ver correção" ou "Reenviar" para `failed`, que leva a `/temas/:themeId/enviar` com o tipo pré-selecionado).
 - Redações em `uploaded`, `queued` e `processing`: polling a cada 5 s enquanto a aba estiver visível; parar quando nenhuma estiver em andamento.
 
 ### 9 · Correção (`/redacoes/:id`)
 
 Dados de `GET /v1/essays/{id}/correction`.
-1. Cabeçalho: "← Minhas correções", título, "Enviada em dd/mm · Nª versão · grade Fuvest vN", botões "Ver foto original" (abre a URL assinada de `GET /v1/essays/{id}/photo` num modal) e "Reescrever esta redação".
+1. Cabeçalho: "← Minhas correções", título, "Enviada em dd/mm · Nª versão · grade Fuvest vN", botões "Ver foto original" (abre a URL assinada de `GET /v1/essays/{id}/photo` num modal) e "Reescrever esta redação" (→ `/temas/:themeId/enviar?tipo=…&reescrita=<id>`).
 2. Resumo: "Nota da grade" grande (ex.: 23 / 30) e variação desde a versão anterior; cartões "O que funcionou" e "O que mais tirou pontos".
 3. "Sua redação": `EssaySheet` com marcas e comentários de margem; legenda "funcionou" / "tirou pontos". Clicar numa marca rola até o critério.
 4. Os 4 critérios: número, nome, pontos (nível × peso), "Nível X de 3 · peso Y", descritor oficial do nível entre aspas, justificativa, "Linhas A a B" (clicável, destaca as linhas na folha) e, se não estiver no nível máximo, o quadro "O que corrigir". No critério 4, desvios agrupados por regra: nome da regra · linha, e a forma correta.

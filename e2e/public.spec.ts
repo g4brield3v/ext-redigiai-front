@@ -98,7 +98,7 @@ test.describe('Temas', () => {
 
 test.describe('Tema e envio', () => {
   test('o botão só libera com tipo e foto, e sem sessão a foto fica guardada e o login abre', async ({ page }) => {
-    await page.goto(`/temas/${THEME_ID}`);
+    await page.goto(`/temas/${THEME_ID}/enviar`);
     const send = page.getByRole('button', { name: 'Enviar para correção' });
     await expect(send).toBeDisabled();
 
@@ -114,7 +114,7 @@ test.describe('Tema e envio', () => {
   });
 
   test('arquivo que não é imagem é recusado com a mensagem da regra', async ({ page }) => {
-    await page.goto(`/temas/${THEME_ID}`);
+    await page.goto(`/temas/${THEME_ID}/enviar`);
     await page.getByLabel('Foto da folha').setInputFiles({ name: 'redacao.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(10) });
 
     await expect(page.getByRole('alert')).toHaveText('Envie uma foto JPG da folha, com até 10 MB.');

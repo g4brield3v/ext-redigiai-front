@@ -183,6 +183,7 @@ export interface components {
             description: string;
             /** Format: uuid */
             rubricVersionId: string;
+            instruction: string;
         };
         ExamDto: {
             slug: string;

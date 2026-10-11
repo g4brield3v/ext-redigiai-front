@@ -6,8 +6,8 @@ export const THEME_ID = '0198f0c0-0000-7000-8000-000000000101';
 const rubricId = '0198f0c0-0000-7000-8000-00000000000a';
 
 const types = [
-  { id: 't1', slug: 'dissertacao', name: 'Dissertação', description: 'Texto dissertativo-argumentativo', rubricVersionId: rubricId },
-  { id: 't2', slug: 'narrativa', name: 'Narrativa', description: 'Texto narrativo com reflexão', rubricVersionId: rubricId },
+  { id: 't1', slug: 'dissertacao', name: 'Dissertação', description: 'Texto dissertativo-argumentativo', rubricVersionId: rubricId, instruction: 'Defenda um ponto de vista.' },
+  { id: 't2', slug: 'narrativa', name: 'Narrativa', description: 'Texto narrativo com reflexão', rubricVersionId: rubricId, instruction: 'Conte uma história com reflexão.' },
 ];
 
 const themes = [
