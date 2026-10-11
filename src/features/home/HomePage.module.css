@@ -1,0 +1,731 @@
+/* Medidas e cores copiadas de docs/design/Main.dc.html. */
+
+.h1 {
+  font-size: 60px;
+  line-height: 1.03;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.h1 em {
+  color: var(--blue);
+}
+
+.h2 {
+  font-size: 42px;
+  line-height: 1.08;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.h3 {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.lead {
+  margin: 0;
+  font-size: 19px;
+  max-width: 30em;
+}
+
+.lead18 {
+  margin: 0;
+  font-size: 18px;
+  max-width: 36em;
+}
+
+.small {
+  margin: 0;
+  font-size: 14px;
+}
+
+.small13 {
+  font-size: 13px;
+}
+
+.strong {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.regular {
+  font-weight: 400;
+}
+
+.section {
+  padding-top: 112px;
+  padding-bottom: 112px;
+}
+
+.section p,
+.band p,
+.dark p {
+  margin: 0;
+}
+
+.band {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding-top: 104px;
+  padding-bottom: 104px;
+}
+
+.stack48 {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.stack22 {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 700px;
+}
+
+.headingNarrow {
+  max-width: 660px;
+}
+
+.centered {
+  align-items: center;
+  text-align: center;
+  max-width: none;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+/* Hero */
+
+.hero {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 56px;
+  align-items: center;
+  padding-top: 80px;
+  padding-bottom: 104px;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.heroActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.window {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-window);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 0 #e9eef6,
+    0 30px 60px -30px rgba(14, 27, 51, 0.28);
+  overflow: hidden;
+}
+
+.windowHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #edf1f7;
+}
+
+.windowTitle {
+  font-weight: 600;
+  font-size: 14.5px;
+}
+
+.corrected {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--good);
+  white-space: nowrap;
+}
+
+.corrected > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1f9d5c;
+}
+
+.criteriaRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #edf1f7;
+}
+
+.criteriaRow > div {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 1px solid #edf1f7;
+  font-size: 13.5px;
+}
+
+.criteriaRow > div:first-child {
+  border-left: 0;
+}
+
+.lost {
+  background: #fff6f4;
+}
+
+.lostLabel {
+  color: #a3271e;
+  font-weight: 600;
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+}
+
+.dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--blue);
+}
+
+.dots .dotOn {
+  background: var(--blue);
+}
+
+.caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  background: var(--blue-soft);
+  border-top: 1px solid #e1e8f8;
+  font-size: 14.5px;
+}
+
+.caption > span:first-child {
+  flex: 1 1 300px;
+}
+
+.caption strong {
+  color: var(--blue);
+}
+
+.captionScore {
+  white-space: nowrap;
+}
+
+.captionScore :global(.serif) {
+  font-size: 34px;
+  line-height: 1;
+}
+
+/* Como funciona */
+
+.four {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mock {
+  height: 210px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.mockLabel {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13.5px;
+}
+
+.optionOn {
+  border: 1.5px solid var(--blue);
+  background: var(--blue-soft);
+  font-weight: 600;
+}
+
+.optionColumn {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.optionDetail {
+  font-weight: 400;
+  font-size: 12.5px;
+}
+
+.radio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #b9c4d8;
+  flex-shrink: 0;
+}
+
+.optionOn .radio {
+  border: 4.5px solid var(--blue);
+}
+
+.soon {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted-3);
+}
+
+.dropzone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1.5px dashed #b9c4d8;
+  border-radius: 10px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.stepTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* A correção */
+
+.ticks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ticks li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 15px;
+}
+
+.ticks svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.criterionCard {
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.criterionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.criterionName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.criterionName .h3 {
+  font-size: 17px;
+}
+
+.criterionBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #fff0ec;
+  color: #a3271e;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.criterionLevel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.descriptor {
+  font-style: italic;
+  font-family: var(--font-serif);
+  font-size: 17px;
+}
+
+.guidance {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: var(--blue-soft);
+  border-radius: 12px;
+}
+
+.guidance > span:first-child {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+/* Como a nota é calculada */
+
+.dark {
+  background: var(--navy);
+  color: #ffffff;
+  padding-top: 112px;
+  padding-bottom: 112px;
+}
+
+.dark .eyebrowDark {
+  color: #9db4ff;
+}
+
+.leadDark {
+  font-size: 18px;
+  color: #b7c2d8;
+}
+
+.scoreSplit {
+  align-items: start;
+  gap: 48px;
+}
+
+.tableCard {
+  background: #ffffff;
+  color: var(--navy);
+  border-radius: 20px;
+  padding: 28px;
+  overflow-x: auto;
+}
+
+.tableSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding: 6px 0;
+}
+
+.calc {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15.5px;
+}
+
+.calc th {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--border-input);
+}
+
+.calc td {
+  padding: 14px 0;
+  border-bottom: 1px solid #e6ebf3;
+  vertical-align: middle;
+}
+
+.calc .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-left: 12px;
+}
+
+.calc tfoot td {
+  border-bottom: 0;
+  font-weight: 700;
+  padding-top: 16px;
+}
+
+.calc .total {
+  font-size: 20px;
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.noteCard {
+  border: 1px solid #2b3b5c;
+  border-radius: 16px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.noteCard p {
+  color: #b7c2d8;
+}
+
+/* Preços */
+
+.prices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.plan {
+  position: relative;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.planHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+}
+
+.price {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.planAction {
+  margin-top: auto;
+}
+
+.featured {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #ffffff;
+}
+
+.featured .planHeader span,
+.featuredSoft {
+  color: #d5deff;
+}
+
+.ribbon {
+  position: absolute;
+  top: -13px;
+  left: 30px;
+  background: var(--navy);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+/* Dúvidas */
+
+.faqBand {
+  border-bottom: 0;
+  padding-bottom: 96px;
+}
+
+.faqSplit {
+  align-items: start;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 56px;
+}
+
+.questions {
+  border-bottom: 1px solid var(--border-window);
+  /* O "+" girado não pode alargar a página. */
+  overflow-x: clip;
+}
+
+.question {
+  border-top: 1px solid var(--border-window);
+  padding: 20px 0;
+}
+
+.question summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 18px;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.question summary::-webkit-details-marker {
+  display: none;
+}
+
+.question p {
+  margin: 12px 0 0;
+}
+
+.plus {
+  transition: transform 0.2s;
+  color: var(--blue);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.question[open] .plus {
+  transform: rotate(45deg);
+}
+
+/* CTA final */
+
+.finalBand {
+  background: var(--surface);
+  padding-bottom: 96px;
+}
+
+.final {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 64px 48px;
+  border-radius: 28px;
+  background: var(--blue);
+  color: #ffffff;
+  text-align: center;
+}
+
+.final .h2 {
+  max-width: 16em;
+}
+
+.final p {
+  margin: 0;
+  font-size: 18px;
+  color: #d5deff;
+  max-width: 32em;
+}
+
+@media (max-width: 1060px) {
+  .four {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .split,
+  .faqSplit,
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .prices {
+    grid-template-columns: 1fr;
+  }
+
+  .h1 {
+    font-size: 42px;
+  }
+
+  .h2 {
+    font-size: 32px;
+  }
+
+  .criteriaRow {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .criteriaRow > div:nth-child(3) {
+    border-left: 0;
+  }
+
+  .final {
+    padding: 48px 24px;
+  }
+}
+
+@media (max-width: 620px) {
+  .four {
+    grid-template-columns: 1fr;
+  }
+
+}
