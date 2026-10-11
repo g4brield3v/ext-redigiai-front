@@ -36,7 +36,21 @@ describe('safeNext', () => {
     expect(safeNext('/temas/abc?x=1')).toBe('/temas/abc?x=1');
   });
 
-  it.each([null, undefined, '', 'https://evil.test', '//evil.test', '/\\evil.test', 'temas'])(
+  it.each([
+    null,
+    undefined,
+    '',
+    'https://evil.test',
+    '//evil.test',
+    '/\\evil.test',
+    'temas',
+    // O navegador remove tab e quebra de linha ao resolver a URL: "/\t/evil.test" viraria "//evil.test".
+    '/\t/evil.test',
+    '/\n/evil.test',
+    '/\r\n/evil.test',
+    '/\t\\evil.test',
+    '/a\u0000b',
+  ])(
     'troca %s pelo destino padrão',
     (next) => {
       expect(safeNext(next)).toBe('/temas');
@@ -54,14 +68,14 @@ describe('cadastro pendente', () => {
   });
 
   it('não confia no destino guardado', () => {
-    localStorage.setItem('redigiai.signup', JSON.stringify({ next: 'https://evil.test', birthDate: 42 }));
+    sessionStorage.setItem('redigiai.signup', JSON.stringify({ next: 'https://evil.test', birthDate: 42 }));
 
     expect(readPendingSignup()).toEqual({ birthDate: undefined, next: '/temas' });
     clearPendingSignup();
   });
 
   it('ignora conteúdo inválido', () => {
-    localStorage.setItem('redigiai.signup', '{not json');
+    sessionStorage.setItem('redigiai.signup', '{not json');
 
     expect(readPendingSignup()).toEqual({});
     clearPendingSignup();

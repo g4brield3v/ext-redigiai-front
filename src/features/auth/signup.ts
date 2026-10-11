@@ -1,6 +1,9 @@
 const STORAGE_KEY = 'redigiai.signup';
 
-/** O que precisa sobreviver à ida ao Google ou ao link do e-mail (que pode abrir em outra aba). */
+/**
+ * O que precisa sobreviver à ida ao Google. Fica só nesta aba e some ao fechá-la: se o link do e-mail
+ * abrir em outra aba, a data de nascimento é pedida de novo depois do login.
+ */
 export type PendingSignup = {
   /** Data de nascimento em ISO (aaaa-mm-dd), se já foi informada na tela de login. */
   birthDate?: string;
@@ -10,7 +13,7 @@ export type PendingSignup = {
 
 export function savePendingSignup(pending: PendingSignup) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
   } catch {
     // Sem armazenamento (modo privado): a data de nascimento é pedida de novo depois do login.
   }
@@ -18,7 +21,7 @@ export function savePendingSignup(pending: PendingSignup) {
 
 export function readPendingSignup(): PendingSignup {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
     const parsed: unknown = raw ? JSON.parse(raw) : null;
     if (parsed && typeof parsed === 'object') {
       const { birthDate, next } = parsed as Record<string, unknown>;
@@ -35,7 +38,7 @@ export function readPendingSignup(): PendingSignup {
 
 export function clearPendingSignup() {
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
   } catch {
     // Nada a limpar.
   }
@@ -43,7 +46,18 @@ export function clearPendingSignup() {
 
 /** Só caminhos internos: impede que `?next=` leve para outro site. */
 export function safeNext(next: string | null | undefined, fallback = '/temas') {
-  return next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : fallback;
+  // Barra invertida e caracteres de controle são reinterpretados ou removidos pelo navegador ao resolver a URL.
+  // eslint-disable-next-line no-control-regex -- a intenção é exatamente barrar caracteres de controle
+  if (!next || !next.startsWith('/') || /[\\\u0000-\u001f\u007f]/.test(next)) {
+    return fallback;
+  }
+
+  try {
+    const url = new URL(next, window.location.origin);
+    return url.origin === window.location.origin ? url.pathname + url.search + url.hash : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 /** Põe as barras enquanto a pessoa digita: 17052008 → 17/05/2008. */
