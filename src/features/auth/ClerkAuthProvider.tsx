@@ -18,7 +18,7 @@ function Bridge({ children }: { children: ReactNode }) {
   const name = user?.firstName ?? user?.primaryEmailAddress?.emailAddress ?? null;
   const value = useMemo<Auth>(
     () => ({
-      enabled: true,
+      mode: 'clerk',
       isLoaded,
       isSignedIn: isSignedIn === true,
       initial: name ? name.charAt(0).toUpperCase() : null,
@@ -31,7 +31,7 @@ function Bridge({ children }: { children: ReactNode }) {
 }
 
 /** Login pelo Clerk com o nosso visual: o SDK cuida da sessão, as telas são nossas. */
-export function ClerkAuthProvider({ publishableKey, children }: { publishableKey: string; children: ReactNode }) {
+export default function ClerkAuthProvider({ publishableKey, children }: { publishableKey: string; children: ReactNode }) {
   const navigate = useNavigate();
 
   return (

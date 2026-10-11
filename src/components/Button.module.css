@@ -67,3 +67,20 @@
   color: #4a5670;
   cursor: not-allowed;
 }
+
+.xs {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.danger {
+  background: #ffffff;
+  color: #9a2a20;
+  border-color: #ebc2bc;
+}
+
+.danger:hover {
+  border-color: #9a2a20;
+  color: #9a2a20;
+}

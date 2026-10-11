@@ -96,3 +96,11 @@
     font-size: 14px;
   }
 }
+
+a.avatar {
+  text-decoration: none;
+}
+
+a.avatar:hover {
+  color: #ffffff;
+}

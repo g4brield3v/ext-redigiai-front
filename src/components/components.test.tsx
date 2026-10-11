@@ -96,13 +96,12 @@ describe('Nav', () => {
     expect(screen.getByRole('link', { name: 'Temas' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('logado, mostra a inicial e Sair', async () => {
-    const signOut = vi.fn(async () => {});
-    renderApp(<Nav />, { auth: { enabled: true, isLoaded: true, isSignedIn: true, initial: 'A', signOut } });
+  it('logado, mostra Minhas correções e a inicial com o link para o perfil', () => {
+    renderApp(<Nav current="painel" />, { auth: { mode: 'clerk', isLoaded: true, isSignedIn: true, initial: 'A', signOut: vi.fn(async () => {}) } });
 
-    expect(screen.getByText('A')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Meu perfil' })).toHaveTextContent('A');
+    expect(screen.getByRole('link', { name: 'Meu perfil' })).toHaveAttribute('href', '/perfil');
+    expect(screen.getByRole('link', { name: 'Minhas correções' })).toHaveAttribute('aria-current', 'page');
     expect(screen.queryByRole('link', { name: 'Entrar' })).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Sair' }));
-    expect(signOut).toHaveBeenCalledOnce();
   });
 });

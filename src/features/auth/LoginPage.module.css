@@ -1,46 +1,43 @@
-/* Medidas copiadas de docs/design/Login.dc.html (o cartão do diálogo). */
+/* Medidas copiadas de docs/telas/html/04-login.html. */
 
-.page {
-  display: flex;
-  justify-content: center;
-  padding: 48px 16px 96px;
+/* A página esmaecida atrás do diálogo. */
+.behind {
+  padding-top: 36px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 28px;
 }
 
-.card {
-  width: 100%;
-  max-width: 448px;
+.behind div {
+  border-radius: 18px;
+  background: #e8ecf3;
+}
+
+.behind div:first-child {
+  height: 720px;
+}
+
+.behind div:last-child {
+  height: 600px;
+}
+
+.draft {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--blue-soft);
+  border-radius: 14px;
+  font-size: 14px;
+}
+
+.draft > span:last-child {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 32px;
-  background: var(--surface);
-  border: 1px solid var(--border-window);
-  border-radius: 22px;
-  box-shadow: var(--shadow-window);
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.title {
-  margin: 0;
-  font-size: 30px;
-  line-height: 1.1;
-}
-
-.close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  color: var(--navy);
+.draftTitle {
+  font-weight: 600;
 }
 
 .separator {

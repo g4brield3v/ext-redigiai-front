@@ -125,7 +125,7 @@ export function CompleteSignupPage() {
   }
 
   return (
-    <LoginShell title="Entre para enviar sua redação" closeTo="/temas">
+    <LoginShell closeTo="/temas">
       {content}
     </LoginShell>
   );

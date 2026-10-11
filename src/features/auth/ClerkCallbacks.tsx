@@ -19,7 +19,7 @@ function Waiting() {
 /** Volta do Google: o Clerk conclui a entrada (ou o cadastro) e segue para o primeiro acesso. */
 export function SsoCallbackPage() {
   return (
-    <LoginShell title="Entre para enviar sua redação" closeTo="/temas">
+    <LoginShell closeTo="/temas">
       <Waiting />
       <AuthenticateWithRedirectCallback
         signInForceRedirectUrl={COMPLETE_PATH}
@@ -44,7 +44,7 @@ export function VerifyEmailLinkPage() {
   }, [loaded, handleEmailLinkVerification]);
 
   return (
-    <LoginShell title="Entre para enviar sua redação" closeTo="/temas">
+    <LoginShell closeTo="/temas">
       {failed ? (
         <div className={styles.center}>
           <p className={styles.error} role="alert">

@@ -143,3 +143,23 @@
     color: var(--correction);
   }
 }
+
+.noteGood {
+  display: inline-flex;
+  align-items: center;
+  color: var(--good);
+}
+
+.noteGood .tag {
+  margin-left: 0;
+  margin-right: 6px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+/* Linhas citadas pelo critério aberto. */
+.lit {
+  background: #fff9e8;
+}

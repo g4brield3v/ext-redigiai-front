@@ -1,16 +1,19 @@
-import { useSignIn, useSignUp } from '@clerk/clerk-react';
-import { isClerkAPIResponseError } from '@clerk/clerk-react/errors';
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { lazy, Suspense, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
-import { Field } from '../../components/primitives';
+import { Field, Modal, SheetThumb } from '../../components/primitives';
+import { loadDraft } from '../envio/draft';
 import { useAuthState } from './AuthContext';
 import styles from './LoginPage.module.css';
 import { maskBirthDate, parseBirthDate, safeNext, savePendingSignup } from './signup';
 
-const COMPLETE_PATH = '/entrar/concluir';
+export const COMPLETE_PATH = '/entrar/concluir';
+
+// O SDK do Clerk só é carregado quando o login real está configurado.
+const ClerkLoginForm = lazy(() => import('./ClerkLoginForm'));
 
 function GoogleIcon() {
   return (
@@ -23,23 +26,22 @@ function GoogleIcon() {
   );
 }
 
-export function LoginShell({ title, closeTo, children }: { title: string; closeTo: string; children: ReactNode }) {
+/** O diálogo de login sobre a página, como na tela aprovada. */
+export function LoginShell({ closeTo, children }: { closeTo: string; children: ReactNode }) {
+  const navigate = useNavigate();
+
   return (
     <>
-      <Nav />
-      <main className={styles.page}>
-        <div className={styles.card}>
-          <div className={styles.header}>
-            <h1 className={`serif ${styles.title}`}>{title}</h1>
-            <Link to={closeTo} className={styles.close} aria-label="Fechar">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            </Link>
-          </div>
-          {children}
+      <div aria-hidden="true">
+        <Nav current="temas" />
+        <div className={`container ${styles.behind}`}>
+          <div />
+          <div />
         </div>
-      </main>
+      </div>
+      <Modal title="Entre para enviar sua redação" width={448} closeButton onClose={() => navigate(closeTo)}>
+        {children}
+      </Modal>
     </>
   );
 }
@@ -54,18 +56,41 @@ export function TermsNotice() {
   );
 }
 
-function LoginForm({ next }: { next: string }) {
-  const { isLoaded: signInLoaded, signIn, setActive } = useSignIn();
-  const { isLoaded: signUpLoaded, signUp } = useSignUp();
-  const navigate = useNavigate();
+/** Aviso de que a foto escolhida antes do login está guardada. */
+function DraftNotice() {
+  const draft = useQuery({ queryKey: ['draft'], queryFn: loadDraft, staleTime: 0 });
+  if (!draft.data) {
+    return null;
+  }
+
+  return (
+    <div className={styles.draft}>
+      <SheetThumb size="sm" />
+      <span>
+        <span className={styles.draftTitle}>{draft.data.title}</span>
+        <span className="muted">A foto está guardada. O envio continua depois de entrar.</span>
+      </span>
+    </div>
+  );
+}
+
+export type LoginFieldsProps = {
+  next: string;
+  ready: boolean;
+  busy?: boolean;
+  error?: string | null;
+  /** E-mail para o qual o link foi enviado; troca o formulário pelo aviso. */
+  sentTo?: string | null;
+  onUseAnotherEmail?: () => void;
+  onGoogle: () => void;
+  onEmail: (email: string) => void;
+};
+
+/** Os campos do login. Quem entra de fato (Clerk ou sessão simulada) é decidido por quem usa. */
+export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmail, onGoogle, onEmail }: LoginFieldsProps) {
   const [email, setEmail] = useState('');
   const [birth, setBirth] = useState('');
   const [birthError, setBirthError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [sentTo, setSentTo] = useState<string | null>(null);
-
-  const ready = signInLoaded && signUpLoaded;
 
   /** Valida o formato e guarda a data para o primeiro acesso; a idade é conferida pelo backend. */
   function rememberBirthDate() {
@@ -79,71 +104,10 @@ function LoginForm({ next }: { next: string }) {
     return true;
   }
 
-  async function continueWithGoogle() {
-    if (!ready || !rememberBirthDate()) {
-      return;
-    }
-    setError(null);
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy: 'oauth_google',
-        redirectUrl: '/entrar/sso',
-        redirectUrlComplete: COMPLETE_PATH,
-      });
-    } catch {
-      setError('Não foi possível continuar com o Google. Tente de novo.');
-    }
-  }
-
-  async function sendLink(event: FormEvent) {
+  function submit(event: FormEvent) {
     event.preventDefault();
-    if (!ready || busy || !rememberBirthDate()) {
-      return;
-    }
-
-    const address = email.trim();
-    const redirectUrl = `${window.location.origin}/entrar/verificar`;
-    setError(null);
-    setBusy(true);
-    try {
-      let sessionId: string | null | undefined;
-      try {
-        const attempt = await signIn.create({ identifier: address });
-        const factor = attempt.supportedFirstFactors?.find((item) => item.strategy === 'email_link');
-        if (!factor || !('emailAddressId' in factor)) {
-          throw new Error('email_link is not enabled');
-        }
-        setSentTo(address);
-        const result = await signIn.createEmailLinkFlow().startEmailLinkFlow({
-          emailAddressId: factor.emailAddressId,
-          redirectUrl,
-        });
-        sessionId = result.status === 'complete' ? result.createdSessionId : null;
-      } catch (signInError) {
-        // Conta nova: o mesmo link serve de cadastro.
-        if (!isClerkAPIResponseError(signInError) || signInError.errors[0]?.code !== 'form_identifier_not_found') {
-          throw signInError;
-        }
-        await signUp.create({ emailAddress: address });
-        setSentTo(address);
-        const result = await signUp.createEmailLinkFlow().startEmailLinkFlow({ redirectUrl });
-        sessionId = result.status === 'complete' ? result.createdSessionId : null;
-      }
-
-      // O link foi aberto em outra aba: esta aba continua daqui.
-      if (sessionId) {
-        await setActive({ session: sessionId });
-        navigate(COMPLETE_PATH, { replace: true });
-      }
-    } catch (caught) {
-      setSentTo(null);
-      setError(
-        isClerkAPIResponseError(caught) && caught.errors[0]?.code === 'form_param_format_invalid'
-          ? 'Informe um e-mail válido.'
-          : 'Não foi possível enviar o link. Tente de novo.',
-      );
-    } finally {
-      setBusy(false);
+    if (ready && !busy && email.trim() && rememberBirthDate()) {
+      onEmail(email.trim());
     }
   }
 
@@ -152,7 +116,7 @@ function LoginForm({ next }: { next: string }) {
       <div className={styles.sent} role="status">
         <strong>Enviamos o link de acesso para {sentTo}.</strong>
         <span className="muted">Abra o e-mail e toque no link para entrar. Sem senha. O link vale por 15 minutos.</span>
-        <button type="button" className={styles.linkButton} onClick={() => setSentTo(null)}>
+        <button type="button" className={styles.linkButton} onClick={onUseAnotherEmail}>
           Usar outro e-mail
         </button>
       </div>
@@ -161,7 +125,7 @@ function LoginForm({ next }: { next: string }) {
 
   return (
     <>
-      <Button variant="ghost" block disabled={!ready} onClick={() => void continueWithGoogle()}>
+      <Button variant="ghost" block disabled={!ready} onClick={() => rememberBirthDate() && onGoogle()}>
         <GoogleIcon />
         Continuar com Google
       </Button>
@@ -170,13 +134,12 @@ function LoginForm({ next }: { next: string }) {
         ou
         <span />
       </div>
-      <form className={styles.form} onSubmit={(event) => void sendLink(event)} noValidate>
+      <form className={styles.form} onSubmit={submit} noValidate>
         <Field
           label="Seu e-mail"
           type="email"
           autoComplete="email"
           placeholder="voce@email.com"
-          required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
@@ -191,7 +154,7 @@ function LoginForm({ next }: { next: string }) {
           hint="A plataforma é para quem tem 16 anos ou mais."
           error={birthError}
         />
-        <Button type="submit" block disabled={!ready || busy || !email.trim()}>
+        <Button type="submit" block disabled={!ready || busy}>
           Receber link de acesso
         </Button>
         <p className={`muted ${styles.note}`}>Sem senha. O link vale por 15 minutos.</p>
@@ -215,13 +178,20 @@ export function LoginPage() {
   }
 
   return (
-    <LoginShell title="Entre para enviar sua redação" closeTo={next}>
-      {auth.enabled ? (
-        <LoginForm next={next} />
+    <LoginShell closeTo={next}>
+      <DraftNotice />
+      {auth.mode === 'clerk' ? (
+        <Suspense fallback={null}>
+          <ClerkLoginForm next={next} />
+        </Suspense>
       ) : (
-        <p className={styles.error} role="alert">
-          O login não está configurado neste ambiente.
-        </p>
+        <LoginFields
+          next={next}
+          ready={auth.mode === 'mock'}
+          error={auth.mode === 'off' ? 'O login não está configurado neste ambiente.' : null}
+          onGoogle={() => auth.mockSignIn?.()}
+          onEmail={() => auth.mockSignIn?.()}
+        />
       )}
       <TermsNotice />
     </LoginShell>

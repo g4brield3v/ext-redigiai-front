@@ -2,8 +2,8 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Button.module.css';
 
-type Variant = 'primary' | 'ghost' | 'inverse';
-type Size = 'sm' | 'md' | 'lg';
+type Variant = 'primary' | 'ghost' | 'inverse' | 'danger';
+type Size = 'xs' | 'sm' | 'md' | 'lg';
 
 type Common = {
   variant?: Variant;

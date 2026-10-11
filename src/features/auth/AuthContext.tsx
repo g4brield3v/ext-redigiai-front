@@ -1,17 +1,19 @@
 import { createContext, useContext } from 'react';
 
 export type Auth = {
-  /** Falso quando o ambiente não tem a chave pública do Clerk: as telas públicas funcionam, o login não. */
-  enabled: boolean;
+  /** `off`: ambiente sem a chave do Clerk (telas públicas funcionam, login não). `mock`: sessão simulada. */
+  mode: 'clerk' | 'mock' | 'off';
   isLoaded: boolean;
   isSignedIn: boolean;
   /** Inicial mostrada no avatar da navegação. */
   initial: string | null;
   signOut: () => Promise<void>;
+  /** Só na sessão simulada: entra como a aluna de exemplo. */
+  mockSignIn?: () => void;
 };
 
 export const signedOut: Auth = {
-  enabled: false,
+  mode: 'off',
   isLoaded: true,
   isSignedIn: false,
   initial: null,
