@@ -1,0 +1,304 @@
+/* Medidas copiadas de docs/telas/html/10-perfil.html. */
+
+.page {
+  padding-top: 44px;
+  padding-bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 20px;
+  font-weight: 500;
+}
+
+.menu a {
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--muted-2);
+  text-decoration: none;
+}
+
+.menu a.menuOn {
+  background: #ffffff;
+  border-color: var(--border);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  scroll-margin-top: 20px;
+}
+
+.card p {
+  margin: 0;
+}
+
+.h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.readonly input {
+  background: var(--bg);
+}
+
+.select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.select label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.select select {
+  height: 48px;
+  width: 100%;
+  border: 1px solid var(--border-input);
+  border-radius: 12px;
+  padding: 0 14px;
+  font: inherit;
+  color: var(--navy);
+  background: #ffffff;
+}
+
+.select select:focus {
+  border-color: var(--blue);
+}
+
+.saveRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cardHeader > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plan {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 18px;
+  background: var(--blue-soft);
+  border-radius: 14px;
+}
+
+.plan > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.plan > span > span:last-child {
+  font-size: 14px;
+}
+
+.purchases {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+}
+
+.purchases li {
+  display: grid;
+  grid-template-columns: 174px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0 16px;
+  padding: 12px 0;
+  border-top: 1px solid #edf1f7;
+}
+
+.amount {
+  text-align: right;
+}
+
+.links {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  min-width: 96px;
+}
+
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--blue);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.notices {
+  gap: 0;
+  padding: 28px 28px 14px;
+}
+
+.notices .h2 {
+  margin-bottom: 12px;
+}
+
+.notices label {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-top: 1px solid #edf1f7;
+  cursor: pointer;
+}
+
+.notices input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--blue);
+  flex-shrink: 0;
+}
+
+.notices label > span,
+.row > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.notices label > span > span:last-child,
+.row > span > span:not(:first-child) {
+  font-size: 14px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.row > span {
+  flex: 1 1 320px;
+}
+
+.row:not(:last-of-type) {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #edf1f7;
+}
+
+.signOut {
+  align-self: flex-start;
+}
+
+.modalText {
+  margin: 0;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modalActions > * {
+  flex: 1 1 160px;
+}
+
+@media (max-width: 980px) {
+  .layout,
+  .fields {
+    grid-template-columns: 1fr;
+  }
+
+  .menu {
+    position: static;
+  }
+
+  /* Compras em cartões: data e valor numa linha, descrição e links abaixo. */
+  .purchases li {
+    grid-template-columns: 1fr auto;
+    gap: 4px 16px;
+  }
+
+  .what {
+    grid-column: 1;
+    grid-row: 1;
+    font-weight: 600;
+  }
+
+  .amount {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .date {
+    grid-column: 1;
+    grid-row: 2;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .links {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}

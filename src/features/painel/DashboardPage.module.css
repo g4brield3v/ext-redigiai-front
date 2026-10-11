@@ -1,0 +1,238 @@
+/* Medidas copiadas de docs/telas/html/08-painel.html. */
+
+.page {
+  padding-top: 44px;
+  padding-bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 22px;
+  background: #fff6e5;
+  border: 1px solid #f1d8a6;
+  border-radius: 18px;
+}
+
+.alert svg {
+  flex-shrink: 0;
+}
+
+.alert > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 320px;
+  font-size: 15px;
+}
+
+.alertTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.card p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.focusCard {
+  gap: 14px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.chart text {
+  font-family: var(--font-ui);
+}
+
+.focus {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: #fff6f4;
+  border-radius: 14px;
+  font-size: 15px;
+}
+
+.focus > span:first-child {
+  font-size: 16px;
+  font-weight: 600;
+  color: #a3271e;
+}
+
+.focusLink {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 22px 8px;
+}
+
+.listHeader span {
+  font-size: 14px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th {
+  padding: 12px 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th:first-child,
+.table th:last-child {
+  padding: 12px 22px;
+}
+
+.table td {
+  padding: 16px 0;
+  border-bottom: 1px solid #edf1f7;
+  vertical-align: middle;
+}
+
+.table td:first-child {
+  padding-left: 22px;
+}
+
+.table td:last-child {
+  padding-right: 22px;
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.version {
+  font-weight: 400;
+}
+
+.score {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.action {
+  text-align: right;
+}
+
+.mobileList {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mobileList li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid #edf1f7;
+  font-size: 15px;
+}
+
+.mobileMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.empty p {
+  margin: 0;
+  font-size: 18px;
+}
+
+@media (max-width: 980px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .table {
+    display: none;
+  }
+
+  .mobileList {
+    display: block;
+  }
+}

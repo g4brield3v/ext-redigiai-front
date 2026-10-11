@@ -1,6 +1,6 @@
 import type { SheetLine } from '../../components/EssaySheet';
 
-// Redação de exemplo da página inicial: conteúdo fixo, copiado da tela aprovada (docs/design/Main.dc.html).
+// Redação de exemplo da página inicial: conteúdo fixo, copiado da tela aprovada (docs/telas/html/01-inicio.html).
 
 export const exampleTitle = 'Fuvest – Dissertação – Algoritmos e o debate público';
 

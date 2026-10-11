@@ -1,0 +1,384 @@
+/* Medidas copiadas de docs/telas/html/03-tema-envio.html e 03b-modal-confirmar-envio.html. */
+
+.page {
+  padding-top: 36px;
+  padding-bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crumbs {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.aside {
+  gap: 24px;
+  padding: 28px;
+  position: sticky;
+  top: 20px;
+}
+
+.statement {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.statement p {
+  margin: 0;
+  font-size: 17.5px;
+  line-height: 1.7;
+}
+
+.collection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.collection > :global(.eyebrow) {
+  margin-bottom: 8px;
+}
+
+.text {
+  border-top: 1px solid var(--border);
+  padding: 16px 0;
+}
+
+.text:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.text summary {
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+}
+
+.text summary::-webkit-details-marker {
+  display: none;
+}
+
+.text p {
+  margin: 12px 0 0;
+}
+
+.text .firstBody {
+  line-height: 1.7;
+}
+
+.source {
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.image {
+  margin-top: 12px;
+  height: 180px;
+  border-radius: 12px;
+  background: #eef1f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.download {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.types {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.types legend {
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.types label {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1px solid var(--border-input);
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.types label.typeOn {
+  border: 1.5px solid var(--blue);
+  background: var(--blue-soft);
+}
+
+.types input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--blue);
+  flex-shrink: 0;
+}
+
+.types label > span,
+.photos li > div,
+.summary > div,
+.pending li > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.small {
+  font-size: 14px;
+}
+
+.small13 {
+  font-size: 13px;
+}
+
+.photoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.photos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.photos li {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--border-input);
+  border-radius: 14px;
+}
+
+.photos li > div {
+  gap: 4px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.photoActions {
+  display: flex;
+  gap: 4px 20px;
+  flex-wrap: wrap;
+}
+
+.textButton {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 22px 14px;
+  border: 1.5px dashed #b9c4d8;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 14.5px;
+}
+
+.dropActions {
+  display: flex;
+  gap: 20px;
+}
+
+.dropActions .textButton {
+  min-height: 44px;
+}
+
+/* Fotografar pela câmera só faz sentido no celular. */
+.cameraButton {
+  display: none;
+}
+
+.tips {
+  margin: 0;
+  padding: 14px 16px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg);
+  border-radius: 12px;
+  font-size: 14.5px;
+}
+
+.tips li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tips svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.summary {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summary > div {
+  gap: 2px;
+}
+
+.hint {
+  font-size: 13.5px;
+  text-align: center;
+}
+
+.errorBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* Modal 3b */
+
+.pending {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pending li {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.pending li > span {
+  gap: 2px;
+}
+
+.costs {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 16px;
+  padding: 16px 18px;
+  background: var(--bg);
+  border-radius: 14px;
+  font-size: 15px;
+}
+
+.costs dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+
+.aiNotice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+
+.aiNotice input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--blue);
+  flex-shrink: 0;
+}
+
+.modalError {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fdecea;
+  color: #9a2a20;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modalActions > * {
+  flex: 1 1 160px;
+}
+
+@media (max-width: 980px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .aside {
+    position: static;
+  }
+
+  .cameraButton {
+    display: inline-block;
+  }
+}

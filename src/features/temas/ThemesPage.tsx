@@ -1,20 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Nav } from '../../components/Nav';
-import { Chip, ErrorState, Field, Skeleton } from '../../components/primitives';
+import { Chip, ErrorState, Field, Skeleton, StepBar } from '../../components/primitives';
 import { ApiError } from '../../lib/api';
 import type { Schemas } from '../../lib/api';
-import { useExams, useRubric, useThemes } from '../../lib/queries';
+import type { EssaySummary } from '../../api/mock-types';
+import { useEssays, useExams, useRubric, useThemes } from '../../lib/queries';
+import { useAuthState } from '../auth/AuthContext';
+import { statusChip } from '../painel/DashboardPage';
 import styles from './ThemesPage.module.css';
 
 const SEARCH_DELAY_MS = 300;
-
-const steps = [
-  { label: '1 · Vestibular', current: true },
-  { label: '2 · Tema', current: true },
-  { label: '3 · Tipo de redação', current: false },
-  { label: '4 · Envio', current: false },
-];
 
 function useDebounced(value: string, delayMs: number) {
   const [debounced, setDebounced] = useState(value);
@@ -57,11 +53,18 @@ function ExamButton({
   );
 }
 
-function ThemeCard({ theme }: { theme: Schemas['ThemeSummaryDto'] }) {
+/** O cartão mostra a situação da redação mais recente que o aluno logado enviou para o tema. */
+function ThemeCard({ theme, essay }: { theme: Schemas['ThemeSummaryDto']; essay?: EssaySummary }) {
+  const chip = essay && statusChip[essay.status];
   return (
-    <Link to={`/temas/${theme.id}`} className={styles.theme}>
+    <Link to={`/temas/${theme.id}`} className={essay ? `${styles.theme} ${styles.themeSent}` : styles.theme}>
       <div className={styles.themeTop}>
         <span className={`muted ${styles.themeExam}`}>{theme.examName}</span>
+        {chip && (
+          <Chip tone={chip.tone}>
+            {essay.status === 'completed' && essay.score !== null ? `Corrigida · ${essay.score}/${essay.maxScore}` : chip.label}
+          </Chip>
+        )}
       </div>
       <h3 className={`serif ${styles.themeTitle}`}>{theme.title}</h3>
       <div className={styles.themeTypes}>
@@ -101,6 +104,15 @@ export function ThemesPage() {
     exams.data?.find((exam) => exam.slug === chosenSlug && exam.status === 'active') ??
     exams.data?.find((exam) => exam.status === 'active');
   const themes = useThemes(selected?.slug, debouncedSearch);
+  const auth = useAuthState();
+  const essays = useEssays(auth.isSignedIn);
+  // A lista vem da mais recente para a mais antiga: vale a primeira de cada tema.
+  const latestByTheme = new Map<string, EssaySummary>();
+  for (const essay of essays.data?.items ?? []) {
+    if (!latestByTheme.has(essay.themeId)) {
+      latestByTheme.set(essay.themeId, essay);
+    }
+  }
 
   return (
     <>
@@ -114,13 +126,7 @@ export function ThemesPage() {
           </p>
         </div>
 
-        <ol className={styles.steps} aria-label="Etapas">
-          {steps.map((step) => (
-            <li key={step.label} className={step.current ? styles.stepCurrent : undefined}>
-              {step.label}
-            </li>
-          ))}
-        </ol>
+        <StepBar current={2} />
 
         <section className={styles.block} aria-labelledby="vestibular">
           <h2 id="vestibular" className="h3">
@@ -180,7 +186,7 @@ export function ThemesPage() {
               ) : (
                 <div className={styles.grid}>
                   {themes.data.map((theme) => (
-                    <ThemeCard key={theme.id} theme={theme} />
+                    <ThemeCard key={theme.id} theme={theme} essay={latestByTheme.get(theme.id)} />
                   ))}
                 </div>
               )}

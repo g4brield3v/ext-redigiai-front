@@ -1,4 +1,4 @@
-/* Medidas e cores copiadas de docs/design/Main.dc.html. */
+/* Medidas e cores copiadas de docs/telas/html/01-inicio.html. */
 
 .h1 {
   font-size: 60px;
@@ -381,6 +381,10 @@
   margin-top: 4px;
 }
 
+.more {
+  font-weight: 600;
+}
+
 .criterionCard {
   padding: 26px;
   display: flex;
@@ -427,6 +431,7 @@
 
 .descriptor {
   font-style: italic;
+  font-weight: 500;
   font-family: var(--font-serif);
   font-size: 17px;
 }
@@ -511,7 +516,6 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  padding-left: 12px;
 }
 
 .calc tfoot td {
@@ -561,6 +565,10 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 20px;
+}
+
+.plan .ticks {
+  gap: 12px;
 }
 
 .planHeader {

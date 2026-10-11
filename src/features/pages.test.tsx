@@ -20,7 +20,7 @@ const profile = {
 };
 
 function signedIn(signOut = vi.fn(async () => {})): Auth {
-  return { enabled: true, isLoaded: true, isSignedIn: true, initial: 'A', signOut };
+  return { mode: 'clerk', isLoaded: true, isSignedIn: true, initial: 'A', signOut };
 }
 
 describe('Início', () => {
@@ -199,7 +199,7 @@ describe('Primeiro acesso', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('A plataforma é destinada a pessoas com 16 anos ou mais.');
     expect(screen.queryByLabelText('Data de nascimento')).not.toBeInTheDocument();
-    await userEvent.click(within(screen.getByRole('main')).getByRole('button', { name: 'Sair' }));
+    await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Sair' }));
     expect(signOut).toHaveBeenCalledOnce();
     clearPendingSignup();
   });

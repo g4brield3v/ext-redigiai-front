@@ -1,19 +1,38 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Nav } from '../components/Nav';
 import { OfflineBanner } from '../components/OfflineBanner';
-import { ClerkAuthProvider } from '../features/auth/ClerkAuthProvider';
-import { SsoCallbackPage, VerifyEmailLinkPage } from '../features/auth/ClerkCallbacks';
+import { useAuthState } from '../features/auth/AuthContext';
 import { CompleteSignupPage } from '../features/auth/CompleteSignupPage';
 import { LoginPage } from '../features/auth/LoginPage';
+import { MockAuthProvider, installMockSession } from '../features/auth/MockAuthProvider';
+import { CheckoutPage } from '../features/checkout/CheckoutPage';
+import { CorrectionPage, ExampleCorrectionPage } from '../features/correcao/CorrectionPage';
+import { CameraPage } from '../features/envio/CameraPage';
+import { ThemePage } from '../features/envio/ThemePage';
 import { HomePage } from '../features/home/HomePage';
+import { DashboardPage } from '../features/painel/DashboardPage';
+import { ProfilePage } from '../features/perfil/ProfilePage';
+import { ReviewPage } from '../features/revisao/ReviewPage';
 import { ThemesPage } from '../features/temas/ThemesPage';
 import { ApiError } from '../lib/api';
+import { clerkKey, mocksEnabled } from '../lib/env';
 
-const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
+// O SDK do Clerk só entra no pacote de quem usa o login real.
+const ClerkAuthProvider = lazy(() => import('../features/auth/ClerkAuthProvider'));
+const SsoCallbackPage = lazy(() => import('../features/auth/ClerkCallbacks').then((m) => ({ default: m.SsoCallbackPage })));
+const VerifyEmailLinkPage = lazy(() =>
+  import('../features/auth/ClerkCallbacks').then((m) => ({ default: m.VerifyEmailLinkPage })),
+);
+// Mostruário dos componentes: só existe em desenvolvimento.
+const ComponentsPage = import.meta.env.DEV ? lazy(() => import('./ComponentsPage')) : null;
+
+if (mocksEnabled) {
+  installMockSession();
+}
 
 function createQueryClient() {
   return new QueryClient({
@@ -55,21 +74,57 @@ function NotFoundPage() {
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
+  if (mocksEnabled) {
+    return <MockAuthProvider>{children}</MockAuthProvider>;
+  }
   // Sem a chave do Clerk, as telas públicas funcionam e o login fica indisponível.
-  return clerkKey ? <ClerkAuthProvider publishableKey={clerkKey}>{children}</ClerkAuthProvider> : <>{children}</>;
+  return clerkKey ? (
+    <Suspense fallback={null}>
+      <ClerkAuthProvider publishableKey={clerkKey}>{children}</ClerkAuthProvider>
+    </Suspense>
+  ) : (
+    <>{children}</>
+  );
+}
+
+/** Rota logada: sem sessão, vai para o login e volta para cá depois. */
+function RequireAuth({ children }: { children: ReactNode }) {
+  const auth = useAuthState();
+  const location = useLocation();
+
+  if (!auth.isLoaded) {
+    return <Nav />;
+  }
+  if (!auth.isSignedIn) {
+    return <Navigate to={`/entrar?next=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+  }
+  return <>{children}</>;
 }
 
 export function AppRoutes() {
+  const logged = (page: ReactNode) => <RequireAuth>{page}</RequireAuth>;
+
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/temas" element={<ThemesPage />} />
-      <Route path="/entrar" element={<LoginPage />} />
-      <Route path="/entrar/concluir" element={<CompleteSignupPage />} />
-      {clerkKey && <Route path="/entrar/sso" element={<SsoCallbackPage />} />}
-      {clerkKey && <Route path="/entrar/verificar" element={<VerifyEmailLinkPage />} />}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    <Suspense fallback={null}>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/temas" element={<ThemesPage />} />
+        <Route path="/temas/:themeId" element={<ThemePage />} />
+        <Route path="/enviar/foto" element={<CameraPage />} />
+        <Route path="/exemplo" element={<ExampleCorrectionPage />} />
+        <Route path="/entrar" element={<LoginPage />} />
+        <Route path="/entrar/concluir" element={<CompleteSignupPage />} />
+        {clerkKey && <Route path="/entrar/sso" element={<SsoCallbackPage />} />}
+        {clerkKey && <Route path="/entrar/verificar" element={<VerifyEmailLinkPage />} />}
+        <Route path="/painel" element={logged(<DashboardPage />)} />
+        <Route path="/redacoes/:id/revisao" element={logged(<ReviewPage />)} />
+        <Route path="/redacoes/:id" element={logged(<CorrectionPage />)} />
+        <Route path="/perfil" element={logged(<ProfilePage />)} />
+        <Route path="/comprar" element={logged(<CheckoutPage />)} />
+        {ComponentsPage && <Route path="/_componentes" element={<ComponentsPage />} />}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
   );
 }
 

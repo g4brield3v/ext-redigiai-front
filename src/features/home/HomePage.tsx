@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { EssaySheet } from '../../components/EssaySheet';
 import { Footer } from '../../components/Footer';
 import { Nav } from '../../components/Nav';
+import { Dots } from '../../components/primitives';
 import { exampleCriteria, exampleLines, exampleTitle, faq } from './example';
 import styles from './HomePage.module.css';
 import { ScoreSection } from './ScoreSection';
@@ -11,16 +13,6 @@ function Check({ size = 18, color = '#2346C9' }: { size?: number; color?: string
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={size === 18 ? 2.6 : 2.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M20 6L9 17l-5-5" />
     </svg>
-  );
-}
-
-export function Dots({ level }: { level: number }) {
-  return (
-    <span className={styles.dots} role="img" aria-label={`Nível ${level} de 3`}>
-      {[1, 2, 3].map((dot) => (
-        <span key={dot} className={dot <= level ? styles.dotOn : undefined} />
-      ))}
-    </span>
   );
 }
 
@@ -214,6 +206,9 @@ function CorrectionSection() {
               </span>
             </li>
           </ul>
+          <Link className={styles.more} to="/exemplo">
+            Abrir uma correção completa →
+          </Link>
         </div>
 
         <div className={`${styles.window} ${styles.criterionCard}`}>

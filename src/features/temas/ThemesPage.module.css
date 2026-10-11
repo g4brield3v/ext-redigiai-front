@@ -1,4 +1,4 @@
-/* Medidas e cores copiadas de docs/design/Propostas.dc.html. */
+/* Medidas e cores copiadas de docs/telas/html/02-temas.html. */
 
 .page {
   padding-top: 48px;
@@ -18,34 +18,6 @@
   margin: 0;
   font-size: 18px;
   max-width: 38em;
-}
-
-.steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.steps li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: #ffffff;
-  border: 1px solid var(--border-input);
-  color: var(--muted);
-}
-
-.steps .stepCurrent {
-  background: var(--navy);
-  border-color: var(--navy);
-  color: #ffffff;
 }
 
 .block {
@@ -127,6 +99,10 @@
   border-radius: 18px;
   color: var(--navy);
   text-decoration: none;
+}
+
+.themeSent {
+  border: 1.5px solid var(--blue);
 }
 
 a.theme:hover {
