@@ -171,6 +171,27 @@ test.describe('Envio', () => {
   });
 });
 
+test.describe('Administração', () => {
+  for (const path of ['/admin', '/admin/propostas', '/admin/propostas/0198f0c0-0000-7000-8000-000000000001']) {
+    test(`${path} sem sessão é a página de não encontrado, sem nenhuma chamada à administração`, async ({ page }) => {
+      const calls: string[] = [];
+      page.on('request', (request) => {
+        if (request.url().includes('/v1/admin')) {
+          calls.push(request.url());
+        }
+      });
+
+      await page.goto(path);
+
+      await expect(page.getByRole('heading', { level: 1, name: 'Não encontramos essa página.' })).toBeVisible();
+      // Nada indica que a área existe: nem o selo, nem o pedido de login.
+      await expect(page.getByText('Admin', { exact: true })).toHaveCount(0);
+      await expect(page).toHaveURL(path);
+      expect(calls).toEqual([]);
+    });
+  }
+});
+
 test.describe('rotas logadas', () => {
   for (const path of ['/painel', '/perfil', '/comprar', '/redacoes/abc', '/redacoes/abc/revisao']) {
     test(`${path} sem sessão leva ao login`, async ({ page }) => {

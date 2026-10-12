@@ -11,6 +11,8 @@ export class ApiError extends Error {
     readonly retryable: boolean,
     readonly status: number,
     readonly traceId?: string,
+    /** Só em `VALIDATION_FAILED` (administração): cada pendência, com o campo a que se refere. */
+    readonly details?: { path: string; message: string }[],
   ) {
     super(message);
     this.name = 'ApiError';
@@ -77,6 +79,7 @@ export async function unwrap<T>(call: Promise<ApiResult<T>>): Promise<T> {
     body?.retryable ?? false,
     response.status,
     body?.traceId,
+    body?.details ?? undefined,
   );
 }
 
@@ -124,6 +127,36 @@ export async function request<T>(
     error?.retryable ?? false,
     response.status,
     error?.traceId,
+    error?.details ?? undefined,
+  );
+}
+
+/** Envia um arquivo (`multipart/form-data`) com o mesmo login e o mesmo formato de erro das outras chamadas. */
+export async function upload<T>(path: string, form: FormData): Promise<T> {
+  const headers = new Headers();
+  await authorize(headers);
+
+  let response: Response;
+  try {
+    response = await globalThis.fetch(`${baseUrl}${path}`, { method: 'POST', headers, body: form });
+  } catch {
+    throw new ApiError('NETWORK_ERROR', 'Não foi possível conectar. Confira a sua internet e tente de novo.', true, 0);
+  }
+
+  const text = await response.text();
+  const data: unknown = text ? JSON.parse(text) : undefined;
+  if (response.ok) {
+    return data as T;
+  }
+
+  const error = data as Partial<Schemas['ErrorResponse']> | undefined;
+  throw new ApiError(
+    error?.code ?? 'INTERNAL_ERROR',
+    error?.message ?? 'Algo deu errado do nosso lado. Tente novamente em instantes.',
+    error?.retryable ?? false,
+    response.status,
+    error?.traceId,
+    error?.details ?? undefined,
   );
 }
 

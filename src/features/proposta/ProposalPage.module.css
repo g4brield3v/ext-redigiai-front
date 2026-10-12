@@ -48,6 +48,14 @@
   padding: 18px 48px 40px;
 }
 
+/* As colunas do verso seguem a largura deste quadro, não a da janela: assim a prévia do cadastro mostra o
+   celular e o computador dentro do mesmo painel. */
+.blocks {
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+}
+
 /* Cada texto da coletânea: rótulo em negrito, conteúdo e fonte em itálico à direita. */
 .block {
   display: flex;
@@ -256,8 +264,10 @@
   .aside {
     position: static;
   }
+}
 
-  /* No celular o rótulo fica em cima e as colunas do verso vêm uma depois da outra. */
+/* Em pouco espaço (celular) o rótulo fica em cima e as colunas do verso vêm uma depois da outra. */
+@container (max-width: 520px) {
   .labeled {
     grid-template-columns: 1fr;
   }

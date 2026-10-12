@@ -95,6 +95,8 @@ Fontes hospedadas no próprio site com `@fontsource/newsreader`, `@fontsource/sc
 | `/propostas` (antes `/temas`) | 2 · Vestibular e proposta (`02-temas.html`) | Público |
 | `/propostas/:slug` | 2b · Proposta e coletânea (`02b-proposta-coletanea.html`) | Público |
 | `/propostas/:slug/enviar` | 3 · Envio (`03-tipo-envio.html`), modal 3b (`03b-modal-confirmar-envio.html`) | Público até enviar |
+| `/admin/propostas` | 11 · Admin: propostas (`11-admin-propostas.html`) | Só administrador (ver `07-propostas-de-redacao.md`, A5) |
+| `/admin/propostas/:id` | 11b · Admin: editar proposta (`11b-admin-editar-proposta.html`) | Só administrador |
 | `/entrar` | 4 · Login (`04-login.html`) | Público |
 | `/enviar/foto` | 5 · Câmera no celular (`05-camera-celular.html`) | Público |
 | `/painel` | 8 · Minhas correções (`08-painel.html`) | Logado |
@@ -141,6 +143,18 @@ Página só de leitura, separada do envio: o aluno lê a proposta, escreve à m�
 - No fim da coluna: "Já escreveu? Envie a foto da folha para correção." com o botão "Enviar minha redação". Na coluna lateral: "Como na prova", com 4 passos (ler; imprimir a folha pautada, com o link "Baixar a folha (PDF)"; escrever sem nome nem assinatura; fotografar e enviar) e o mesmo botão (→ `/propostas/:slug/enviar`). O aluno não escolhe tipo nem opção em lugar nenhum.
 - Dados de `GET /v1/prompts/{slug}`. Proposta inexistente, em rascunho ou arquivada → erro `PROMPT_NOT_AVAILABLE` com link para `/propostas`.
 - `?versao=N` abre a versão que uma redação antiga usou (`GET /v1/prompts/{slug}?version=N`). Versão arquivada mostra o aviso de que foi substituída, com link para a atual, e não tem botão de envio.
+
+### 11 · Administração das propostas (`/admin/propostas` e `/admin/propostas/:id`)
+
+Regras, API e campos em `docs/07-propostas-de-redacao.md`, seção A5. Referências: `11-admin-propostas` e `11b-admin-editar-proposta`. O código fica em `src/features/admin` e é carregado à parte: quem não é administrador não o baixa.
+
+- `/admin/*` só existe para quem tem `role: admin` em `GET /v1/me`. Para aluno logado e para quem não entrou, é a página de "não encontrado", sem nenhuma chamada a `/v1/admin`. O link "Admin" aparece ao lado do avatar só para administradores.
+- Sessão sem o segundo fator, quando a API o exige (`ADMIN_2FA_REQUIRED`): a tela pede a ativação da verificação em duas etapas.
+- **Lista:** abas por situação com as contagens que vêm da API, busca com atraso de 300 ms, tabela (proposta, versão, status, atualizada, ação), "Importar JSON" e "Nova proposta".
+- **Editor:** barra fixa (voltar, status e versão, "Salvo às hh:mm", "Exportar JSON", "Validar", "Publicar" com confirmação); pendências clicáveis, que levam ao campo; título e dados gerais; um cartão por bloco, com posição editável, alça para arrastar, ↑ ↓, duplicar e remover; cartão fixo de Instruções, com o tipo de redação (gênero como na prova e categoria de correção), linhas, título obrigatório e itens; "Abordagens esperadas do tema"; prévia à direita com os mesmos componentes da página do aluno, em "Computador" e "Celular".
+- Mudar a ordem renumera os blocos de 10 em 10. O editor manda sempre a proposta inteira (`PUT`), com `expectedUpdatedAt`.
+- **Salvamento automático:** 2 segundos depois da última alteração. Se falhar, o que foi digitado fica no navegador (`localStorage`) e volta ao reabrir; com `PROMPT_CHANGED`, o editor para de salvar e pede para recarregar.
+- Proposta publicada ou arquivada abre só para leitura, com "Criar nova versão"; a publicada tem também "Arquivar". O rascunho tem "Apagar este rascunho" no fim do formulário.
 
 ### 3 · Envio (`/propostas/:slug/enviar`)
 

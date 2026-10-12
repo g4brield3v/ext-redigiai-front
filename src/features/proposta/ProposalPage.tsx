@@ -117,6 +117,20 @@ function PromptBlock({ block, genreLabel }: { block: Block; genreLabel: string }
   }
 }
 
+/**
+ * O conteúdo da proposta, bloco a bloco, como o aluno lê. A prévia do cadastro usa este mesmo componente, para o
+ * administrador ver exatamente o que vai ao ar.
+ */
+export function PromptBlocks({ blocks, genreLabel }: { blocks: Block[]; genreLabel: string }) {
+  return (
+    <div className={styles.blocks}>
+      {blocks.map((block, index) => (
+        <PromptBlock key={`${block.position}-${index}`} block={block} genreLabel={genreLabel} />
+      ))}
+    </div>
+  );
+}
+
 function PageSkeleton() {
   return (
     <div className={styles.columns} aria-busy="true" aria-label="Carregando a proposta">
@@ -188,9 +202,7 @@ export function ProposalPage() {
                   <Link to={`/propostas/${encodeURIComponent(data.slug)}`}>Ver a versão atual</Link>
                 </Notice>
               )}
-              {data.blocks.map((block) => (
-                <PromptBlock key={block.position} block={block} genreLabel={data.genreLabel} />
-              ))}
+              <PromptBlocks blocks={data.blocks} genreLabel={data.genreLabel} />
               {!archived && (
                 <div className={styles.ready}>
                   <span>

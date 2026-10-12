@@ -26,7 +26,7 @@ React + Vite + TypeScript (strict), React Router, TanStack Query, CSS Modules, c
 openapi.json     cópia do contrato da API (vem do repositório do back-end)
 src/api/         schema.d.ts (gerado, não editar à mão) e provisional-types.ts (endpoints ainda sem backend)
 src/components/  componentes do design system
-src/features/    uma pasta por área (home, propostas, proposta, envio, revisao, correcao, painel, perfil, checkout, auth)
+src/features/    uma pasta por área (home, propostas, proposta, admin, envio, revisao, correcao, painel, perfil, checkout, auth)
 src/routes/      rotas e provedores
 e2e/             Playwright (telas públicas)
 docs/            especificação do front e telas aprovadas
@@ -39,7 +39,7 @@ Dockerfile
 ```bash
 npm ci && npm run dev        # http://localhost:5173 (precisa da API em VITE_API_URL)
 # Sem login, só na sua máquina: VITE_DEV_AUTH=true em .env.development.local (e DevAuth__Enabled=true na API).
-# Uma barra no topo troca entre os alunos de teste (ana | bruno | nova | visitante). O build recusa essa variável.
+# Uma barra no topo troca entre os alunos de teste (ana | bruno | nova | admin | visitante). O build recusa essa variável.
 npm run sync:api             # copia o openapi.json do repositório do back-end (pasta ao lado)
 npm run gen:api              # regenera src/api/schema.d.ts a partir do openapi.json
 npm test && npm run typecheck && npm run lint
