@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correção com nota zero</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&amp;family=Schibsted+Grotesk:wght@400;500;600;700&amp;family=Caveat:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2346C9}a:hover{color:#16308F}
+*{box-sizing:border-box}
+.pg{background:#F6F8FC;color:#0E1B33;font-family:'Schibsted Grotesk',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55}
+.in{max-width:1180px;margin:0 auto;padding-left:32px;padding-right:32px}
+.nav{background:#FFFFFF;border-bottom:1px solid #E1E6F0}
+.nav .in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:#0E1B33;text-decoration:none;letter-spacing:-.01em}
+.links{display:flex;gap:28px;font-size:15px;font-weight:500}
+.links a{color:#46536B;text-decoration:none;padding:6px 0}.links a:hover{color:#0E1B33}
+.links a.on{color:#0E1B33;font-weight:600;box-shadow:inset 0 -2px 0 #2346C9}
+.av{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:#2346C9;color:#FFFFFF;font-weight:700;text-decoration:none}
+.serif{font-family:Newsreader,Georgia,serif;font-weight:500;letter-spacing:-.015em}
+.h1{font-size:44px;line-height:1.06;margin:0;text-wrap:balance}
+.h2{font-size:28px;line-height:1.15;margin:0;text-wrap:balance}
+.h3{font-size:18px;font-weight:600;margin:0;line-height:1.3}
+.mut{color:#56627A}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#2346C9}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font:inherit;font-weight:600;font-size:15.5px;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.pri{background:#2346C9;color:#FFFFFF}.pri:hover{background:#1A37A6;color:#FFFFFF}
+.pri:disabled{background:#C5CEDF;color:#4A5670;cursor:not-allowed}
+.ghost{background:#FFFFFF;color:#0E1B33;border-color:#D3DBEA}.ghost:hover{border-color:#0E1B33;color:#0E1B33}
+.card{background:#FFFFFF;border:1px solid #E1E6F0;border-radius:18px}
+.win{background:#FFFFFF;border:1px solid #DCE3EF;border-radius:18px;box-shadow:0 1px 0 #E9EEF6,0 24px 48px -28px rgba(14,27,51,.25);overflow:hidden}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.s-ok{background:#E5F5EC;color:#17603B}.s-rev{background:#FFF1D6;color:#6B4300}.s-run{background:#E8EEFF;color:#1A37A6}.s-q{background:#EEF1F6;color:#3B4559}.s-err{background:#FDECEA;color:#9A2A20}.s-tag{background:#EEF1F6;color:#3B4559}
+.dots{display:inline-flex;gap:4px}.dots span{width:10px;height:10px;border-radius:50%;border:1.5px solid #2346C9}.dots span.f{background:#2346C9}
+.tick{display:flex;gap:10px;align-items:flex-start;font-size:15px}.tick svg{flex-shrink:0;margin-top:4px}
+.sheet{display:grid;grid-template-columns:36px minmax(0,1fr);background:#FFFFFF}
+.sheet.wm{grid-template-columns:36px minmax(0,1fr) 170px}
+.sheet .n,.sheet .t,.sheet .m{height:36px;border-bottom:1px solid #D5DEEC;display:flex;align-items:flex-end}
+.sheet .n{justify-content:flex-end;padding:0 8px 7px 0;font-size:11px;color:#9AA6BC;border-right:1px solid #F0C9C4;font-variant-numeric:tabular-nums}
+.sheet .t{padding:0 10px 4px 12px;font-family:Caveat,'Segoe Print',cursive;font-size:22px;line-height:1;color:#1C2F6E;white-space:nowrap;overflow:hidden}
+.sheet .m{padding:0 10px 5px;border-left:1px dashed #E3E8F1;font-family:Caveat,cursive;font-size:19px;line-height:1;color:#C8372D;white-space:nowrap}
+.ind{padding-left:36px !important}
+.circ{border:2px solid #C8372D;border-radius:50% 45% 52% 48%;padding:0 4px;margin:0 -2px}
+.wav{text-decoration:underline wavy #C8372D;text-decoration-thickness:1.5px;text-underline-offset:5px}
+.ok1{background:#E4F4EC;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.tag{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #C8372D;font-family:'Schibsted Grotesk',sans-serif;font-size:11px;font-weight:700;color:#C8372D;margin-left:6px;line-height:1}
+.tag.g{border-color:#1F7A4C;color:#1F7A4C}
+.blur{filter:blur(2px);background:#FFF3C4;border-radius:3px;padding:0 3px}
+.f{display:flex;flex-direction:column;gap:6px}
+.f label,.lab{font-size:14px;font-weight:600}
+.inp{height:48px;border:1px solid #D3DBEA;border-radius:12px;padding:0 14px;font:inherit;color:#0E1B33;background:#FFFFFF;width:100%}
+.inp:focus{border-color:#2346C9}
+:focus-visible{outline:3px solid #2346C9;outline-offset:3px}
+@media (max-width:980px){.in{padding-left:16px;padding-right:16px}.links{display:none}.h1{font-size:34px}.stack{grid-template-columns:1fr !important}}
+@media (max-width:620px){.sheet.wm{grid-template-columns:30px minmax(0,1fr)}.sheet .m{display:none}}
+
+.wrap{max-width:1240px;margin:0 auto;padding-left:32px;padding-right:32px}
+.sec-nav{position:sticky;top:0;z-index:5;background:rgba(246,248,252,.94);backdrop-filter:blur(6px);border-bottom:1px solid #E1E6F0}
+.sec-nav .wrap{display:flex;gap:6px;align-items:center;height:56px;overflow-x:auto}
+.sec-nav a{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:14.5px;font-weight:600;color:#46536B;text-decoration:none;white-space:nowrap}
+.sec-nav a:hover{background:#EEF1F6;color:#0E1B33}
+.sec-nav a.on{background:#0E1B33;color:#FFFFFF}
+.sec-nav .cnt{font-size:12px;font-weight:700;padding:1px 7px;border-radius:999px;background:#E1E6F0;color:#3B4559}
+.sec-nav a.on .cnt{background:rgba(255,255,255,.18);color:#FFFFFF}
+.meter{display:inline-flex;gap:3px}.meter i{width:22px;height:8px;border-radius:3px;background:#E1E6F0}.meter i.f{background:#2346C9}
+.meter.lg i{width:34px;height:10px}
+.lost{font-size:13px;font-weight:700;color:#A3271E;font-variant-numeric:tabular-nums}
+.full{font-size:13px;font-weight:700;color:#17603B}
+.maprow{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto 52px;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;text-decoration:none;color:#0E1B33}
+.maprow:hover{background:#F1F5FF}
+.num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:#EEF1F6;font-weight:700;font-size:13px;color:#0E1B33;flex-shrink:0}
+.num.bad{background:#FDECEA;color:#A3271E}
+.paper{background:#FFFFFF;border:1px solid #DCE3EF;border-radius:18px;overflow:hidden}
+.paper-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #E1E6F0;flex-wrap:wrap}
+.lines{display:grid;grid-template-columns:44px minmax(0,1fr)}
+.lines .ln{font-size:11.5px;color:#9AA6BC;text-align:right;padding-right:10px;line-height:40px;border-right:1px solid #F0C9C4;font-variant-numeric:tabular-nums}
+.lines .tx{font-family:Caveat,'Segoe Print',cursive;font-size:23px;color:#1C2F6E;line-height:40px;padding:0 20px 0 14px;background-image:repeating-linear-gradient(to bottom,transparent 0 39px,#D5DEEC 39px 40px);white-space:normal;overflow-wrap:anywhere}
+.lines .ln{background-image:repeating-linear-gradient(to bottom,transparent 0 39px,#D5DEEC 39px 40px)}
+.lines .par{text-indent:30px}
+.lines .tx.sel{background-color:#F5F8FF}
+.hb{background:rgba(200,55,45,.07);text-decoration:underline wavy #C8372D;text-decoration-thickness:1.5px;text-underline-offset:6px;border-radius:3px;cursor:pointer}
+.hg{background:#E4F4EC;border-bottom:2px solid #1F7A4C;border-radius:3px;cursor:pointer}
+.hb.on{background:rgba(200,55,45,.18);outline:2px solid #C8372D;outline-offset:1px}
+.hg.on{background:#CDEBDA;outline:2px solid #1F7A4C;outline-offset:1px}
+.pin{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;font-family:'Schibsted Grotesk',sans-serif;font-size:11.5px;font-weight:700;color:#FFFFFF;background:#C8372D;vertical-align:4px;margin:0 3px 0 4px;line-height:1;cursor:pointer;border:0}
+.pin.g{background:#1F7A4C}
+.pin.on{box-shadow:0 0 0 3px #FFFFFF,0 0 0 5px #0E1B33}
+.panel{position:sticky;top:72px;display:flex;flex-direction:column;gap:12px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid #D3DBEA;background:#FFFFFF;font:inherit;font-size:13.5px;font-weight:600;color:#3B4559;cursor:pointer}
+.fchip.on{background:#0E1B33;border-color:#0E1B33;color:#FFFFFF}
+.fchip .d{width:8px;height:8px;border-radius:50%}
+.ann{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border:1px solid #E1E6F0;border-radius:14px;background:#FFFFFF;cursor:pointer;text-align:left;font:inherit;color:#0E1B33;width:100%}
+.ann:hover{border-color:#B9C5DA}
+.ann.on{border-color:#2346C9;box-shadow:0 0 0 3px #E3E9FF}
+.ann .top{display:flex;align-items:center;gap:8px;font-size:13px;color:#56627A;flex-wrap:wrap}
+.ann .quote{font-family:Caveat,cursive;font-size:20px;line-height:1.2;color:#1C2F6E}
+.ann .quote s{text-decoration-color:#C8372D;text-decoration-thickness:2px}
+.ann .fix{display:flex;gap:8px;align-items:baseline;font-size:14.5px;padding:8px 10px;background:#F1F5FF;border-radius:10px}
+.ann .fix b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#2346C9;white-space:nowrap}
+.kind{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:12.5px}
+.kind.bad{color:#A3271E}.kind.good{color:#17603B}
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#FFFFFF;border:1px solid #E1E6F0;border-radius:14px;font-size:14px}
+.stepper button{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid #D3DBEA;background:#FFFFFF;font:inherit;font-weight:600;font-size:14px;color:#0E1B33;cursor:pointer}
+.crit{display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid #E1E6F0;border-radius:18px;background:#FFFFFF}
+.ladder{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rung{padding:12px 14px;border-radius:12px;font-size:14.5px;line-height:1.5;display:flex;flex-direction:column;gap:4px}
+.rung .lab{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.rung.now{background:#F6F8FC;border:1px solid #E1E6F0}.rung.now .lab{color:#56627A}
+.rung.next{background:#F1F5FF;border:1px dashed #9DB1EE}.rung.next .lab{color:#2346C9}
+.rung q{font-family:Newsreader,Georgia,serif;font-style:italic;font-size:15.5px;quotes:"“" "”"}
+.todo{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.04)}
+.todo input{width:22px;height:22px;margin:2px 0 0;accent-color:#7FA0FF;flex-shrink:0}
+.gain{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(127,160,255,.18);color:#C9D6FF;white-space:nowrap}
+.dim{background:none!important;text-decoration:none!important;border-bottom-color:transparent!important;outline:0!important;cursor:default}
+.pin.dim,.ann.hide{display:none}
+@media (max-width:980px){.wrap{padding-left:16px;padding-right:16px}.panel{position:static}.ladder{grid-template-columns:1fr}.maprow{grid-template-columns:28px minmax(0,1fr) auto 48px}.maprow .meter{display:none}}
+@media (max-width:620px){.lines{grid-template-columns:32px minmax(0,1fr)}.lines .tx{font-size:21px;padding:0 12px 0 10px}.lines .par{text-indent:20px}}
+
+</style>
+</head>
+<body>
+<div class="pg" style="min-height: 2200px">
+<header class="nav"><div class="in"><a class="logo" href="01-inicio.html"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="#2346C9"></rect><path d="M8 11h14M8 15.5h14M8 20h8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></path><path d="M18.5 21.5c1.6-1.2 3.2-3 4.2-5" stroke="#FFB4A8" stroke-width="2" fill="none" stroke-linecap="round"></path></svg>RedigiAI</a><nav class="links" aria-label="Principal"><a href="02-temas.html">Temas</a><a href="08-painel.html" class="on" aria-current="page">Minhas correções</a></nav><a class="av" href="10-perfil.html" aria-label="Meu perfil">A</a></div></header>
+<div class="wrap" style="padding-top: 28px; padding-bottom: 20px; display: flex; flex-direction: column; gap: 14px">
+<a href="08-painel.html" style="font-size: 14px; font-weight: 600; text-decoration: none">← Minhas correções</a>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<h1 class="serif" style="margin: 0; font-size: 36px; line-height: 1.1">Fuvest – Dissertação – Algoritmos e o debate público</h1>
+<span class="mut" style="font-size: 14px">Enviada em 12/10 · 1ª versão · grade Fuvest 2027 (v1)</span>
+</div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap"><a class="btn ghost" href="#">Ver foto original</a><a class="btn pri" href="03-tipo-envio.html">Reescrever esta redação</a></div>
+</div>
+</div>
+<section class="wrap" aria-label="Resultado" style="padding-bottom: 8px">
+<div class="card stack" style="display: grid; grid-template-columns: 220px minmax(0, 1fr) 340px; overflow: hidden; border-color: #F3C9C3">
+<div style="padding: 26px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid #F3DCD8; background: #FFF7F5">
+<span class="mut" style="font-size: 13.5px; font-weight: 600">Nota da grade</span>
+<span><span class="serif" style="font-size: 64px; line-height: 1; color: #A3271E">0</span><span class="mut" style="font-size: 22px"> / 40</span></span>
+<span class="chip s-err" style="align-self: flex-start">Nota zero</span>
+</div>
+<div style="padding: 26px 28px; display: flex; flex-direction: column; gap: 12px">
+<span class="eyebrow" style="color: #A3271E">Por que a nota foi zero</span>
+<h2 class="serif" style="margin: 0; font-size: 26px; line-height: 1.2">A redação não aborda o tema proposto</h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.6">A proposta pede uma discussão sobre <strong>algoritmos e o debate público</strong>. O texto trata do imaginário humano como fuga da realidade (linhas 2 a 8) e não menciona algoritmos, redes ou a coletânea em nenhuma linha.</p>
+<p class="mut" style="margin: 0; font-size: 14px; line-height: 1.55">Regra da Fuvest: texto que não aborda o tema recebe nota zero, e os quatro critérios não são pontuados. Isso é diferente de tangenciar o tema, que só reduz o nível do critério 1.</p>
+</div>
+<div style="padding: 26px; display: flex; flex-direction: column; gap: 14px; background: #FBFCFE; border-left: 1px solid #E1E6F0">
+<span class="eyebrow">Comece por aqui</span>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; font-weight: 500">Releia o enunciado e escreva, numa frase, o recorte pedido antes de planejar a nova redação.</p>
+<a class="btn pri" href="02b-proposta-coletanea.html" style="align-self: flex-start; min-height: 42px">Reler a proposta</a>
+<p style="margin: 0; padding-top: 12px; border-top: 1px solid #E1E6F0; font-size: 14.5px; line-height: 1.5"><strong style="color: #17603B">✓ Aproveite:</strong> os exemplos de repertório estão bem escolhidos e sustentam a sua tese; use a mesma segurança com exemplos ligados ao tema.</p>
+</div>
+</div>
+</section>
+<nav class="sec-nav" aria-label="Seções da correção"><div class="wrap"><a href="#texto" class="on" aria-current="true">Texto comentado <span class="cnt">2</span></a><a href="#plano">Plano de reescrita</a><a href="#avaliar">Avaliar a correção</a></div></nav>
+<section id="texto" class="wrap" style="padding-top: 32px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 class="serif h2">Texto comentado</h2><p class="mut" style="margin: 0">Os apontamentos mostram onde o texto saiu do tema e o que vale aproveitar na reescrita.</p></div>
+<div class="stack" style="display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 24px; align-items: start">
+<div class="paper"><div class="paper-h"><span style="font-weight: 600">Sua redação</span><span class="mut" style="font-size: 13.5px">Mostrando 10 de 30 linhas</span></div><div class="lines"><span class="ln">01</span><span class="tx">Sem limites</span><span class="ln">02</span><span class="tx par"><span class="hb" data-ann="9">Não há limites para o imaginário humano.</span><button type="button" class="pin" data-ann="9" aria-label="Apontamento 9">9</button> Mesmo em condições</span><span class="ln">03</span><span class="tx">adversas, o homem é capaz de criar representações da realidade</span><span class="ln">04</span><span class="tx">com a intenção de mudar uma situação vigente, seja para sair da</span><span class="ln">05</span><span class="tx">rotina ou para fugir de uma realidade hostil. Essas imagens</span><span class="ln">06</span><span class="tx">exercem um papel importante na vida humana, pois vão muito além</span><span class="ln">07</span><span class="tx">da diversão: elas alimentam a esperança e, em alguns casos,</span><span class="ln">08</span><span class="tx">podem decidir a sobrevivência de uma pessoa.</span><span class="ln">09</span><span class="tx par"><span class="hg" data-ann="10">Em um filme muito conhecido, um pai transforma a vida num campo</span></span><span class="ln">10</span><span class="tx"><span class="hg" data-ann="10">de prisioneiros em uma brincadeira para proteger o filho</span><button type="button" class="pin g" data-ann="10" aria-label="Apontamento 10">10</button>.</span></div></div>
+<aside class="panel" aria-label="Apontamentos"><div class="anns" style="display: flex; flex-direction: column; gap: 10px"><button type="button" class="ann" data-ann="9" data-kind="bad" data-crit="1">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">9</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 2</span><span style="margin-left: auto" class="num bad" title="Critério 1">1</span></span>
+<span class="quote">“Não há limites para o imaginário humano.”</span>
+
+<span style="font-size: 15px; line-height: 1.5">A tese trata do imaginário humano, não de algoritmos e do debate público.</span>
+
+</button><button type="button" class="ann" data-ann="10" data-kind="good" data-crit="1">
+<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">10</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linhas 9 e 10</span><span style="margin-left: auto" class="num" title="Critério 1">1</span></span>
+<span class="quote">“Em um filme muito conhecido, um pai transforma…”</span>
+
+<span style="font-size: 15px; line-height: 1.5">Bom repertório: o exemplo sustenta com clareza a ideia que você defendeu.</span>
+
+</button></div>
+<div style="padding: 16px; border-radius: 14px; background: #F6F8FC; font-size: 14.5px; line-height: 1.55" class="mut">Com nota zero, os critérios não recebem nível. A correção mostra só o motivo, os apontamentos e o plano de reescrita.</div></aside>
+</div>
+</section>
+<section id="plano" class="wrap" style="padding-top: 48px">
+<div style="background: #0E1B33; color: #FFFFFF; border-radius: 22px; padding: 36px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 36px; align-items: start" class="stack">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="eyebrow" style="color: #9DB1EE">Plano de reescrita</span><h2 class="serif h2" style="color: #FFFFFF">Como fazer a nova redação</h2></div>
+<label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 1</span></span><span style="font-size: 16.5px; line-height: 1.5">Releia o enunciado e escreva numa frase o recorte pedido: a relação entre algoritmos e o debate público.</span></span></label><label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 2</span></span><span style="font-size: 16.5px; line-height: 1.5">Use pelo menos dois textos da coletânea como ponto de partida dos argumentos.</span></span></label><label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 3</span></span><span style="font-size: 16.5px; line-height: 1.5">Escolha repertório ligado ao tema, como bolhas de filtro ou desinformação nas redes, com a mesma segurança dos exemplos de filmes.</span></span></label>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 22px; background: rgba(255,255,255,.06); border-radius: 16px">
+<span style="font-weight: 600; font-size: 17px">Reescreva com o plano ao lado</span>
+<span style="font-size: 14.5px; line-height: 1.55; color: #C5CEDF">A reescrita é corrigida como uma nova versão, e você vê a evolução da nota entre as duas.</span>
+<a class="btn" href="03-tipo-envio.html" style="background: #FFFFFF; color: #0E1B33">Reescrever esta redação</a>
+<span style="font-size: 13px; color: #9AA6BC">Marque os passos para lembrar o que já resolveu.</span>
+</div>
+</div>
+</section>
+<section id="avaliar" class="wrap" style="padding-top: 32px; padding-bottom: 72px; display: flex; flex-direction: column; gap: 16px">
+<div class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center">
+<h2 class="h3">A correção ajudou você a entender o que melhorar?</h2>
+<div role="radiogroup" style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" class="fchip" role="radio" aria-checked="false">Ajudou muito</button><button type="button" class="fchip" role="radio" aria-checked="false">Ajudou em parte</button><button type="button" class="fchip" role="radio" aria-checked="false">Não ajudou</button></div>
+</div>
+<div class="f"><label for="cm">Comentário (opcional)</label><textarea id="cm" class="inp" style="height: 80px; padding: 12px 14px; resize: vertical" placeholder="Conte o que faltou ou o que não fez sentido"></textarea></div>
+<button type="button" class="btn ghost" style="align-self: flex-start" disabled>Enviar avaliação</button>
+</div>
+<p class="mut" style="margin: 0; font-size: 13px">Correção feita por IA com base nos critérios públicos da Fuvest (grade 2027, v1). Não substitui a banca.</p>
+</section>
+</div>
+<script>
+(function(){
+  var cards=[].slice.call(document.querySelectorAll('.ann[data-ann]'));
+  if(!cards.length) return;
+  var kind='all', crit=null, cur=null;
+  function visible(){return cards.filter(function(c){return !c.classList.contains('hide')});}
+  function select(n, from){
+    cur=n;
+    document.querySelectorAll('[data-ann]').forEach(function(el){el.classList.toggle('on', el.getAttribute('data-ann')===String(n));});
+    document.querySelectorAll('.tx.sel').forEach(function(el){el.classList.remove('sel')});
+    var span=document.querySelector('.hb[data-ann="'+n+'"],.hg[data-ann="'+n+'"]');
+    if(span){var tx=span.closest('.tx'); if(tx) tx.classList.add('sel'); if(from==='card') span.scrollIntoView({block:'center',behavior:'smooth'});}
+    var card=document.querySelector('.ann[data-ann="'+n+'"]');
+    if(card && from!=='card') card.scrollIntoView({block:'nearest',behavior:'smooth'});
+    var v=visible(), i=v.indexOf(card), st=document.querySelector('.stepper strong'); if(st) st.textContent=i+1;
+    var tot=document.querySelector('.stepper .mut'); if(tot) tot.textContent='de '+v.length+' apontamentos';
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('.pin[data-ann],.hb[data-ann],.hg[data-ann],.ann[data-ann]');
+    if(t && !t.classList.contains('dim')){select(t.getAttribute('data-ann'), t.classList.contains('ann')?'card':'text');return;}
+    var s=e.target.closest('[data-step]');
+    if(s){var v=visible(); if(!v.length) return; var i=v.findIndex(function(c){return c.getAttribute('data-ann')===String(cur)}); i=(i+parseInt(s.getAttribute('data-step'),10)+v.length)%v.length; select(v[i].getAttribute('data-ann'),'card'); return;}
+    var fk=e.target.closest('[data-fkind]'), fc=e.target.closest('[data-fcrit]');
+    if(fk){kind=fk.getAttribute('data-fkind'); document.querySelectorAll('[data-fkind]').forEach(function(b){b.classList.toggle('on',b===fk)});}
+    if(fc){var c=fc.getAttribute('data-fcrit'); crit=(crit===c)?null:c; document.querySelectorAll('[data-fcrit]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-fcrit')===crit)});}
+    if(fk||fc){
+      cards.forEach(function(c){var ok=(kind==='all'||c.getAttribute('data-kind')===kind)&&(!crit||c.getAttribute('data-crit')===crit); c.classList.toggle('hide',!ok);
+        document.querySelectorAll('.pin[data-ann="'+c.getAttribute('data-ann')+'"],.hb[data-ann="'+c.getAttribute('data-ann')+'"],.hg[data-ann="'+c.getAttribute('data-ann')+'"]').forEach(function(el){el.classList.toggle('dim',!ok)});});
+      var v=visible(); if(v.length) select(v[0].getAttribute('data-ann'),'filter');
+    }
+  });
+  document.addEventListener('keydown',function(e){if(e.target.closest('input,textarea'))return; if(e.key==='j'||e.key==='ArrowDown'&&e.altKey){document.querySelector('[data-step="1"]').click();} if(e.key==='k'){document.querySelector('[data-step="-1"]').click();}});
+  document.querySelectorAll('[role="radio"]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[role="radio"]').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)}); var s=document.querySelector('#avaliar .btn.ghost'); if(s){s.disabled=false;s.className='btn pri';s.style.alignSelf='flex-start'}})});
+  var first=document.querySelector('.ann.on')||cards[0]; if(first) select(first.getAttribute('data-ann'),'init');
+})();
+</script>
+</body>
+</html>

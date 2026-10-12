@@ -55,114 +55,284 @@ a{color:#2346C9}a:hover{color:#16308F}
 @media (max-width:980px){.in{padding-left:16px;padding-right:16px}.links{display:none}.h1{font-size:34px}.stack{grid-template-columns:1fr !important}}
 @media (max-width:620px){.sheet.wm{grid-template-columns:30px minmax(0,1fr)}.sheet .m{display:none}}
 
+.wrap{max-width:1240px;margin:0 auto;padding-left:32px;padding-right:32px}
+.sec-nav{position:sticky;top:0;z-index:5;background:rgba(246,248,252,.94);backdrop-filter:blur(6px);border-bottom:1px solid #E1E6F0}
+.sec-nav .wrap{display:flex;gap:6px;align-items:center;height:56px;overflow-x:auto}
+.sec-nav a{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:14.5px;font-weight:600;color:#46536B;text-decoration:none;white-space:nowrap}
+.sec-nav a:hover{background:#EEF1F6;color:#0E1B33}
+.sec-nav a.on{background:#0E1B33;color:#FFFFFF}
+.sec-nav .cnt{font-size:12px;font-weight:700;padding:1px 7px;border-radius:999px;background:#E1E6F0;color:#3B4559}
+.sec-nav a.on .cnt{background:rgba(255,255,255,.18);color:#FFFFFF}
+.meter{display:inline-flex;gap:3px}.meter i{width:22px;height:8px;border-radius:3px;background:#E1E6F0}.meter i.f{background:#2346C9}
+.meter.lg i{width:34px;height:10px}
+.lost{font-size:13px;font-weight:700;color:#A3271E;font-variant-numeric:tabular-nums}
+.full{font-size:13px;font-weight:700;color:#17603B}
+.maprow{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto 52px;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;text-decoration:none;color:#0E1B33}
+.maprow:hover{background:#F1F5FF}
+.num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:#EEF1F6;font-weight:700;font-size:13px;color:#0E1B33;flex-shrink:0}
+.num.bad{background:#FDECEA;color:#A3271E}
+.paper{background:#FFFFFF;border:1px solid #DCE3EF;border-radius:18px;overflow:hidden}
+.paper-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #E1E6F0;flex-wrap:wrap}
+.lines{display:grid;grid-template-columns:44px minmax(0,1fr)}
+.lines .ln{font-size:11.5px;color:#9AA6BC;text-align:right;padding-right:10px;line-height:40px;border-right:1px solid #F0C9C4;font-variant-numeric:tabular-nums}
+.lines .tx{font-family:Caveat,'Segoe Print',cursive;font-size:23px;color:#1C2F6E;line-height:40px;padding:0 20px 0 14px;background-image:repeating-linear-gradient(to bottom,transparent 0 39px,#D5DEEC 39px 40px);white-space:normal;overflow-wrap:anywhere}
+.lines .ln{background-image:repeating-linear-gradient(to bottom,transparent 0 39px,#D5DEEC 39px 40px)}
+.lines .par{text-indent:30px}
+.lines .tx.sel{background-color:#F5F8FF}
+.hb{background:rgba(200,55,45,.07);text-decoration:underline wavy #C8372D;text-decoration-thickness:1.5px;text-underline-offset:6px;border-radius:3px;cursor:pointer}
+.hg{background:#E4F4EC;border-bottom:2px solid #1F7A4C;border-radius:3px;cursor:pointer}
+.hb.on{background:rgba(200,55,45,.18);outline:2px solid #C8372D;outline-offset:1px}
+.hg.on{background:#CDEBDA;outline:2px solid #1F7A4C;outline-offset:1px}
+.pin{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;font-family:'Schibsted Grotesk',sans-serif;font-size:11.5px;font-weight:700;color:#FFFFFF;background:#C8372D;vertical-align:4px;margin:0 3px 0 4px;line-height:1;cursor:pointer;border:0}
+.pin.g{background:#1F7A4C}
+.pin.on{box-shadow:0 0 0 3px #FFFFFF,0 0 0 5px #0E1B33}
+.panel{position:sticky;top:72px;display:flex;flex-direction:column;gap:12px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid #D3DBEA;background:#FFFFFF;font:inherit;font-size:13.5px;font-weight:600;color:#3B4559;cursor:pointer}
+.fchip.on{background:#0E1B33;border-color:#0E1B33;color:#FFFFFF}
+.fchip .d{width:8px;height:8px;border-radius:50%}
+.ann{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border:1px solid #E1E6F0;border-radius:14px;background:#FFFFFF;cursor:pointer;text-align:left;font:inherit;color:#0E1B33;width:100%}
+.ann:hover{border-color:#B9C5DA}
+.ann.on{border-color:#2346C9;box-shadow:0 0 0 3px #E3E9FF}
+.ann .top{display:flex;align-items:center;gap:8px;font-size:13px;color:#56627A;flex-wrap:wrap}
+.ann .quote{font-family:Caveat,cursive;font-size:20px;line-height:1.2;color:#1C2F6E}
+.ann .quote s{text-decoration-color:#C8372D;text-decoration-thickness:2px}
+.ann .fix{display:flex;gap:8px;align-items:baseline;font-size:14.5px;padding:8px 10px;background:#F1F5FF;border-radius:10px}
+.ann .fix b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#2346C9;white-space:nowrap}
+.kind{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:12.5px}
+.kind.bad{color:#A3271E}.kind.good{color:#17603B}
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#FFFFFF;border:1px solid #E1E6F0;border-radius:14px;font-size:14px}
+.stepper button{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid #D3DBEA;background:#FFFFFF;font:inherit;font-weight:600;font-size:14px;color:#0E1B33;cursor:pointer}
+.crit{display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid #E1E6F0;border-radius:18px;background:#FFFFFF}
+.ladder{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rung{padding:12px 14px;border-radius:12px;font-size:14.5px;line-height:1.5;display:flex;flex-direction:column;gap:4px}
+.rung .lab{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.rung.now{background:#F6F8FC;border:1px solid #E1E6F0}.rung.now .lab{color:#56627A}
+.rung.next{background:#F1F5FF;border:1px dashed #9DB1EE}.rung.next .lab{color:#2346C9}
+.rung q{font-family:Newsreader,Georgia,serif;font-style:italic;font-size:15.5px;quotes:"“" "”"}
+.todo{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.04)}
+.todo input{width:22px;height:22px;margin:2px 0 0;accent-color:#7FA0FF;flex-shrink:0}
+.gain{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(127,160,255,.18);color:#C9D6FF;white-space:nowrap}
+.dim{background:none!important;text-decoration:none!important;border-bottom-color:transparent!important;outline:0!important;cursor:default}
+.pin.dim,.ann.hide{display:none}
+@media (max-width:980px){.wrap{padding-left:16px;padding-right:16px}.panel{position:static}.ladder{grid-template-columns:1fr}.maprow{grid-template-columns:28px minmax(0,1fr) auto 48px}.maprow .meter{display:none}}
+@media (max-width:620px){.lines{grid-template-columns:32px minmax(0,1fr)}.lines .tx{font-size:21px;padding:0 12px 0 10px}.lines .par{text-indent:20px}}
+
 </style>
 </head>
 <body>
-<div class="pg" style="min-height: 2650px">
+<div class="pg" style="min-height: 4700px">
 <header class="nav"><div class="in"><a class="logo" href="01-inicio.html"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="#2346C9"></rect><path d="M8 11h14M8 15.5h14M8 20h8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></path><path d="M18.5 21.5c1.6-1.2 3.2-3 4.2-5" stroke="#FFB4A8" stroke-width="2" fill="none" stroke-linecap="round"></path></svg>RedigiAI</a><nav class="links" aria-label="Principal"><a href="02-temas.html">Temas</a><a href="08-painel.html" class="on" aria-current="page">Minhas correções</a></nav><a class="av" href="10-perfil.html" aria-label="Meu perfil">A</a></div></header>
-<main class="in" style="padding-top: 36px; padding-bottom: 96px; display: flex; flex-direction: column; gap: 24px">
-<a href="08-painel.html" style="font-weight: 600; font-size: 15px; text-decoration: none">← Minhas correções</a>
-<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
-<div style="display: flex; flex-direction: column; gap: 6px; max-width: 760px">
-<h1 class="serif h1">Fuvest – Dissertação – Algoritmos e o debate público</h1>
-<span class="mut" style="font-size: 15px">Enviada em 10/10 · 2ª versão · grade Fuvest v1</span>
+<div class="wrap" style="padding-top: 28px; padding-bottom: 20px; display: flex; flex-direction: column; gap: 14px">
+<a href="08-painel.html" style="font-size: 14px; font-weight: 600; text-decoration: none">← Minhas correções</a>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<h1 class="serif" style="margin: 0; font-size: 36px; line-height: 1.1">Fuvest – Dissertação – Algoritmos e o debate público</h1>
+<span class="mut" style="font-size: 14px">Enviada em 12/10 · 2ª versão · grade Fuvest 2027 (v1)</span>
 </div>
 <div style="display: flex; gap: 10px; flex-wrap: wrap"><a class="btn ghost" href="#">Ver foto original</a><a class="btn pri" href="03-tipo-envio.html">Reescrever esta redação</a></div>
 </div>
-
-<div class="stack" style="display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1fr) minmax(0, 1fr); gap: 20px">
-<section class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 10px">
-<span class="mut" style="font-size: 14px; font-weight: 500">Nota da grade</span>
-<div><span class="serif" style="font-size: 64px; line-height: 1">23</span><span class="mut" style="font-size: 22px"> / 30</span></div>
-<span class="chip s-ok" style="align-self: flex-start">+2 desde a 1ª versão</span>
-
+</div>
+<section class="wrap" aria-label="Resultado" style="padding-bottom: 8px">
+<div class="card stack" style="display: grid; grid-template-columns: 220px minmax(0, 1fr) minmax(0, 1fr); overflow: hidden">
+<div style="padding: 26px 26px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid #E1E6F0">
+<span class="mut" style="font-size: 13.5px; font-weight: 600">Nota da grade</span>
+<span><span class="serif" style="font-size: 64px; line-height: 1">27</span><span class="mut" style="font-size: 22px"> / 40</span></span>
+<span class="chip s-ok" style="align-self: flex-start">+4 desde a 1ª versão</span>
+</div>
+<div style="padding: 14px 14px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid #E1E6F0">
+<span class="mut" style="font-size: 13.5px; font-weight: 600; padding: 8px 12px 4px">Onde a nota foi ganha e perdida</span>
+<a class="maprow" href="#c1"><span class="num">1</span><span style="font-weight: 600; font-size: 15px">Tema e autoria</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">9<span class="mut" style="font-weight: 500"> / 12</span></span><span class="lost" style="text-align: right">−3</span></a><a class="maprow" href="#c2"><span class="num">2</span><span style="font-weight: 600; font-size: 15px">Tipo e gênero</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">6<span class="mut" style="font-weight: 500"> / 8</span></span><span class="lost" style="text-align: right">−2</span></a><a class="maprow" href="#c3"><span class="num bad">3</span><span style="font-weight: 600; font-size: 15px">Coesão e progressão</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">6<span class="mut" style="font-weight: 500"> / 12</span></span><span class="lost" style="text-align: right">−6</span></a><a class="maprow" href="#c4"><span class="num">4</span><span style="font-weight: 600; font-size: 15px">Escrita e vocabulário</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">6<span class="mut" style="font-weight: 500"> / 8</span></span><span class="lost" style="text-align: right">−2</span></a>
+</div>
+<div style="padding: 26px; display: flex; flex-direction: column; gap: 14px; background: #FBFCFE">
+<span class="eyebrow">Comece por aqui</span>
+<p style="margin: 0; font-size: 18px; line-height: 1.5; font-weight: 500">O parágrafo das linhas 10 a 12 repete o anterior. Troque-o por uma consequência nova, apoiada na coletânea.</p>
+<span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span class="num bad">3</span><span style="font-size: 14px; font-weight: 600">Coesão e progressão · vale até +6 pontos</span></span>
+<a class="btn pri" href="#texto" style="align-self: flex-start; min-height: 42px">Ver no texto</a>
+<p style="margin: 0; padding-top: 12px; border-top: 1px solid #E1E6F0; font-size: 14.5px; line-height: 1.5"><strong style="color: #17603B">✓ Mantenha:</strong> o dado do texto 2 sustenta a sua tese logo na introdução.</p>
+</div>
+</div>
 </section>
-<section class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 8px">
-<span style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #17603B"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17603B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>O que funcionou</span>
-<p style="margin: 0; font-size: 16.5px; line-height: 1.55">O dado do texto 2 sustenta a sua tese nas linhas 3 a 7, e a sua posição está clara desde a introdução.</p>
+<nav class="sec-nav" aria-label="Seções da correção"><div class="wrap"><a href="#texto" class="on" aria-current="true">Texto comentado <span class="cnt">8</span></a><a href="#criterios">Critérios</a><a href="#plano">Plano de reescrita</a><a href="#avaliar">Avaliar a correção</a></div></nav>
+<section id="texto" class="wrap" style="padding-top: 32px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 class="serif h2">Texto comentado</h2><p class="mut" style="margin: 0">Clique num número para ver o apontamento. Os vermelhos tiraram pontos; os verdes funcionaram e valem manter.</p></div>
+</div>
+<div class="stack" style="display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 24px; align-items: start">
+<div class="paper">
+<div class="paper-h"><span style="font-weight: 600">Sua redação</span><span style="display: flex; gap: 16px; font-size: 13.5px" class="mut"><span style="display: inline-flex; align-items: center; gap: 6px"><span class="pin" style="margin: 0; vertical-align: 0">1</span>tirou pontos</span><span style="display: inline-flex; align-items: center; gap: 6px"><span class="pin g" style="margin: 0; vertical-align: 0">1</span>funcionou</span></span></div>
+<div class="lines"><span class="ln">01</span><span class="tx par" data-line="1">A tecnologia digital mudou a forma como as pessoas se informam</span><span class="ln">02</span><span class="tx" data-line="2">e participam do debate público. Hoje, boa parte dos brasileiros</span><span class="ln">03</span><span class="tx" data-line="3">lê notícias apenas pelas redes sociais, <span class="hg" data-ann="1">como mostra o texto 2 da</span></span><span class="ln">04</span><span class="tx" data-line="4"><span class="hg" data-ann="1">coletânea</span><button type="button" class="pin g" data-ann="1" aria-label="Apontamento 1">1</button>. <span class="hb" data-ann="2">Esse dado, revela</span><button type="button" class="pin" data-ann="2" aria-label="Apontamento 2">2</button> que poucas empresas controlam o que</span><span class="ln">05</span><span class="tx" data-line="5">milhões de pessoas leem todos os dias, sem que ninguém perceba.</span><span class="ln">06</span><span class="tx par" data-line="6">Os algoritmos das plataformas decidem o que cada usuário vê,</span><span class="ln">07</span><span class="tx" data-line="7">priorizando sempre o conteúdo que gera mais engajamento e tempo</span><span class="ln">08</span><span class="tx" data-line="8">de tela. <span class="hg" data-ann="3">Por isso,</span><button type="button" class="pin g" data-ann="3" aria-label="Apontamento 3">3</button> notícias falsas e indignadas circulam mais</span><span class="ln">09</span><span class="tx" data-line="9">rápido do que as verdadeiras, como alerta o texto 3.</span><span class="ln">10</span><span class="tx par" data-line="10"><span class="hb" data-ann="4">Além disso, os algoritmos também escolhem o que as pessoas</span></span><span class="ln">11</span><span class="tx" data-line="11"><span class="hb" data-ann="4">veem, e cada uma recebe só aquilo que gera mais engajamento.</span><button type="button" class="pin" data-ann="4" aria-label="Apontamento 4">4</button> Assim,</span><span class="ln">12</span><span class="tx" data-line="12"><span class="hb" data-ann="5">a gente</span><button type="button" class="pin" data-ann="5" aria-label="Apontamento 5">5</button> acaba vendo sempre as mesmas opiniões.</span><span class="ln">13</span><span class="tx par sel" data-line="13"><span class="hb on" data-ann="6">À partir</span><button type="button" class="pin on" data-ann="6" aria-label="Apontamento 6">6</button> desse controle, cabe perguntar quem deve regular</span><span class="ln">14</span><span class="tx" data-line="14">esse filtro invisível e com quais critérios. <span class="hg" data-ann="7">Em países europeus,</span></span><span class="ln">15</span><span class="tx" data-line="15"><span class="hg" data-ann="7">leis já obrigam as empresas a explicar como seus sistemas</span></span><span class="ln">16</span><span class="tx" data-line="16"><span class="hg" data-ann="7">recomendam conteúdo</span><button type="button" class="pin g" data-ann="7" aria-label="Apontamento 7">7</button>, o que mostra que a transparência é possível.</span><span class="ln">17</span><span class="tx par" data-line="17">Portanto, os algoritmos não são neutros: eles moldam o debate</span><span class="ln">18</span><span class="tx" data-line="18">público ao escolher o que merece atenção. <span class="hb" data-ann="8">Cabe à sociedade</span></span><span class="ln">19</span><span class="tx" data-line="19"><span class="hb" data-ann="8">discutir esse tema com seriedade</span><button type="button" class="pin" data-ann="8" aria-label="Apontamento 8">8</button>, para que a tecnologia sirva à</span><span class="ln">20</span><span class="tx" data-line="20">democracia e não o contrário.</span></div>
+</div>
+<aside class="panel" aria-label="Apontamentos">
+<div class="stepper"><button type="button" data-step="-1">← Anterior</button><span><strong>6</strong> <span class="mut">de 8 apontamentos</span></span><button type="button" data-step="1">Próximo →</button></div>
+<div class="filters" role="group" aria-label="Filtrar apontamentos">
+<button type="button" class="fchip on" data-fkind="all">Todos <span class="mut" style="font-weight: 500">8</span></button>
+<button type="button" class="fchip" data-fkind="bad"><span class="d" style="background: #C8372D"></span>Tiraram pontos <span style="font-weight: 500">5</span></button>
+<button type="button" class="fchip" data-fkind="good"><span class="d" style="background: #1F7A4C"></span>Funcionaram <span style="font-weight: 500">3</span></button>
+</div>
+<div class="filters" role="group" aria-label="Filtrar por critério"><button type="button" class="fchip" data-fcrit="1"><span class="num" style="width: 20px; height: 20px; font-size: 11px">1</span>Tema e autoria</button><button type="button" class="fchip" data-fcrit="2"><span class="num" style="width: 20px; height: 20px; font-size: 11px">2</span>Tipo e gênero</button><button type="button" class="fchip" data-fcrit="3"><span class="num" style="width: 20px; height: 20px; font-size: 11px">3</span>Coesão e progressão</button><button type="button" class="fchip" data-fcrit="4"><span class="num" style="width: 20px; height: 20px; font-size: 11px">4</span>Escrita e vocabulário</button></div>
+<div class="anns" style="display: flex; flex-direction: column; gap: 10px"><button type="button" class="ann" data-ann="1" data-kind="good" data-crit="1">
+<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">1</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linhas 3 e 4</span><span style="margin-left: auto" class="num" title="Critério 1">1</span></span>
+<span class="quote">“como mostra o texto 2 da coletânea”</span>
+
+<span style="font-size: 15px; line-height: 1.5">O dado do texto 2 sustenta a sua tese logo na introdução.</span>
+
+</button><button type="button" class="ann" data-ann="2" data-kind="bad" data-crit="4">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">2</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 4</span><span style="margin-left: auto" class="num bad" title="Critério 4">4</span></span>
+<span class="quote">“<s>Esse dado, revela</s>”</span>
+<span style="font-size: 13px; font-weight: 600">Regra: Vírgula entre sujeito e verbo</span>
+<span style="font-size: 15px; line-height: 1.5">Vírgula separando sujeito e verbo.</span>
+<span class="fix"><b>Escreva</b><span>Esse dado revela</span></span>
+</button><button type="button" class="ann" data-ann="3" data-kind="good" data-crit="3">
+<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">3</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linha 8</span><span style="margin-left: auto" class="num" title="Critério 3">3</span></span>
+<span class="quote">“Por isso,”</span>
+
+<span style="font-size: 15px; line-height: 1.5">Conectivo certo: liga a causa (o algoritmo) à consequência (notícias falsas circulam mais).</span>
+
+</button><button type="button" class="ann" data-ann="4" data-kind="bad" data-crit="3">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">4</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linhas 10 e 11</span><span style="margin-left: auto" class="num bad" title="Critério 3">3</span></span>
+<span class="quote">“Além disso, os algoritmos também escolhem o que as pessoas veem…”</span>
+
+<span style="font-size: 15px; line-height: 1.5">Este parágrafo repete a ideia das linhas 6 a 8: não traz informação nova.</span>
+
+</button><button type="button" class="ann" data-ann="5" data-kind="bad" data-crit="4">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">5</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 12</span><span style="margin-left: auto" class="num bad" title="Critério 4">4</span></span>
+<span class="quote">“<s>a gente</s>”</span>
+<span style="font-size: 13px; font-weight: 600">Regra: Marca de oralidade</span>
+<span style="font-size: 15px; line-height: 1.5">Marca de oralidade no registro formal.</span>
+<span class="fix"><b>Escreva</b><span>nós / os usuários</span></span>
+</button><button type="button" class="ann on" data-ann="6" data-kind="bad" data-crit="4">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">6</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 13</span><span style="margin-left: auto" class="num bad" title="Critério 4">4</span></span>
+<span class="quote">“<s>À partir</s>”</span>
+<span style="font-size: 13px; font-weight: 600">Regra: Crase antes de verbo</span>
+<span style="font-size: 15px; line-height: 1.5">“A” antes de verbo nunca leva crase.</span>
+<span class="fix"><b>Escreva</b><span>A partir</span></span>
+</button><button type="button" class="ann" data-ann="7" data-kind="good" data-crit="1">
+<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">7</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linhas 14 a 16</span><span style="margin-left: auto" class="num" title="Critério 1">1</span></span>
+<span class="quote">“Em países europeus, leis já obrigam…”</span>
+
+<span style="font-size: 15px; line-height: 1.5">Repertório próprio, além da coletânea: mostra autoria.</span>
+
+</button><button type="button" class="ann" data-ann="8" data-kind="bad" data-crit="2">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">8</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linhas 18 e 19</span><span style="margin-left: auto" class="num bad" title="Critério 2">2</span></span>
+<span class="quote">“Cabe à sociedade discutir esse tema com seriedade”</span>
+
+<span style="font-size: 15px; line-height: 1.5">Conclusão genérica: não responde à pergunta que você mesmo fez na linha 13.</span>
+
+</button></div>
+</aside>
+</div>
 </section>
-<section class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 8px">
-<span style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #A3271E"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3271E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"></path></svg>O que mais tirou pontos</span>
-<p style="margin: 0; font-size: 16.5px; line-height: 1.55">O parágrafo das linhas 11 a 13 repete o anterior, e a conclusão não responde à pergunta da linha 14.</p>
+<section id="criterios" class="wrap" style="padding-top: 48px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 class="serif h2">Critérios</h2><p class="mut" style="margin: 0">Cada critério mostra o seu nível, o que a grade pede para o próximo e o que fazer para chegar lá.</p></div>
+<div class="stack" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start"><article id="c1" class="crit">
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<span class="num" style="width: 32px; height: 32px; font-size: 15px">1</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><h3 class="h3">Tema e autoria</h3><span class="mut" style="font-size: 13.5px">Compreensão e desenvolvimento do tema, uso da coletânea e autoria · peso 3</span></div>
+<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums">9<span class="mut" style="font-size: 15px; font-weight: 500"> / 12</span></span><span class="lost">−3 pontos</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 3 de 4</span></div>
+<div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Abordagem adequada do tema, com uso produtivo da coletânea e repertório próprio, com fortes indícios de autoria.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 4</span><q>Abordagem aprimorada do tema, com apropriação consistente da coletânea e repertório próprio, com indícios robustos de autoria.</q></div></div>
+<p style="margin: 0; font-size: 15.5px; line-height: 1.6">A tese está clara desde a introdução e o texto 2 é usado como prova, não como resumo. O exemplo europeu das linhas 14 a 16 é seu, mas aparece só de passagem.</p>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15.5px">Transforme o exemplo europeu das linhas 14 a 16 no argumento central de um parágrafo e ligue-o ao dado do texto 2.</span></div>
+<a href="#texto" style="font-size: 14.5px; font-weight: 600">Ver 2 apontamentos no texto →</a>
+</article><article id="c2" class="crit">
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<span class="num" style="width: 32px; height: 32px; font-size: 15px">2</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><h3 class="h3">Tipo e gênero</h3><span class="mut" style="font-size: 13.5px">Compreensão e atendimento da proposta quanto à modalidade textual (tipo/gênero) · peso 2</span></div>
+<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums">6<span class="mut" style="font-size: 15px; font-weight: 500"> / 8</span></span><span class="lost">−2 pontos</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 3 de 4</span></div>
+<div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Atendimento adequado: tipo e gênero claramente identificáveis, mesmo que falte algum traço específico.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 4</span><q>Atendimento pleno, com domínio evidente da estrutura composicional do tipo e do gênero escolhidos.</q></div></div>
+<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Introdução com tese, desenvolvimento e conclusão estão presentes. Falta o traço que fecha a dissertação: a conclusão não responde à pergunta da linha 13.</p>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15.5px">Reescreva a conclusão (linhas 17 a 20) dizendo quem deve regular os algoritmos e com que critério.</span></div>
+<a href="#texto" style="font-size: 14.5px; font-weight: 600">Ver 1 apontamento no texto →</a>
+</article><article id="c3" class="crit">
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<span class="num bad" style="width: 32px; height: 32px; font-size: 15px">3</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><h3 class="h3">Coesão e progressão</h3><span class="mut" style="font-size: 13.5px">Recursos linguísticos (coesão e coerência) e progressão textual · peso 3</span></div>
+<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums">6<span class="mut" style="font-size: 15px; font-weight: 500"> / 12</span></span><span class="lost">−6 pontos</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 2 de 4</span></div>
+<div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Articulação satisfatória, com poucos recursos de coesão e coerência e algumas falhas de composição.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 3</span><q>Boa articulação, com recursos adequados de coesão e coerência e raras falhas de composição.</q></div></div>
+<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Os conectivos funcionam, mas o parágrafo das linhas 10 a 12 repete o das linhas 6 a 8: o texto para de avançar no meio.</p>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15.5px">Troque o parágrafo das linhas 10 a 12 por uma consequência nova, como o efeito das bolhas de opinião sobre o voto, apoiada na coletânea.</span></div>
+<a href="#texto" style="font-size: 14.5px; font-weight: 600">Ver 2 apontamentos no texto →</a>
+</article><article id="c4" class="crit">
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<span class="num" style="width: 32px; height: 32px; font-size: 15px">4</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><h3 class="h3">Escrita e vocabulário</h3><span class="mut" style="font-size: 13.5px">Correção gramatical, convenção da escrita e adequação vocabular · peso 2</span></div>
+<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums">6<span class="mut" style="font-size: 15px; font-weight: 500"> / 8</span></span><span class="lost">−2 pontos</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 3 de 4</span></div>
+<div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Rompe raramente as convenções da escrita, com bom domínio da norma-padrão e do vocabulário.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 4</span><q>Rompe as convenções apenas de forma mínima e ocasional, com excelente domínio da norma-padrão e do vocabulário.</q></div></div>
+<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Três desvios em 20 linhas, cada um de uma regra diferente.</p>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 4px 16px 6px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9; padding-top: 10px">O que corrigir · desvios por regra</span><ul style="margin: 0; padding: 0; list-style: none; font-size: 15px"><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">2</span><span><strong>Vírgula entre sujeito e verbo</strong> · linha 4<br><span class="mut">Escreva</span> “Esse dado revela” <span class="mut">no lugar de</span> “Esse dado, revela”.</span></li><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">5</span><span><strong>Marca de oralidade</strong> · linha 12<br><span class="mut">Escreva</span> “nós / os usuários” <span class="mut">no lugar de</span> “a gente”.</span></li><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">6</span><span><strong>Crase antes de verbo</strong> · linha 13<br><span class="mut">Escreva</span> “A partir” <span class="mut">no lugar de</span> “À partir”.</span></li></ul></div>
+<a href="#texto" style="font-size: 14.5px; font-weight: 600">Ver 3 apontamentos no texto →</a>
+</article></div>
 </section>
+<section id="plano" class="wrap" style="padding-top: 48px">
+<div style="background: #0E1B33; color: #FFFFFF; border-radius: 22px; padding: 36px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 36px; align-items: start" class="stack">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="eyebrow" style="color: #9DB1EE">Plano de reescrita</span><h2 class="serif h2" style="color: #FFFFFF">Três passos, na ordem que mais aumenta a nota</h2></div>
+<label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 1</span><span class="gain">até +6 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Troque o parágrafo das linhas 10 a 12 por uma consequência nova, como o efeito das bolhas de opinião sobre o voto, apoiada na coletânea.</span></span></label><label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 2</span><span class="gain">até +3 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Transforme o exemplo europeu das linhas 14 a 16 no argumento central de um parágrafo e ligue-o ao dado do texto 2.</span></span></label><label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 3</span><span class="gain">até +2 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Reescreva a conclusão dizendo quem deve regular os algoritmos e com que critério.</span></span></label>
 </div>
-
-<div class="stack" style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 24px; align-items: start">
-<section class="win">
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #EDF1F7; flex-wrap: wrap">
-<h2 class="h3">Sua redação</h2>
-<div style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px" class="mut">
-<span style="display: flex; align-items: center; gap: 6px"><span style="width: 18px; height: 10px; background: #E4F4EC; border-radius: 2px"></span>funcionou</span>
-<span style="display: flex; align-items: center; gap: 6px"><span style="width: 18px; height: 10px; border-bottom: 2px solid #C8372D"></span>tirou pontos</span>
-</div>
-</div>
-<div class="sheet wm"><span class="n">01</span><span class="t ind">A tecnologia digital mudou a forma como as</span><span class="m"></span><span class="n">02</span><span class="t">pessoas se informam e participam do debate</span><span class="m"></span><span class="n">03</span><span class="t">público. <span class="ok1">Hoje, boa parte dos brasileiros lê</span></span><span class="m"><span class="tag g" style="margin-left:0;margin-right:6px">1</span><span style="color:#1F7A4C">bom uso do texto 2</span></span><span class="n">04</span><span class="t"><span class="ok1">notícias apenas pelas redes sociais, como</span></span><span class="m"></span><span class="n">05</span><span class="t"><span class="ok1">mostra o texto 2 da coletânea.</span> Esse dado<span class="circ">,</span></span><span class="m">"dado revela", sem vírgula<span class="tag">4</span></span><span class="n">06</span><span class="t">revela que poucas empresas controlam o que</span><span class="m"></span><span class="n">07</span><span class="t">milhões de pessoas leem todos os dias.</span><span class="m"></span><span class="n">08</span><span class="t ind">Os algoritmos das plataformas decidem o que</span><span class="m"></span><span class="n">09</span><span class="t">cada usuário vê, priorizando sempre o conteúdo</span><span class="m"></span><span class="n">10</span><span class="t">que gera mais engajamento e tempo de tela.</span><span class="m"></span><span class="n">11</span><span class="t ind"><span class="wav">Além disso, os algoritmos também escolhem</span></span><span class="m">repete o § anterior<span class="tag">3</span></span><span class="n">12</span><span class="t"><span class="wav">o que as pessoas veem, e cada uma recebe</span></span><span class="m">sem dado novo</span><span class="n">13</span><span class="t"><span class="wav">só aquilo que gera mais engajamento.</span></span><span class="m"></span><span class="n">14</span><span class="t ind"><span class="circ">À partir</span> desse controle, cabe perguntar</span><span class="m">"A partir", sem crase<span class="tag">4</span></span><span class="n">15</span><span class="t">quem deve regular esse filtro invisível e</span><span class="m"></span><span class="n">16</span><span class="t">com quais critérios.</span><span class="m"></span></div>
-<div style="padding: 14px 20px; border-top: 1px solid #EDF1F7"><button type="button" class="btn ghost" style="min-height: 40px; font-size: 14px">Mostrar linhas 17 a 30</button></div>
-</section>
-<div style="display: flex; flex-direction: column; gap: 14px"><section class="card" style="padding: 22px; display: flex; flex-direction: column; gap: 10px">
-<div style="display: flex; align-items: center; gap: 10px"><span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #E8EEFF; color: #1A37A6; font-weight: 700; font-size: 14px; flex-shrink: 0">1</span><h3 class="h3" style="font-size: 17px; flex: 1">Tema, coletânea e autoria</h3><span style="font-weight: 600; white-space: nowrap">9 <span class="mut" style="font-weight: 400">/ 9</span></span></div>
-<div style="display: flex; align-items: center; gap: 10px"><span class="dots" aria-label="Nível 3 de 3"><span class="f"></span><span class="f"></span><span class="f"></span></span><span class="mut" style="font-size: 14px">Nível 3 de 3 · peso 3</span></div>
-<p class="mut" style="margin: 0; font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 16.5px">“Desenvolvimento adequado, com apropriação consistente da coletânea e indícios de autoria.”</p>
-<p style="margin: 0; font-size: 15px">O dado do texto 2 é usado para sustentar a tese, sem paráfrase, e a posição autoral aparece desde a introdução.</p>
-
-<span class="mut" style="font-size: 13.5px; font-weight: 600">Linhas 3 a 7</span>
-
-</section><section class="card" style="padding: 22px; display: flex; flex-direction: column; gap: 10px">
-<div style="display: flex; align-items: center; gap: 10px"><span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #E8EEFF; color: #1A37A6; font-weight: 700; font-size: 14px; flex-shrink: 0">2</span><h3 class="h3" style="font-size: 17px; flex: 1">Gênero e tipo de texto</h3><span style="font-weight: 600; white-space: nowrap">4 <span class="mut" style="font-weight: 400">/ 6</span></span></div>
-<div style="display: flex; align-items: center; gap: 10px"><span class="dots" aria-label="Nível 2 de 3"><span class="f"></span><span class="f"></span><span></span></span><span class="mut" style="font-size: 14px">Nível 2 de 3 · peso 2</span></div>
-<p class="mut" style="margin: 0; font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 16.5px">“Atendimento razoável ao gênero e ao tipo solicitados.”</p>
-<p style="margin: 0; font-size: 15px">A estrutura dissertativa está presente, mas a conclusão retoma o tema sem responder à pergunta aberta na linha 14.</p>
-
-<span class="mut" style="font-size: 13.5px; font-weight: 600">Linhas 27 a 30</span>
-<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15px">Reescreva a conclusão para responder à pergunta da linha 14: diga quem deve regular o filtro dos algoritmos e com qual critério.</span></div>
-</section><section class="card" style="padding: 22px; display: flex; flex-direction: column; gap: 10px">
-<div style="display: flex; align-items: center; gap: 10px"><span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #FFF0EC; color: #A3271E; font-weight: 700; font-size: 14px; flex-shrink: 0">3</span><h3 class="h3" style="font-size: 17px; flex: 1">Coesão, coerência e progressão</h3><span style="font-weight: 600; white-space: nowrap">6 <span class="mut" style="font-weight: 400">/ 9</span></span></div>
-<div style="display: flex; align-items: center; gap: 10px"><span class="dots" aria-label="Nível 2 de 3"><span class="f"></span><span class="f"></span><span></span></span><span class="mut" style="font-size: 14px">Nível 2 de 3 · peso 3</span></div>
-<p class="mut" style="margin: 0; font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 16.5px">“Boa articulação, com composição adequada.”</p>
-<p style="margin: 0; font-size: 15px">Os conectivos funcionam, mas o parágrafo das linhas 11 a 13 repete a ideia das linhas 8 a 10: os dois dizem que os algoritmos escolhem o conteúdo pelo engajamento.</p>
-
-<span class="mut" style="font-size: 13.5px; font-weight: 600">Linhas 8 a 13</span>
-<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15px">Troque o parágrafo das linhas 11 a 13 por uma consequência que ainda não apareceu, como o efeito dessa seleção sobre o voto, sustentada por um dado da coletânea.</span></div>
-</section><section class="card" style="padding: 22px; display: flex; flex-direction: column; gap: 10px">
-<div style="display: flex; align-items: center; gap: 10px"><span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #FFF0EC; color: #A3271E; font-weight: 700; font-size: 14px; flex-shrink: 0">4</span><h3 class="h3" style="font-size: 17px; flex: 1">Convenções da escrita e vocabulário</h3><span style="font-weight: 600; white-space: nowrap">4 <span class="mut" style="font-weight: 400">/ 6</span></span></div>
-<div style="display: flex; align-items: center; gap: 10px"><span class="dots" aria-label="Nível 2 de 3"><span class="f"></span><span class="f"></span><span></span></span><span class="mut" style="font-size: 14px">Nível 2 de 3 · peso 2</span></div>
-<p class="mut" style="margin: 0; font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 16.5px">“Rompe poucas vezes as convenções, com bom domínio da norma-padrão.”</p>
-<p style="margin: 0; font-size: 15px">Dois desvios de regra:</p>
-<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px"><li style="padding: 10px 12px; border: 1px solid #E1E6F0; border-radius: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; font-size: 15px">Crase antes de verbo · linha 14</span><span style="font-size: 15px">Escreva "A partir", sem crase: "a" antes de verbo nunca leva acento grave.</span></li><li style="padding: 10px 12px; border: 1px solid #E1E6F0; border-radius: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; font-size: 15px">Vírgula entre sujeito e verbo · linha 5</span><span style="font-size: 15px">Retire a vírgula de "Esse dado, revela": sujeito e verbo não se separam por vírgula.</span></li></ul>
-<span class="mut" style="font-size: 13.5px; font-weight: 600">Linhas 5 e 14</span>
-
-</section></div>
-</div>
-
-<section style="background: #0E1B33; color: #FFFFFF; border-radius: 22px; padding: 32px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center" class="stack">
-<div style="display: flex; flex-direction: column; gap: 14px">
-<h2 class="serif h2" style="color: #FFFFFF">O que corrigir na reescrita</h2>
-<ol style="margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 17px; color: #DCE3F2">
-<li>Troque o parágrafo das linhas 11 a 13 por um argumento novo, apoiado na coletânea.</li>
-<li>Faça a conclusão responder à pergunta da linha 14.</li>
-<li>Corrija a crase da linha 14 e a vírgula da linha 5.</li>
-</ol>
-</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 22px; background: rgba(255,255,255,.06); border-radius: 16px">
+<span style="font-weight: 600; font-size: 17px">Reescreva com o plano ao lado</span>
+<span style="font-size: 14.5px; line-height: 1.55; color: #C5CEDF">A reescrita é corrigida como uma nova versão, e você vê a evolução da nota entre as duas.</span>
 <a class="btn" href="03-tipo-envio.html" style="background: #FFFFFF; color: #0E1B33">Reescrever esta redação</a>
-</section>
-<section class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 14px">
-<h2 class="h3">Avalie esta correção</h2>
-<fieldset style="border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px">
-<legend class="mut" style="padding: 0; margin-bottom: 10px; font-size: 15px">A correção ajudou você a entender o que melhorar?</legend>
-<div style="display: flex; gap: 8px; flex-wrap: wrap">
-<label style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid #D3DBEA; border-radius: 999px; cursor: pointer"><input type="radio" name="av" style="accent-color: #2346C9">Ajudou muito</label>
-<label style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid #D3DBEA; border-radius: 999px; cursor: pointer"><input type="radio" name="av" style="accent-color: #2346C9">Ajudou em parte</label>
-<label style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid #D3DBEA; border-radius: 999px; cursor: pointer"><input type="radio" name="av" style="accent-color: #2346C9">Não ajudou</label>
+<span style="font-size: 13px; color: #9AA6BC">Marque os passos para lembrar o que já resolveu.</span>
 </div>
-</fieldset>
-<div class="f"><label for="fbt">Comentário (opcional)</label><textarea id="fbt" rows="3" placeholder="Conte o que faltou ou o que não fez sentido" style="border: 1px solid #D3DBEA; border-radius: 12px; padding: 12px 14px; font: inherit; color: #0E1B33; resize: vertical"></textarea></div>
-<button type="button" class="btn ghost" style="align-self: flex-start">Enviar avaliação</button>
-</section>
-<footer style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 14px">
-<span class="mut">Correção feita por IA com base nos critérios públicos da Fuvest (grade v1). Não substitui a banca.</span>
-
-</footer>
-</main>
 </div>
+</section>
+<section id="avaliar" class="wrap" style="padding-top: 32px; padding-bottom: 72px; display: flex; flex-direction: column; gap: 16px">
+<div class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center">
+<h2 class="h3">A correção ajudou você a entender o que melhorar?</h2>
+<div role="radiogroup" style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" class="fchip" role="radio" aria-checked="false">Ajudou muito</button><button type="button" class="fchip" role="radio" aria-checked="false">Ajudou em parte</button><button type="button" class="fchip" role="radio" aria-checked="false">Não ajudou</button></div>
+</div>
+<div class="f"><label for="cm">Comentário (opcional)</label><textarea id="cm" class="inp" style="height: 80px; padding: 12px 14px; resize: vertical" placeholder="Conte o que faltou ou o que não fez sentido"></textarea></div>
+<button type="button" class="btn ghost" style="align-self: flex-start" disabled>Enviar avaliação</button>
+</div>
+<p class="mut" style="margin: 0; font-size: 13px">Correção feita por IA com base nos critérios públicos da Fuvest (grade 2027, v1). Não substitui a banca.</p>
+</section>
+</div>
+<script>
+(function(){
+  var cards=[].slice.call(document.querySelectorAll('.ann[data-ann]'));
+  if(!cards.length) return;
+  var kind='all', crit=null, cur=null;
+  function visible(){return cards.filter(function(c){return !c.classList.contains('hide')});}
+  function select(n, from){
+    cur=n;
+    document.querySelectorAll('[data-ann]').forEach(function(el){el.classList.toggle('on', el.getAttribute('data-ann')===String(n));});
+    document.querySelectorAll('.tx.sel').forEach(function(el){el.classList.remove('sel')});
+    var span=document.querySelector('.hb[data-ann="'+n+'"],.hg[data-ann="'+n+'"]');
+    if(span){var tx=span.closest('.tx'); if(tx) tx.classList.add('sel'); if(from==='card') span.scrollIntoView({block:'center',behavior:'smooth'});}
+    var card=document.querySelector('.ann[data-ann="'+n+'"]');
+    if(card && from!=='card') card.scrollIntoView({block:'nearest',behavior:'smooth'});
+    var v=visible(), i=v.indexOf(card), st=document.querySelector('.stepper strong'); if(st) st.textContent=i+1;
+    var tot=document.querySelector('.stepper .mut'); if(tot) tot.textContent='de '+v.length+' apontamentos';
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('.pin[data-ann],.hb[data-ann],.hg[data-ann],.ann[data-ann]');
+    if(t && !t.classList.contains('dim')){select(t.getAttribute('data-ann'), t.classList.contains('ann')?'card':'text');return;}
+    var s=e.target.closest('[data-step]');
+    if(s){var v=visible(); if(!v.length) return; var i=v.findIndex(function(c){return c.getAttribute('data-ann')===String(cur)}); i=(i+parseInt(s.getAttribute('data-step'),10)+v.length)%v.length; select(v[i].getAttribute('data-ann'),'card'); return;}
+    var fk=e.target.closest('[data-fkind]'), fc=e.target.closest('[data-fcrit]');
+    if(fk){kind=fk.getAttribute('data-fkind'); document.querySelectorAll('[data-fkind]').forEach(function(b){b.classList.toggle('on',b===fk)});}
+    if(fc){var c=fc.getAttribute('data-fcrit'); crit=(crit===c)?null:c; document.querySelectorAll('[data-fcrit]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-fcrit')===crit)});}
+    if(fk||fc){
+      cards.forEach(function(c){var ok=(kind==='all'||c.getAttribute('data-kind')===kind)&&(!crit||c.getAttribute('data-crit')===crit); c.classList.toggle('hide',!ok);
+        document.querySelectorAll('.pin[data-ann="'+c.getAttribute('data-ann')+'"],.hb[data-ann="'+c.getAttribute('data-ann')+'"],.hg[data-ann="'+c.getAttribute('data-ann')+'"]').forEach(function(el){el.classList.toggle('dim',!ok)});});
+      var v=visible(); if(v.length) select(v[0].getAttribute('data-ann'),'filter');
+    }
+  });
+  document.addEventListener('keydown',function(e){if(e.target.closest('input,textarea'))return; if(e.key==='j'||e.key==='ArrowDown'&&e.altKey){document.querySelector('[data-step="1"]').click();} if(e.key==='k'){document.querySelector('[data-step="-1"]').click();}});
+  document.querySelectorAll('[role="radio"]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[role="radio"]').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)}); var s=document.querySelector('#avaliar .btn.ghost'); if(s){s.disabled=false;s.className='btn pri';s.style.alignSelf='flex-start'}})});
+  var first=document.querySelector('.ann.on')||cards[0]; if(first) select(first.getAttribute('data-ann'),'init');
+})();
+</script>
 </body>
 </html>
