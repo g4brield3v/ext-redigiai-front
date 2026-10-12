@@ -54,66 +54,43 @@ a{color:#2346C9}a:hover{color:#16308F}
 :focus-visible{outline:3px solid #2346C9;outline-offset:3px}
 @media (max-width:980px){.in{padding-left:16px;padding-right:16px}.links{display:none}.h1{font-size:34px}.stack{grid-template-columns:1fr !important}}
 @media (max-width:620px){.sheet.wm{grid-template-columns:30px minmax(0,1fr)}.sheet .m{display:none}}
-
+.pblk{display:flex;flex-direction:column;gap:8px;padding:22px 0;border-top:1px solid #E1E6F0}.psrc{margin:0;font-size:13.5px;font-style:italic;color:#56627A;text-align:right}
 </style>
 </head>
 <body>
-<div class="pg" style="min-height: 1900px">
+<div class="pg" style="min-height: 1650px">
 <header class="nav"><div class="in"><a class="logo" href="01-inicio.html"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="#2346C9"></rect><path d="M8 11h14M8 15.5h14M8 20h8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></path><path d="M18.5 21.5c1.6-1.2 3.2-3 4.2-5" stroke="#FFB4A8" stroke-width="2" fill="none" stroke-linecap="round"></path></svg>RedigiAI</a><nav class="links" aria-label="Principal"><a href="02-temas.html" class="on" aria-current="page">Temas</a><a href="01-inicio.html">Como a nota é calculada</a></nav><a href="04-login.html" style="font-weight: 600; color: #0E1B33; text-decoration: none">Entrar</a></div></header>
 <main class="in" style="padding-top: 36px; padding-bottom: 96px; display: flex; flex-direction: column; gap: 28px">
 <div style="display: flex; flex-direction: column; gap: 10px">
-<nav aria-label="Você está em" style="font-size: 14px; font-weight: 500"><a href="02-temas.html">Fuvest</a> <span class="mut">/</span> <a href="02-temas.html">Temas</a> <span class="mut">/ Algoritmos e o debate público</span></nav>
+<nav aria-label="Você está em" style="font-size: 14px; font-weight: 500"><a href="02-temas.html">Fuvest</a> <span class="mut">/</span> <a href="02-temas.html">Propostas</a> <span class="mut">/ Algoritmos e o debate público</span></nav>
 <span class="eyebrow">Proposta de redação · Fuvest</span>
 <h1 class="serif h1" style="max-width: 16em">Algoritmos e o debate público</h1>
-<div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip s-tag">Dissertação</span><span class="chip s-tag">Narrativa</span><span class="chip s-tag">Coletânea com 4 textos</span></div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip s-tag">Dissertação em prosa</span><span class="chip s-tag">Coletânea com 4 textos</span><span class="chip s-tag">20 a 30 linhas · com título</span></div>
 </div>
-<div class="stack" style="display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 36px; align-items: start">
-<article class="card" style="padding: 40px 48px; display: flex; flex-direction: column; gap: 8px">
-<section style="display: flex; flex-direction: column; gap: 14px; padding-bottom: 26px">
-<span class="eyebrow">Proposta</span>
-<p style="margin: 0; font-size: 18px; line-height: 1.75">[Enunciado da proposta: o que o candidato deve discutir sobre o tema e como usar a coletânea.]</p>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px" class="stack">
-<div style="padding: 16px 18px; border-radius: 14px; background: #F6F8FC"><span style="font-weight: 600">Dissertação</span><p class="mut" style="margin: 4px 0 0; font-size: 15px">[Instrução da proposta para o texto dissertativo-argumentativo.]</p></div>
-<div style="padding: 16px 18px; border-radius: 14px; background: #F6F8FC"><span style="font-weight: 600">Narrativa</span><p class="mut" style="margin: 4px 0 0; font-size: 15px">[Instrução da proposta para o texto narrativo com reflexão.]</p></div>
-</div>
+<div class="stack" style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 36px; align-items: start">
+<article class="card" style="padding: 18px 48px 40px; display: flex; flex-direction: column">
+<section class="pblk"><div style="display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 16px" class="stack"><strong>Texto 1:</strong><div class="mut" style="height: 170px; border-radius: 12px; background: #EEF1F6; display: flex; align-items: center; justify-content: center">[Imagem: tirinha, charge ou gráfico]</div></div><p class="psrc">[Autor], <em>[Obra]</em>.</p></section>
+<section class="pblk"><p style="margin: 0; font-size: 17px; line-height: 1.75"><strong>Texto 2:</strong> [Trecho do texto 2, exatamente como na prova.]</p><p class="psrc">[Autor], <em>[Título]</em>. [Ano]. Disponível em [endereço]. Adaptado.</p></section>
+<section class="pblk"><div style="display: grid; grid-template-columns: 90px repeat(3, minmax(0, 1fr)); gap: 16px; font-size: 16px; line-height: 1.6; font-style: italic" class="stack"><strong style="font-style: normal">Texto 3:</strong><div style="display: flex; flex-direction: column"><span>[verso]</span><span>[verso]</span><span>[verso]</span><span>[verso]</span></div><div style="display: flex; flex-direction: column"><span>[verso]</span><span>[verso]</span><span>[verso]</span><span>[verso]</span></div><div style="display: flex; flex-direction: column"><span>[verso]</span><span>[verso]</span><span>[verso]</span><span>[verso]</span></div></div><p class="psrc">[Autor], <em>[Obra]</em>. [Ano].</p></section>
+<section class="pblk"><p style="margin: 0; font-size: 17px; line-height: 1.75"><strong>Texto 4:</strong> [Trecho do texto 4.]</p><p class="psrc">[Autor], [Ano].</p></section>
+<section style="display: flex; flex-direction: column; gap: 8px; padding-top: 26px; border-top: 1px solid #E1E6F0">
+<p style="margin: 0; font-size: 17.5px; line-height: 1.75">Considerando as ideias apresentadas nos textos e também outras informações que julgar pertinentes, redija uma <strong>dissertação em prosa</strong>, na qual você exponha seu ponto de vista sobre o tema: <strong>algoritmos e o debate público</strong>.</p>
 </section>
-<span class="eyebrow" style="padding-top: 8px">Coletânea</span>
-<section style="display: flex; flex-direction: column; gap: 10px; padding: 26px 0; border-top: 1px solid #E1E6F0">
-<span style="font-size: 13px; font-weight: 600; color: #2346C9">Texto 1</span>
-<h3 class="serif" style="margin: 0; font-size: 22px; line-height: 1.25">[Título do texto 1]</h3>
-<p style="margin: 0; font-size: 17px; line-height: 1.75">[Trecho do texto 1, como aparece na proposta da prova.]</p>
-<p class="mut" style="margin: 0; font-size: 13.5px; font-style: italic">[Fonte do texto 1]</p>
+<section style="display: flex; flex-direction: column; gap: 8px; padding-top: 24px">
+<span style="font-weight: 700; font-size: 14.5px">Instruções</span>
+<ul style="margin: 0; padding-left: 20px; font-size: 15px; line-height: 1.7"><li><strong>Tipo de redação:</strong> dissertação em prosa.</li><li>A dissertação deve ser redigida de acordo com a norma-padrão da língua portuguesa.</li><li>Escreva, no mínimo, 20 linhas, com letra legível, e não ultrapasse o espaço de 30 linhas da folha de redação.</li><li>Dê um título a sua redação.</li></ul>
 </section>
-<section style="display: flex; flex-direction: column; gap: 10px; padding: 26px 0; border-top: 1px solid #E1E6F0">
-<span style="font-size: 13px; font-weight: 600; color: #2346C9">Texto 2</span>
-<h3 class="serif" style="margin: 0; font-size: 22px; line-height: 1.25">[Título do texto 2]</h3>
-<p style="margin: 0; font-size: 17px; line-height: 1.75">[Trecho do texto 2.]</p>
-<p class="mut" style="margin: 0; font-size: 13.5px; font-style: italic">[Fonte do texto 2]</p>
-</section>
-<section style="display: flex; flex-direction: column; gap: 10px; padding: 26px 0; border-top: 1px solid #E1E6F0">
-<span style="font-size: 13px; font-weight: 600; color: #2346C9">Texto 3</span>
-<h3 class="serif" style="margin: 0; font-size: 22px; line-height: 1.25">[Gráfico ou charge]</h3>
-<div class="mut" style="height: 260px; border-radius: 12px; background: #EEF1F6; display: flex; align-items: center; justify-content: center">[Imagem]</div>
-<p class="mut" style="margin: 0; font-size: 13.5px; font-style: italic">[Fonte do texto 3]</p>
-</section>
-<section style="display: flex; flex-direction: column; gap: 10px; padding: 26px 0; border-top: 1px solid #E1E6F0">
-<span style="font-size: 13px; font-weight: 600; color: #2346C9">Texto 4</span>
-<h3 class="serif" style="margin: 0; font-size: 22px; line-height: 1.25">[Título do texto 4]</h3>
-<p style="margin: 0; font-size: 17px; line-height: 1.75">[Trecho do texto 4.]</p>
-<p class="mut" style="margin: 0; font-size: 13.5px; font-style: italic">[Fonte do texto 4]</p>
-</section>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 28px; padding: 18px 20px; border-radius: 14px; background: #F6F8FC"><span style="font-size: 15px"><strong>Já escreveu?</strong> Envie a foto da folha para correção.</span><a class="btn pri" href="03-tipo-envio.html">Enviar minha redação</a></div>
 </article>
-<aside class="card" aria-label="Como enviar" style="padding: 28px; display: flex; flex-direction: column; gap: 22px; position: sticky; top: 20px">
-<h2 class="serif h2" style="font-size: 24px">Escreva à mão, como na prova</h2>
+<aside class="card" aria-label="Como fazer" style="padding: 28px; display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px">
+<h2 class="serif h2" style="font-size: 24px">Como na prova</h2>
 <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 16px; font-size: 15px">
-<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">1</span><span style="display: flex; flex-direction: column; gap: 6px">Imprima a folha pautada de 30 linhas.<a href="#" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>Baixar a folha (PDF)</a></span></li>
-<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">2</span><span>Escreva a redação na folha, sem nome nem assinatura.</span></li>
-<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">3</span><span>Fotografe a folha inteira e envie para correção.</span></li>
+<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">1</span><span>Leia a coletânea, o comando e as instruções.</span></li>
+<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">2</span><span style="display: flex; flex-direction: column; gap: 6px">Imprima a folha pautada: ela sai com o tema e o tipo no topo.<a href="#" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>Baixar a folha (PDF)</a></span></li>
+<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">3</span><span>Escreva à mão, sem nome nem assinatura.</span></li>
+<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">4</span><span>Fotografe a folha e envie.</span></li>
 </ol>
-<div style="border-top: 1px solid #E1E6F0; padding-top: 20px; display: flex; flex-direction: column; gap: 10px">
 <a class="btn pri" href="03-tipo-envio.html" style="width: 100%">Enviar minha redação</a>
-<span class="mut" style="font-size: 13.5px; text-align: center">Você escolhe o tipo de redação na próxima página.</span>
-</div>
 </aside>
 </div>
 </main>
