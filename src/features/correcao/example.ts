@@ -1,6 +1,7 @@
 // Correções de exemplo: conteúdo fixo e fictício, copiado das telas aprovadas
 // (docs/telas/html/09-correcao.html e 09z-correcao-nota-zero.html). Não vêm da API.
-// A primeira é a correção pública de /exemplo; a de nota zero é usada nos testes.
+// A primeira é a correção pública de /exemplo; a de nota zero é usada nos testes e, só em
+// desenvolvimento, em /exemplo/nota-zero.
 
 import type { Annotation, Correction, IllegibleWord, TranscriptionLine } from '../../api/provisional-types';
 

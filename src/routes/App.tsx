@@ -34,6 +34,10 @@ const VerifyEmailLinkPage = lazy(() =>
 );
 // A correção de exemplo traz os próprios dados e só é carregada por quem abre /exemplo.
 const ExampleCorrectionPage = lazy(() => import('../features/correcao/ExampleCorrectionPage'));
+// A variante de nota zero do exemplo serve para revisar a tela: só existe em desenvolvimento.
+const ExampleZeroCorrectionPage = import.meta.env.DEV
+  ? lazy(() => import('../features/correcao/ExampleZeroCorrectionPage'))
+  : null;
 // Mostruário dos componentes: só existe em desenvolvimento.
 const ComponentsPage = import.meta.env.DEV ? lazy(() => import('./ComponentsPage')) : null;
 
@@ -122,6 +126,7 @@ export function AppRoutes() {
         <Route path="/temas/:themeId/enviar" element={<SubmitPage />} />
         <Route path="/enviar/foto" element={<CameraPage />} />
         <Route path="/exemplo" element={<ExampleCorrectionPage />} />
+        {ExampleZeroCorrectionPage && <Route path="/exemplo/nota-zero" element={<ExampleZeroCorrectionPage />} />}
         <Route path="/entrar" element={<LoginPage />} />
         <Route path="/entrar/concluir" element={<CompleteSignupPage />} />
         {clerkKey && !devAuth && <Route path="/entrar/sso" element={<SsoCallbackPage />} />}
