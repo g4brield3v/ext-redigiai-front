@@ -208,6 +208,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/essays/{id}/correction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Correção completa: nota calculada pelo backend, nível e orientação de cada critério, marcas na redação e
+         *     próximos passos. Só existe depois que a redação chega a `completed`; antes disso responde 409.
+         */
+        get: operations["getCorrection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/essays/{id}/photo": {
         parameters: {
             query?: never;
@@ -279,6 +299,77 @@ export interface components {
         };
         BatchEssayResponseDto: {
             essayIds: string[];
+        };
+        CorrectionCriterionDto: {
+            /** Format: int32 */
+            position: number;
+            name: string;
+            /** Format: int32 */
+            weight: number;
+            /** Format: int32 */
+            level: number;
+            /** Format: int32 */
+            maxLevel: number;
+            /** Format: int32 */
+            points: number;
+            /** Format: int32 */
+            maxPoints: number;
+            descriptor: string;
+            justification: string;
+            lines: number[];
+            linesLabel: string;
+            guidance: null | string;
+            deviations: components["schemas"]["RuleDeviationDto"][];
+        };
+        CorrectionDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            essayId: string;
+            title: string;
+            /** Format: uuid */
+            themeId: string;
+            /** Format: uuid */
+            essayTypeId: string;
+            /** Format: date-time */
+            sentAt: string;
+            /** Format: int32 */
+            version: number;
+            examName: string;
+            /** Format: int32 */
+            rubricVersion: number;
+            /** Format: int32 */
+            score: number;
+            /** Format: int32 */
+            maxScore: number;
+            /** Format: int32 */
+            scoreDelta: null | number;
+            /** Format: int32 */
+            previousVersion: null | number;
+            zeroReason: null | string;
+            zeroRule: null | string;
+            zeroExplanation: null | string;
+            strengths: string;
+            mainIssue: string;
+            /** Format: int32 */
+            sheetLines: number;
+            lines: components["schemas"]["TranscriptionLineDto"][];
+            marks: components["schemas"]["CorrectionMarkDto"][];
+            criteria: components["schemas"]["CorrectionCriterionDto"][];
+            nextSteps: string[];
+        };
+        CorrectionMarkDto: {
+            /** Format: int32 */
+            criterion: number;
+            kind: components["schemas"]["MarkKind"];
+            /** Format: int32 */
+            line: number;
+            /** Format: int32 */
+            start: number;
+            /** Format: int32 */
+            end: number;
+            note: null | string;
+            tagged: boolean;
         };
         CreditBalanceDto: {
             /** Format: int32 */
@@ -405,6 +496,8 @@ export interface components {
             contextBefore: string;
             contextAfter: string;
         };
+        /** @enum {unknown} */
+        MarkKind: "good" | "issue";
         PhotoUrlDto: {
             url: string;
         };
@@ -451,6 +544,12 @@ export interface components {
             /** Format: int32 */
             level: number;
             descriptor: string;
+        };
+        RuleDeviationDto: {
+            rule: string;
+            /** Format: int32 */
+            line: number;
+            correction: string;
         };
         ThemeDetailDto: {
             /** Format: uuid */
@@ -1055,6 +1154,55 @@ export interface operations {
             };
             /** @description Unprocessable Entity */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCorrection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorrectionDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

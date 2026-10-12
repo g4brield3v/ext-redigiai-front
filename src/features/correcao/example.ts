@@ -62,6 +62,7 @@ export const exampleCorrection: Correction = {
   scoreDelta: 2,
   previousVersion: 1,
   zeroReason: null,
+  zeroRule: null,
   zeroExplanation: null,
   strengths: 'O dado do texto 2 sustenta a sua tese nas linhas 3 a 7, e a sua posição está clara desde a introdução.',
   mainIssue: 'O parágrafo das linhas 11 a 13 repete o anterior, e a conclusão não responde à pergunta da linha 14.',

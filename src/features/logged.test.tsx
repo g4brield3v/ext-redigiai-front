@@ -226,7 +226,8 @@ describe('Correção', () => {
       'GET /v1/essays/essay-done/correction': json({
         ...exampleCorrection,
         score: 0,
-        zeroReason: 'Identificação do candidato',
+        zeroReason: 'candidate_identification',
+        zeroRule: 'Identificação do candidato',
         zeroExplanation: 'Há um nome escrito na linha 30 da folha.',
         criteria: [],
         nextSteps: [],

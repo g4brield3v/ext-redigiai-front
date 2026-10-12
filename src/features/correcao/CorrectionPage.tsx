@@ -212,7 +212,7 @@ export function CorrectionView({ correction, example = false }: ViewProps) {
         {correction.zeroReason ? (
           <section className={styles.zero}>
             <h2 className="h3">A redação recebeu nota zero</h2>
-            <span className={styles.zeroReason}>{correction.zeroReason}</span>
+            <span className={styles.zeroReason}>{correction.zeroRule ?? correction.zeroReason}</span>
             <p>{correction.zeroExplanation}</p>
           </section>
         ) : (

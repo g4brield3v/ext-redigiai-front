@@ -15,66 +15,15 @@ export type IllegibleWord = Schemas['IllegibleWordDto'];
 
 export type IllegibleAnswer = { wordId: string; value: string };
 
-export type CorrectionMark = {
-  criterion: number;
-  kind: 'good' | 'issue';
-  line: number;
-  start: number;
-  end: number;
-  /** Nota de margem, na mesma linha da marca. */
-  note: string | null;
-  /** Quando verdadeiro, o selo do critério acompanha a nota. */
-  tagged: boolean;
-};
-
-export type RuleDeviation = { rule: string; line: number; correction: string };
-
-export type CorrectionCriterion = {
-  position: number;
-  name: string;
-  weight: number;
-  level: number;
-  /** Nível mais alto da grade usada (4 na Fuvest atual). */
-  maxLevel: number;
-  points: number;
-  maxPoints: number;
-  /** Descritor oficial do nível, da grade. */
-  descriptor: string;
-  justification: string;
-  lines: number[];
-  /** Texto pronto da referência às linhas: "Linhas 3 a 7". */
-  linesLabel: string;
-  guidance: string | null;
-  deviations: RuleDeviation[];
-};
+export type CorrectionMark = Schemas['CorrectionMarkDto'];
+export type RuleDeviation = Schemas['RuleDeviationDto'];
+export type CorrectionCriterion = Schemas['CorrectionCriterionDto'];
 
 export type FeedbackRating = 'helped_a_lot' | 'helped_partly' | 'did_not_help';
 
-export type Correction = {
-  id: string;
-  essayId: string;
-  title: string;
-  themeId: string;
-  essayTypeId: string;
-  sentAt: string;
-  version: number;
-  examName: string;
-  rubricVersion: number;
-  score: number;
-  maxScore: number;
-  /** Diferença para a versão anterior da mesma redação. */
-  scoreDelta: number | null;
-  previousVersion: number | null;
-  zeroReason: string | null;
-  zeroExplanation: string | null;
-  strengths: string;
-  mainIssue: string;
-  sheetLines: number;
-  lines: TranscriptionLine[];
-  marks: CorrectionMark[];
-  criteria: CorrectionCriterion[];
-  nextSteps: string[];
-  feedback: { rating: FeedbackRating; comment: string | null } | null;
+/** A correção publicada pelo backend. A avaliação do aluno ainda não vem na resposta. */
+export type Correction = Schemas['CorrectionDto'] & {
+  feedback?: { rating: FeedbackRating; comment: string | null } | null;
 };
 
 export type Progress = {
