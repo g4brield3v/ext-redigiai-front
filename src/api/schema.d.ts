@@ -188,6 +188,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/essays/{id}/illegible": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Palavras ilegíveis digitadas pelo aluno. Só é aceito em `awaiting_review`, antes do prazo e com todas
+         *     as palavras preenchidas; a redação segue para a fila de correção.
+         */
+        put: operations["fillIllegibleWords"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/essays/{id}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Endereço temporário da foto enviada, válido por 5 minutos. */
+        get: operations["getEssayPhoto"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -351,6 +388,11 @@ export interface components {
         HealthResponse: {
             status: string;
         };
+        IllegibleAnswer: {
+            /** Format: uuid */
+            wordId: string;
+            value: null | string;
+        };
         IllegibleWordDto: {
             /** Format: uuid */
             id: string;
@@ -362,6 +404,9 @@ export interface components {
             end: number;
             contextBefore: string;
             contextAfter: string;
+        };
+        PhotoUrlDto: {
+            url: string;
         };
         ProfileDto: {
             /** Format: uuid */
@@ -931,6 +976,110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EssayDetailDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    fillIllegibleWords: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IllegibleAnswer"][];
+                "text/json": components["schemas"]["IllegibleAnswer"][];
+                "application/*+json": components["schemas"]["IllegibleAnswer"][];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getEssayPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhotoUrlDto"];
                 };
             };
             /** @description Unauthorized */
