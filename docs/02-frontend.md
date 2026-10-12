@@ -114,7 +114,7 @@ Rota logada sem sessão → `/entrar?next=<rota>`. Depois do login, `POST /v1/me
 Seções, nesta ordem:
 1. **Hero:** eyebrow "Correção de redação para vestibular"; H1 "Uma correção que mostra onde e como melhorar."; texto de apoio; botões "Ver os temas" (→ `/temas`) e "Como a nota é calculada" (âncora); nota "Você só cria conta na hora de enviar." À direita, uma folha de exemplo corrigida (componente `EssaySheet` com dados fixos) e o resumo de critérios com nota 23/30.
 2. **Como funciona:** 4 passos (vestibular, tema, tipo, envio), cada um com ilustração da escolha. Unicamp e Enem aparecem como "em breve".
-3. **A correção:** três pontos (nível de 1 a 3 por critério; orientação direta com linhas; erros agrupados pela regra) e um cartão de critério de exemplo.
+3. **A correção:** três pontos (nível de 1 a `maxLevel` da grade por critério; orientação direta com linhas; erros agrupados pela regra) e um cartão de critério de exemplo.
 4. **Como a nota é calculada** (`id="nota"`): tabela critério × nível × peso × pontos, nota da grade, "Quando a nota é zero" e "Se a grade mudar". Os dados vêm de `GET /v1/rubrics/{versionId}`.
 5. **Preços:** três cartões (Teste grátis R$ 0, Plano semanal R$ 39,90/mês em destaque, Correção avulsa R$ 16).
 6. **Perguntas frequentes:** acordeão (`<details>`).
