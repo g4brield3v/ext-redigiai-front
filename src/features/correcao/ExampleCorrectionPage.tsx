@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { Nav } from '../../components/Nav';
 import { CorrectionView } from './CorrectionPage';
 import { exampleCorrection } from './example';
@@ -9,11 +8,8 @@ export default function ExampleCorrectionPage() {
   return (
     <>
       <Nav />
-      <main className={`container ${styles.page}`}>
-        <Link className={styles.back} to="/">
-          ← Início
-        </Link>
-        <CorrectionView correction={exampleCorrection} example />
+      <main className={styles.page}>
+        <CorrectionView correction={exampleCorrection} back={{ to: '/', label: 'Início' }} example />
       </main>
     </>
   );

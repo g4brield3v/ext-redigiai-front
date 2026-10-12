@@ -216,12 +216,30 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Correção completa: nota calculada pelo backend, nível e orientação de cada critério, marcas na redação e
-         *     próximos passos. Só existe depois que a redação chega a `completed`; antes disso responde 409.
+         * Correção completa: nota calculada pelo backend, nível e orientação de cada critério, apontamentos na
+         *     redação, por onde começar e o plano de reescrita, com os pontos que cada passo pode render. Só existe
+         *     depois que a redação chega a `completed`; antes disso responde 409.
          */
         get: operations["getCorrection"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/corrections/{id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Avaliação do aluno sobre a correção, com comentário opcional. Uma por correção: a segunda responde 409. */
+        post: operations["sendCorrectionFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -300,26 +318,45 @@ export interface components {
         BatchEssayResponseDto: {
             essayIds: string[];
         };
+        CorrectionAnnotationDto: {
+            /** Format: int32 */
+            id: number;
+            kind: components["schemas"]["MarkKind"];
+            /** Format: int32 */
+            criterion: number;
+            /** Format: int32 */
+            lineStart: number;
+            /** Format: int32 */
+            lineEnd: number;
+            /** Format: int32 */
+            charStart: number;
+            /** Format: int32 */
+            charEnd: number;
+            quote: string;
+            note: null | string;
+            ruleName: null | string;
+            fix: null | string;
+        };
         CorrectionCriterionDto: {
             /** Format: int32 */
             position: number;
-            name: string;
+            shortName: string;
+            fullName: string;
             /** Format: int32 */
             weight: number;
             /** Format: int32 */
             level: number;
             /** Format: int32 */
-            maxLevel: number;
-            /** Format: int32 */
             points: number;
             /** Format: int32 */
             maxPoints: number;
-            descriptor: string;
+            /** Format: int32 */
+            pointsLost: number;
+            currentDescriptor: string;
+            nextDescriptor: null | string;
             justification: string;
-            lines: number[];
-            linesLabel: string;
             guidance: null | string;
-            deviations: components["schemas"]["RuleDeviationDto"][];
+            annotationIds: number[];
         };
         CorrectionDto: {
             /** Format: uuid */
@@ -336,8 +373,7 @@ export interface components {
             /** Format: int32 */
             version: number;
             examName: string;
-            /** Format: int32 */
-            rubricVersion: number;
+            rubric: components["schemas"]["CorrectionRubricDto"];
             /** Format: int32 */
             score: number;
             /** Format: int32 */
@@ -346,30 +382,50 @@ export interface components {
             scoreDelta: null | number;
             /** Format: int32 */
             previousVersion: null | number;
-            zeroReason: null | string;
-            zeroRule: null | string;
-            zeroExplanation: null | string;
+            /** Format: int32 */
+            previousVersionScore: null | number;
+            zero: components["schemas"]["CorrectionZeroDto"];
             strengths: string;
-            mainIssue: string;
+            mainIssue: components["schemas"]["CorrectionPointDto"];
             /** Format: int32 */
             sheetLines: number;
             lines: components["schemas"]["TranscriptionLineDto"][];
-            marks: components["schemas"]["CorrectionMarkDto"][];
+            annotations: components["schemas"]["CorrectionAnnotationDto"][];
             criteria: components["schemas"]["CorrectionCriterionDto"][];
-            nextSteps: string[];
+            nextSteps: components["schemas"]["CorrectionPointDto"][];
+            feedback: null | components["schemas"]["CorrectionFeedbackDto"];
         };
-        CorrectionMarkDto: {
+        CorrectionFeedbackDto: {
+            rating: components["schemas"]["FeedbackRating"];
+            comment: null | string;
+        };
+        CorrectionFeedbackRequest: {
+            rating: null | components["schemas"]["FeedbackRating"];
+            /** @description Comentário opcional, com até 1.000 caracteres. */
+            comment?: null | string;
+        };
+        CorrectionPointDto: {
+            text: string;
             /** Format: int32 */
-            criterion: number;
-            kind: components["schemas"]["MarkKind"];
+            criterion: null | number;
             /** Format: int32 */
-            line: number;
+            potentialGain: null | number;
+        };
+        CorrectionRubricDto: {
             /** Format: int32 */
-            start: number;
+            version: number;
             /** Format: int32 */
-            end: number;
-            note: null | string;
-            tagged: boolean;
+            maxLevel: number;
+            /** Format: int32 */
+            maxScore: number;
+            versionLabel: string;
+        };
+        CorrectionZeroDto: {
+            applies: boolean;
+            ruleCode: null | string;
+            ruleLabel: null | string;
+            ruleNote: null | string;
+            explanation: null | string;
         };
         CreditBalanceDto: {
             /** Format: int32 */
@@ -476,6 +532,8 @@ export interface components {
         };
         /** @enum {unknown} */
         ExamStatus: "active" | "coming_soon";
+        /** @enum {unknown} */
+        FeedbackRating: "helped_a_lot" | "helped_partly" | "did_not_help";
         HealthResponse: {
             status: string;
         };
@@ -544,12 +602,6 @@ export interface components {
             /** Format: int32 */
             level: number;
             descriptor: string;
-        };
-        RuleDeviationDto: {
-            rule: string;
-            /** Format: int32 */
-            line: number;
-            correction: string;
         };
         ThemeDetailDto: {
             /** Format: uuid */
@@ -1203,6 +1255,70 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    sendCorrectionFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectionFeedbackRequest"];
+                "text/json": components["schemas"]["CorrectionFeedbackRequest"];
+                "application/*+json": components["schemas"]["CorrectionFeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

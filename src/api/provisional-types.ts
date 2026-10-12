@@ -15,16 +15,11 @@ export type IllegibleWord = Schemas['IllegibleWordDto'];
 
 export type IllegibleAnswer = { wordId: string; value: string };
 
-export type CorrectionMark = Schemas['CorrectionMarkDto'];
-export type RuleDeviation = Schemas['RuleDeviationDto'];
+export type Annotation = Schemas['CorrectionAnnotationDto'];
 export type CorrectionCriterion = Schemas['CorrectionCriterionDto'];
-
-export type FeedbackRating = 'helped_a_lot' | 'helped_partly' | 'did_not_help';
-
-/** A correção publicada pelo backend. A avaliação do aluno ainda não vem na resposta. */
-export type Correction = Schemas['CorrectionDto'] & {
-  feedback?: { rating: FeedbackRating; comment: string | null } | null;
-};
+export type CorrectionPoint = Schemas['CorrectionPointDto'];
+export type FeedbackRating = Schemas['FeedbackRating'];
+export type Correction = Schemas['CorrectionDto'];
 
 export type Progress = {
   points: { essayId: string; date: string; score: number; maxScore: number }[];
