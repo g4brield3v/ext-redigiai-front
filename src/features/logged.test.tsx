@@ -24,6 +24,7 @@ const account: Account = {
   name: 'Ana Souza',
   termsAcceptanceRequired: false,
   aiNoticeAccepted: true,
+  role: 'student',
   emailPreferences: { correctionReady: true, illegibleReminder: true, newThemes: false },
   credits: { total: 3, buckets: [{ source: 'single', remaining: 3, expiresAt: null }] },
   subscription: null,
@@ -36,7 +37,9 @@ function essay(id: string, status: EssaySummary['status'], extra: Partial<EssayS
   return {
     id,
     title: 'Fuvest – Dissertação – Algoritmos e o debate público',
-    themeId: 'theme-1',
+    promptId: 'prompt-1',
+    promptSlug: 'algoritmos-e-o-debate-publico',
+    promptVersion: 1,
     essayTypeId: 'type-1',
     status,
     version: 1,
@@ -113,18 +116,18 @@ describe('Minhas correções', () => {
     expect(rows[3]).toHaveTextContent('Na fila');
     expect(within(rows[3]!).queryByRole('link')).not.toBeInTheDocument();
     expect(rows[4]).toHaveTextContent('Não corrigida · crédito devolvido');
-    expect(within(rows[4]!).getByRole('link', { name: 'Reenviar' })).toHaveAttribute('href', '/temas/theme-1/enviar?tipo=type-1');
+    expect(within(rows[4]!).getByRole('link', { name: 'Reenviar' })).toHaveAttribute('href', '/propostas/algoritmos-e-o-debate-publico/enviar');
 
     expect(screen.getByText('+2 pontos na última correção')).toBeInTheDocument();
     expect(screen.getByText('3 · Coesão, coerência e progressão')).toBeInTheDocument();
   });
 
-  it('sem redações, convida a ver os temas', async () => {
+  it('sem redações, convida a ver as propostas', async () => {
     mockApi({ 'GET /v1/me': json(account), 'GET /v1/essays': json({ items: [], nextCursor: null }) });
     renderApp(<DashboardPage />, { route: '/painel', path: '/painel', auth: signedIn() });
 
     expect(await screen.findByText('Você ainda não enviou nenhuma redação.')).toBeInTheDocument();
-    expect(within(screen.getByRole('main')).getByRole('link', { name: 'Ver os temas' })).toBeInTheDocument();
+    expect(within(screen.getByRole('main')).getByRole('link', { name: 'Ver as propostas' })).toBeInTheDocument();
   });
 
   it('mostra a mensagem da API quando a lista falha', async () => {
@@ -202,6 +205,8 @@ describe('Correção', () => {
     // Pontos de propósito diferentes de nível × peso: a tela exibe o que o backend mandou.
     const fromApi = {
       ...exampleCorrection,
+      promptSlug: 'algoritmos-e-o-debate-publico',
+      promptVersion: 2,
       score: 17,
       criteria: exampleCorrection.criteria.map((criterion, index) => (index === 0 ? { ...criterion, points: 2 } : criterion)),
     };
@@ -218,7 +223,7 @@ describe('Correção', () => {
     expect(document.getElementById('criterio-4')).toHaveTextContent('Crase antes de verbo · linha 13');
     expect(screen.getAllByRole('link', { name: 'Reescrever esta redação' })[0]).toHaveAttribute(
       'href',
-      '/temas/enviar?tipo=&reescrita=exemplo',
+      '/propostas/algoritmos-e-o-debate-publico/enviar?versao=2&reescrita=exemplo',
     );
   });
 
@@ -282,14 +287,14 @@ describe('Correção', () => {
 });
 
 describe('Confirmação do envio', () => {
-  const pending = [{ title: 'Fuvest – Dissertação – Tema', fileName: 'foto.jpg', themeId: 'theme-1', essayTypeId: 'type-1', assetId: 'asset-1' }];
+  const pending = [{ title: 'Fuvest – Dissertação – Tema', fileName: 'foto.jpg', promptId: 'prompt-1', assetId: 'asset-1' }];
 
   it('mostra custo e saldo, e envia com a chave de idempotência', async () => {
     const requests = mockApi({
       'GET /v1/me': json(account),
       'POST /v1/essays/batch': json({ essayIds: ['new-1'] }, 202),
     });
-    renderApp(<ConfirmSendModal essays={pending} onClose={() => {}} />, { route: '/temas/theme-1', path: '/temas/:themeId', auth: signedIn() });
+    renderApp(<ConfirmSendModal essays={pending} onClose={() => {}} />, { route: '/propostas/tema', path: '/propostas/:slug', auth: signedIn() });
 
     const dialog = screen.getByRole('dialog', { name: 'Confirme o envio' });
     expect(await within(dialog).findByText('2 correções')).toBeInTheDocument();
@@ -300,14 +305,15 @@ describe('Confirmação do envio', () => {
     const post = requests.find((r) => r.method === 'POST')!;
     expect(post.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
     expect(post.body).toEqual({
-      essays: [{ themeId: 'theme-1', essayTypeId: 'type-1', assetId: 'asset-1', parentEssayId: null }],
+      // Sem tipo: quem define é a proposta.
+      essays: [{ promptId: 'prompt-1', assetId: 'asset-1', parentEssayId: null }],
       aiNoticeAccepted: null,
     });
   });
 
   it('sem saldo suficiente, não deixa confirmar e oferece comprar', async () => {
     mockApi({ 'GET /v1/me': json({ ...account, credits: { total: 0, buckets: [] } }) });
-    renderApp(<ConfirmSendModal essays={pending} onClose={() => {}} />, { route: '/temas/theme-1', path: '/temas/:themeId', auth: signedIn() });
+    renderApp(<ConfirmSendModal essays={pending} onClose={() => {}} />, { route: '/propostas/tema', path: '/propostas/:slug', auth: signedIn() });
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Você não tem correções suficientes para este envio.');
     expect(screen.getByRole('button', { name: 'Confirmar envio' })).toBeDisabled();
@@ -316,7 +322,7 @@ describe('Confirmação do envio', () => {
 
   it('no primeiro envio, exige o aceite do aviso sobre IA', async () => {
     mockApi({ 'GET /v1/me': json({ ...account, aiNoticeAccepted: false }) });
-    renderApp(<ConfirmSendModal essays={pending} onClose={() => {}} />, { route: '/temas/theme-1', path: '/temas/:themeId', auth: signedIn() });
+    renderApp(<ConfirmSendModal essays={pending} onClose={() => {}} />, { route: '/propostas/tema', path: '/propostas/:slug', auth: signedIn() });
 
     const notice = await screen.findByRole('checkbox', { name: /A correção é feita por IA/ });
     const confirm = screen.getByRole('button', { name: 'Confirmar envio' });

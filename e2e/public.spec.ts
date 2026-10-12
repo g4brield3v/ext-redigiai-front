@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { THEME_ID, horizontalOverflow, interceptCatalog } from './catalog';
+import { PROMPT_SLUG, horizontalOverflow, interceptCatalog } from './catalog';
 
 // Telas públicas, em 1440 px e 360 px. As respostas da API são interceptadas pelo teste.
 
@@ -9,7 +9,6 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function choosePhoto(page: Page) {
-  await page.getByRole('radio', { name: /Dissertação/ }).check();
   await page.getByLabel('Foto da folha').setInputFiles({
     name: 'foto-redacao.jpg',
     mimeType: 'image/jpeg',
@@ -28,7 +27,7 @@ test.describe('Início', () => {
     expect(await horizontalOverflow(page)).toBe(0);
 
     await page.getByRole('link', { name: 'Ver os temas' }).first().click();
-    await expect(page).toHaveURL(/\/temas$/);
+    await expect(page).toHaveURL(/\/propostas$/);
   });
 
   test('"Como a nota é calculada" rola até a seção', async ({ page }) => {
@@ -65,20 +64,27 @@ test.describe('Início', () => {
   });
 });
 
-test.describe('Temas', () => {
-  test('lista vestibulares e temas, e a busca filtra pelo título', async ({ page }) => {
-    await page.goto('/temas');
-    const cards = page.locator('main a[href^="/temas/"]');
+test.describe('Propostas', () => {
+  test('lista vestibulares e propostas, e a busca filtra pelo título', async ({ page }) => {
+    await page.goto('/propostas');
+    const cards = page.locator('main a[href^="/propostas/"]');
 
     await expect(page.getByRole('button', { name: /Fuvest/ })).toContainText('Grade com 4 critérios');
     await expect(page.getByRole('button', { name: /Unicamp/ })).toBeDisabled();
     await expect(cards).toHaveCount(3);
+    await expect(cards.first()).toContainText('Dissertação em prosa');
     expect(await horizontalOverflow(page)).toBe(0);
 
-    await page.getByRole('searchbox', { name: 'Buscar tema' }).fill('silêncio');
+    await page.getByRole('searchbox', { name: 'Buscar proposta' }).fill('silêncio');
     await expect(cards).toHaveCount(1);
-    await page.getByRole('searchbox', { name: 'Buscar tema' }).fill('zzz');
-    await expect(page.getByText('Nenhum tema encontrado para essa busca.')).toBeVisible();
+    await page.getByRole('searchbox', { name: 'Buscar proposta' }).fill('zzz');
+    await expect(page.getByText('Nenhuma proposta encontrada para essa busca.')).toBeVisible();
+  });
+
+  test('o endereço antigo da lista leva às propostas', async ({ page }) => {
+    await page.goto('/temas');
+
+    await expect(page).toHaveURL('/propostas');
   });
 
   test('mostra a mensagem da API quando o catálogo falha', async ({ page }) => {
@@ -88,56 +94,66 @@ test.describe('Temas', () => {
         json: { code: 'INTERNAL_ERROR', message: 'Algo deu errado do nosso lado. Tente novamente em instantes.', retryable: false, traceId: 't' },
       }),
     );
-    await page.goto('/temas');
+    await page.goto('/propostas');
 
     await expect(page.getByRole('alert')).toContainText('Algo deu errado do nosso lado. Tente novamente em instantes.');
   });
 });
 
 test.describe('Proposta e coletânea', () => {
-  test('mostra a proposta, a instrução de cada tipo e a coletânea inteira, e leva ao envio', async ({ page }) => {
-    await page.goto(`/temas/${THEME_ID}`);
+  test('mostra a coletânea, o comando e as instruções na ordem da prova, e leva ao envio', async ({ page }) => {
+    await page.goto(`/propostas/${PROMPT_SLUG}`);
 
     await expect(page.getByRole('heading', { level: 1, name: 'Algoritmos e o debate público' })).toBeVisible();
-    await expect(page.getByText('Enunciado da proposta.')).toBeVisible();
-    await expect(page.getByText('Defenda um ponto de vista.')).toBeVisible();
-    await expect(page.getByText('Conte uma história com reflexão.')).toBeVisible();
-    await expect(page.getByText('Trecho do texto 1.')).toBeVisible();
-    await expect(page.getByText('Texto 2', { exact: true })).toBeVisible();
-    // O tipo e a foto ficam na página de envio.
+    await expect(page.getByText('20 a 30 linhas · com título')).toBeVisible();
+    await expect(page.getByText('Trecho do texto 2, exatamente como na prova.')).toBeVisible();
+    await expect(page.getByText('Primeiro verso da coluna três')).toBeVisible();
+    await expect(page.getByText('Trecho do texto 4.')).toBeVisible();
+    // O comando traz o negrito do cadastro, e as instruções começam pelo tipo de redação.
+    await expect(page.locator('strong', { hasText: 'algoritmos e o debate público' })).toBeVisible();
+    await expect(page.getByRole('listitem').filter({ hasText: 'Tipo de redação:' })).toHaveText('Tipo de redação: dissertação em prosa.');
+    // O aluno não escolhe tipo, nem aqui nem no envio.
     await expect(page.getByRole('radio')).toHaveCount(0);
     expect(await horizontalOverflow(page)).toBe(0);
 
-    await page.getByRole('link', { name: 'Enviar minha redação' }).click();
+    await page.getByRole('link', { name: 'Enviar minha redação' }).first().click();
 
-    await expect(page).toHaveURL(`/temas/${THEME_ID}/enviar`);
+    await expect(page).toHaveURL(`/propostas/${PROMPT_SLUG}/enviar`);
     await expect(page.getByRole('heading', { level: 1, name: 'Envie sua redação' })).toBeVisible();
-    await expect(page.getByRole('radio')).toHaveCount(2);
-    await expect(page.getByText('Trecho do texto 1.')).toHaveCount(0);
-    await page.getByRole('link', { name: 'Ver proposta e coletânea' }).click();
-    await expect(page).toHaveURL(`/temas/${THEME_ID}`);
+    await expect(page.getByText('Tipo de redação, definido pela proposta')).toBeVisible();
+    await expect(page.getByRole('radio')).toHaveCount(0);
+    await expect(page.getByText('Trecho do texto 4.')).toHaveCount(0);
+    await page.getByRole('link', { name: 'Ver coletânea' }).click();
+    await expect(page).toHaveURL(`/propostas/${PROMPT_SLUG}`);
   });
 
-  test('no celular, o botão de enviar fica preso ao pé da tela', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 800 });
-    await page.goto(`/temas/${THEME_ID}`);
+  test('o verso fica em colunas lado a lado no computador e em sequência no celular', async ({ page }) => {
+    await page.goto(`/propostas/${PROMPT_SLUG}`);
+    const first = page.getByText('Primeiro verso da coluna um');
+    const second = page.getByText('Primeiro verso da coluna dois');
+    await expect(first).toBeVisible();
+    const [a, b] = [(await first.boundingBox())!, (await second.boundingBox())!];
 
-    const button = page.getByRole('link', { name: 'Enviar minha redação' });
-    await expect(button).toBeInViewport();
-    await page.mouse.wheel(0, 600);
-    await expect(button).toBeInViewport();
+    if (page.viewportSize()!.width > 980) {
+      expect(Math.abs(a.y - b.y)).toBeLessThan(2);
+      expect(b.x).toBeGreaterThan(a.x);
+    } else {
+      expect(b.y).toBeGreaterThan(a.y);
+      expect(Math.abs(a.x - b.x)).toBeLessThan(2);
+    }
     expect(await horizontalOverflow(page)).toBe(0);
   });
 });
 
-test.describe('Tema e envio', () => {
-  test('o botão só libera com tipo e foto, e sem sessão a foto fica guardada e o login abre', async ({ page }) => {
-    await page.goto(`/temas/${THEME_ID}/enviar`);
+test.describe('Envio', () => {
+  test('o botão libera com a foto, e sem sessão a foto fica guardada e o login abre', async ({ page }) => {
+    await page.goto(`/propostas/${PROMPT_SLUG}/enviar`);
     const send = page.getByRole('button', { name: 'Enviar para correção' });
     await expect(send).toBeDisabled();
+    // O título vem da API e já aparece antes da foto: não depende de nenhuma escolha do aluno.
+    await expect(page.getByText('Fuvest – Dissertação – Algoritmos e o debate público')).toBeVisible();
 
     await choosePhoto(page);
-    await expect(page.getByText('Fuvest – Dissertação – Algoritmos e o debate público')).toBeVisible();
     expect(await horizontalOverflow(page)).toBe(0);
     await send.click();
 
@@ -148,7 +164,7 @@ test.describe('Tema e envio', () => {
   });
 
   test('arquivo que não é imagem é recusado com a mensagem da regra', async ({ page }) => {
-    await page.goto(`/temas/${THEME_ID}/enviar`);
+    await page.goto(`/propostas/${PROMPT_SLUG}/enviar`);
     await page.getByLabel('Foto da folha').setInputFiles({ name: 'redacao.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(10) });
 
     await expect(page.getByRole('alert')).toHaveText('Envie uma foto JPG da folha, com até 10 MB.');
@@ -170,6 +186,6 @@ test.describe('rotas logadas', () => {
 
     // O X do diálogo usa o mesmo destino validado.
     await page.getByRole('button', { name: 'Fechar' }).click();
-    await expect(page).toHaveURL('/temas');
+    await expect(page).toHaveURL('/propostas');
   });
 });

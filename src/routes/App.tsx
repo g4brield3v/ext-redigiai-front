@@ -17,7 +17,7 @@ import { DashboardPage } from '../features/painel/DashboardPage';
 import { ProfilePage } from '../features/perfil/ProfilePage';
 import { ReviewPage } from '../features/revisao/ReviewPage';
 import { ProposalPage } from '../features/proposta/ProposalPage';
-import { ThemesPage } from '../features/temas/ThemesPage';
+import { PromptsPage } from '../features/propostas/PromptsPage';
 import { ApiError } from '../lib/api';
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
@@ -75,7 +75,7 @@ function NotFoundPage() {
       <Nav />
       <main className="container" style={{ paddingTop: 72, paddingBottom: 96, display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'flex-start' }}>
         <h1 className="serif h1">Não encontramos essa página.</h1>
-        <Button to="/temas">Ver os temas</Button>
+        <Button to="/propostas">Ver as propostas</Button>
       </main>
     </>
   );
@@ -121,9 +121,11 @@ export function AppRoutes() {
     <Suspense fallback={null}>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/temas" element={<ThemesPage />} />
-        <Route path="/temas/:themeId" element={<ProposalPage />} />
-        <Route path="/temas/:themeId/enviar" element={<SubmitPage />} />
+        <Route path="/propostas" element={<PromptsPage />} />
+        <Route path="/propostas/:slug" element={<ProposalPage />} />
+        <Route path="/propostas/:slug/enviar" element={<SubmitPage />} />
+        {/* Endereço antigo da lista, que ainda pode estar em favoritos e e-mails. */}
+        <Route path="/temas" element={<Navigate to="/propostas" replace />} />
         <Route path="/enviar/foto" element={<CameraPage />} />
         <Route path="/exemplo" element={<ExampleCorrectionPage />} />
         {ExampleZeroCorrectionPage && <Route path="/exemplo/nota-zero" element={<ExampleZeroCorrectionPage />} />}

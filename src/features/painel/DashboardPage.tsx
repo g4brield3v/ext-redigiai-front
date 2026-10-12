@@ -35,7 +35,7 @@ function EssayAction({ essay }: { essay: EssaySummary }) {
       );
     case 'failed':
       return (
-        <Button to={`/temas/${encodeURIComponent(essay.themeId)}/enviar?tipo=${encodeURIComponent(essay.essayTypeId)}`} size="xs" variant="ghost">
+        <Button to={`/propostas/${encodeURIComponent(essay.promptSlug)}/enviar`} size="xs" variant="ghost">
           Reenviar
         </Button>
       );
@@ -262,7 +262,7 @@ export function DashboardPage() {
             <Button to="/comprar" variant="ghost">
               Comprar correções
             </Button>
-            <Button to="/temas">Nova redação</Button>
+            <Button to="/propostas">Nova redação</Button>
           </div>
         </div>
 
@@ -290,7 +290,7 @@ export function DashboardPage() {
         ) : essays.data.items.length === 0 ? (
           <section className={styles.empty}>
             <p>Você ainda não enviou nenhuma redação.</p>
-            <Button to="/temas">Ver os temas</Button>
+            <Button to="/propostas">Ver as propostas</Button>
           </section>
         ) : (
           <>

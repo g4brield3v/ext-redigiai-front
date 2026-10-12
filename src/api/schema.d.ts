@@ -26,6 +26,157 @@ export interface paths {
         patch: operations["updateMe"];
         trace?: never;
     };
+    "/v1/admin/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Envia uma imagem de proposta (JPG, PNG ou WebP, até 5 MB) para a pasta pública. O `assetId` devolvido
+         *     vai no bloco de imagem da coletânea.
+         */
+        post: operations["uploadPromptImage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/prompts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Todas as versões, com situação, tipo, número de textos e data de atualização. `status` filtra por
+         *     situação (`draft`, `published`, `archived`), `exam` pelo vestibular e `q` pelo título.
+         */
+        get: operations["listAdminPrompts"];
+        put?: never;
+        /**
+         * Cria um rascunho, vazio ou a partir do JSON completo da proposta (importação). Exige `Idempotency-Key`;
+         *     repetir a chave devolve o mesmo rascunho.
+         */
+        post: operations["createPrompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/prompts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A proposta no formato de cadastro, o mesmo da importação. É o que "Exportar JSON" entrega. */
+        get: operations["getAdminPrompt"];
+        /**
+         * Substitui o rascunho inteiro. Proposta publicada responde `PROMPT_NOT_DRAFT`; com
+         *     `expectedUpdatedAt`, se houve outro salvamento antes, `PROMPT_CHANGED`.
+         */
+        put: operations["savePrompt"];
+        post?: never;
+        /** Apaga só rascunho. Versão publicada ou arquivada responde `PROMPT_NOT_DRAFT`. */
+        delete: operations["deletePrompt"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/prompts/{id}/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Muda só a ordem dos blocos do rascunho. Posição repetida responde `VALIDATION_FAILED`. */
+        patch: operations["reorderPromptBlocks"];
+        trace?: never;
+    };
+    "/v1/admin/prompts/{id}/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A validação de publicação, sem publicar. */
+        post: operations["validatePrompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/prompts/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Valida e publica. A versão publicada anterior do mesmo endereço passa a arquivada. */
+        post: operations["publishPrompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/prompts/{id}/new-version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cria um rascunho da versão seguinte, com o conteúdo desta versão publicada ou arquivada. */
+        post: operations["createPromptVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/prompts/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tira a proposta da lista dos alunos. Nada é apagado. */
+        post: operations["archivePrompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/exams": {
         parameters: {
             query?: never;
@@ -43,15 +194,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/exams/{slug}/themes": {
+    "/v1/exams/{slug}/prompts": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Temas ativos do vestibular, com os tipos aceitos e o número de textos da coletânea. */
-        get: operations["listThemes"];
+        /**
+         * Propostas publicadas do vestibular, com o título, o resumo, o tipo de redação e o número de textos da
+         *     coletânea. `q` filtra pelo título.
+         */
+        get: operations["listPrompts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -60,15 +214,19 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/themes/{id}": {
+    "/v1/prompts/{slug}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Enunciado, coletânea e tipos de redação aceitos pelo tema. */
-        get: operations["getTheme"];
+        /**
+         * A versão publicada da proposta, com os blocos na ordem da página, o tipo de redação, as linhas e os endereços
+         *     das imagens. Com `version`, devolve essa versão se ela já foi publicada: é o que a redação feita numa
+         *     versão antiga continua mostrando.
+         */
+        get: operations["getPrompt"];
         put?: never;
         post?: never;
         delete?: never;
@@ -303,9 +461,7 @@ export interface components {
     schemas: {
         BatchEssayItem: {
             /** Format: uuid */
-            themeId: string;
-            /** Format: uuid */
-            essayTypeId: string;
+            promptId: string;
             /** Format: uuid */
             assetId: string;
             /** Format: uuid */
@@ -317,6 +473,12 @@ export interface components {
         };
         BatchEssayResponseDto: {
             essayIds: string[];
+        };
+        BlockPositionRequest: {
+            /** Format: uuid */
+            id: null | string;
+            /** Format: int32 */
+            position: null | number;
         };
         CorrectionAnnotationDto: {
             /** Format: int32 */
@@ -365,7 +527,10 @@ export interface components {
             essayId: string;
             title: string;
             /** Format: uuid */
-            themeId: string;
+            promptId: string;
+            promptSlug: string;
+            /** Format: int32 */
+            promptVersion: number;
             /** Format: uuid */
             essayTypeId: string;
             /** Format: date-time */
@@ -446,19 +611,30 @@ export interface components {
             illegibleReminder: boolean;
             newThemes: boolean;
         };
-        /** @description Formato único de erro da API (especificação, seção 12). */
+        ErrorDetail: {
+            path: string;
+            message: string;
+        };
+        /**
+         * @description Formato único de erro da API (especificação, seção 12). `Details` só vem em `VALIDATION_FAILED`
+         *     (rotas de administração): cada pendência, com o campo a que se refere.
+         */
         ErrorResponse: {
             code: string;
             message: string;
             retryable: boolean;
             traceId: string;
+            details?: null | components["schemas"]["ErrorDetail"][];
         };
         EssayDetailDto: {
             /** Format: uuid */
             id: string;
             title: string;
             /** Format: uuid */
-            themeId: string;
+            promptId: string;
+            promptSlug: string;
+            /** Format: int32 */
+            promptVersion: number;
             /** Format: uuid */
             essayTypeId: string;
             status: components["schemas"]["EssayStatus"];
@@ -492,7 +668,10 @@ export interface components {
             id: string;
             title: string;
             /** Format: uuid */
-            themeId: string;
+            promptId: string;
+            promptSlug: string;
+            /** Format: int32 */
+            promptVersion: number;
             /** Format: uuid */
             essayTypeId: string;
             status: components["schemas"]["EssayStatus"];
@@ -511,16 +690,6 @@ export interface components {
             maxScore: null | number;
             failureCode: null | string;
         };
-        EssayTypeDto: {
-            /** Format: uuid */
-            id: string;
-            slug: string;
-            name: string;
-            description: string;
-            /** Format: uuid */
-            rubricVersionId: string;
-            instruction: string;
-        };
         ExamDto: {
             slug: string;
             name: string;
@@ -537,6 +706,8 @@ export interface components {
         HealthResponse: {
             status: string;
         };
+        /** Format: binary */
+        IFormFile: string;
         IllegibleAnswer: {
             /** Format: uuid */
             wordId: string;
@@ -564,15 +735,217 @@ export interface components {
             id: string;
             email: string;
             name: null | string;
+            role: components["schemas"]["UserRole"];
             termsAcceptanceRequired: boolean;
             aiNoticeAccepted: boolean;
             emailPreferences: components["schemas"]["EmailPreferencesDto"];
             credits: components["schemas"]["CreditBalanceDto"];
         };
+        PromptAdminDto: {
+            /** Format: uuid */
+            id: string;
+            exam: string;
+            slug: string;
+            /** Format: int32 */
+            version: number;
+            status: components["schemas"]["PromptStatus"];
+            title: string;
+            summary: null | string;
+            sourceLabel: null | string;
+            essayType: null | string;
+            genreLabel: null | string;
+            sheet: components["schemas"]["PromptSheetDto"];
+            blocks: components["schemas"]["PromptBlockDto"][];
+            gradingNotes: components["schemas"]["PromptNotesDto"];
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: date-time */
+            publishedAt: null | string;
+            issues: components["schemas"]["PromptIssueDto"][];
+        };
+        PromptBlockDataDto: {
+            label?: null | string;
+            format?: null | string;
+            source?: null | string;
+            body?: null | string;
+            columns?: null | string[][];
+            /** Format: uuid */
+            assetId?: null | string;
+            alt?: null | string;
+            aiDescription?: null | string;
+            title?: null | string;
+            items?: null | string[];
+            text?: null | string;
+            imageUrl?: null | string;
+        };
+        PromptBlockDto: {
+            /** Format: uuid */
+            id?: null | string;
+            /** Format: int32 */
+            position?: null | number;
+            kind?: null | string;
+            data?: null | components["schemas"]["PromptBlockDataDto"];
+        };
+        PromptBlockPublicDataDto: {
+            label?: null | string;
+            format?: null | string;
+            source?: null | string;
+            body?: null | string;
+            columns?: null | string[][];
+            imageUrl?: null | string;
+            alt?: null | string;
+            title?: null | string;
+            items?: null | string[];
+            text?: null | string;
+        };
+        PromptBlockPublicDto: {
+            /** Format: int32 */
+            position: number;
+            kind: string;
+            data: components["schemas"]["PromptBlockPublicDataDto"];
+        };
+        PromptCountsDto: {
+            /** Format: int32 */
+            all: number;
+            /** Format: int32 */
+            draft: number;
+            /** Format: int32 */
+            published: number;
+            /** Format: int32 */
+            archived: number;
+        };
+        PromptDetailDto: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            /** Format: int32 */
+            version: number;
+            status: components["schemas"]["PromptStatus"];
+            title: string;
+            summary: null | string;
+            genreLabel: string;
+            /** Format: uuid */
+            essayTypeId: string;
+            essayTypeName: string;
+            essayTitle: string;
+            examSlug: string;
+            examName: string;
+            /** Format: int32 */
+            sheetLines: number;
+            /** Format: int32 */
+            minLines: null | number;
+            /** Format: int32 */
+            maxLines: null | number;
+            titleRequired: boolean;
+            /** Format: int32 */
+            textCount: number;
+            blocks: components["schemas"]["PromptBlockPublicDto"][];
+        };
+        PromptDocument: {
+            exam?: null | string;
+            slug?: null | string;
+            title?: null | string;
+            summary?: null | string;
+            sourceLabel?: null | string;
+            essayType?: null | string;
+            genreLabel?: null | string;
+            sheet?: null | components["schemas"]["PromptSheetDto"];
+            blocks?: null | components["schemas"]["PromptBlockDto"][];
+            gradingNotes?: null | components["schemas"]["PromptNotesDto"];
+            /** Format: date-time */
+            expectedUpdatedAt?: null | string;
+        };
+        PromptImageDto: {
+            /** Format: uuid */
+            assetId: string;
+            url: string;
+            /** Format: int32 */
+            width: number;
+            /** Format: int32 */
+            height: number;
+        };
+        PromptIssueDto: {
+            path: string;
+            message: string;
+        };
+        PromptListDto: {
+            items: components["schemas"]["PromptListItemDto"][];
+            counts: components["schemas"]["PromptCountsDto"];
+        };
+        PromptListItemDto: {
+            /** Format: uuid */
+            id: string;
+            exam: string;
+            examName: string;
+            slug: string;
+            /** Format: int32 */
+            version: number;
+            status: components["schemas"]["PromptStatus"];
+            title: string;
+            genreLabel: null | string;
+            essayTypeName: null | string;
+            /** Format: int32 */
+            textCount: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PromptNotesDto: {
+            expectedFocus?: null | string;
+            tangentSignals?: null | string;
+            offTopicSignals?: null | string;
+            keyData?: null | string[];
+            extra?: null | string;
+        };
+        PromptSavedDto: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            /** Format: int32 */
+            version: number;
+            status: components["schemas"]["PromptStatus"];
+            /** Format: date-time */
+            updatedAt: string;
+            blocks: components["schemas"]["SavedBlockDto"][];
+            issues: components["schemas"]["PromptIssueDto"][];
+        };
+        PromptSheetDto: {
+            /** Format: int32 */
+            minLines?: null | number;
+            /** Format: int32 */
+            maxLines?: null | number;
+            titleRequired?: null | boolean;
+        };
+        /** @enum {unknown} */
+        PromptStatus: "draft" | "published" | "archived";
+        PromptSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: string;
+            summary: null | string;
+            genreLabel: string;
+            essayTypeName: string;
+            /** Format: int32 */
+            textCount: number;
+            /** Format: int32 */
+            minLines: null | number;
+            /** Format: int32 */
+            maxLines: null | number;
+            titleRequired: boolean;
+            examSlug: string;
+            examName: string;
+        };
+        PromptValidationDto: {
+            valid: boolean;
+            issues: components["schemas"]["PromptIssueDto"][];
+        };
         RegisterRequest: {
             /** Format: date */
             birthDate: null | string;
             termsAccepted: boolean;
+        };
+        ReorderBlocksRequest: {
+            blocks: null | components["schemas"]["BlockPositionRequest"][];
         };
         RubricCriterionDto: {
             /** Format: int32 */
@@ -603,38 +976,12 @@ export interface components {
             level: number;
             descriptor: string;
         };
-        ThemeDetailDto: {
+        SavedBlockDto: {
             /** Format: uuid */
             id: string;
-            title: string;
-            statement: string;
-            examSlug: string;
-            examName: string;
-            /** Format: int32 */
-            sheetLines: number;
-            texts: components["schemas"]["ThemeTextDto"][];
-            essayTypes: components["schemas"]["EssayTypeDto"][];
-        };
-        ThemeSummaryDto: {
-            /** Format: uuid */
-            id: string;
-            title: string;
-            examSlug: string;
-            examName: string;
-            essayTypes: components["schemas"]["EssayTypeDto"][];
-            /** Format: int32 */
-            textCount: number;
-        };
-        ThemeTextDto: {
             /** Format: int32 */
             position: number;
-            kind: components["schemas"]["ThemeTextKind"];
-            title: string;
-            source: string;
-            body: null | string;
         };
-        /** @enum {unknown} */
-        ThemeTextKind: "text" | "image";
         TranscriptionLineDto: {
             /** Format: int32 */
             number: number;
@@ -658,6 +1005,8 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** @enum {unknown} */
+        UserRole: "student" | "admin";
         ZeroRuleDto: {
             code: string;
             description: string;
@@ -815,6 +1164,686 @@ export interface operations {
             };
         };
     };
+    uploadPromptImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    file?: components["schemas"]["IFormFile"];
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptImageDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listAdminPrompts: {
+        parameters: {
+            query?: {
+                status?: string;
+                exam?: string;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptListDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createPrompt: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": null | components["schemas"]["PromptDocument"];
+                "text/json": null | components["schemas"]["PromptDocument"];
+                "application/*+json": null | components["schemas"]["PromptDocument"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptSavedDto"];
+                };
+            };
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptSavedDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getAdminPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptAdminDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    savePrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromptDocument"];
+                "text/json": components["schemas"]["PromptDocument"];
+                "application/*+json": components["schemas"]["PromptDocument"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptSavedDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    deletePrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    reorderPromptBlocks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderBlocksRequest"];
+                "text/json": components["schemas"]["ReorderBlocksRequest"];
+                "application/*+json": components["schemas"]["ReorderBlocksRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptSavedDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    validatePrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptValidationDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    publishPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptSavedDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createPromptVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptSavedDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    archivePrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptSavedDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     listExams: {
         parameters: {
             query?: never;
@@ -835,7 +1864,7 @@ export interface operations {
             };
         };
     };
-    listThemes: {
+    listPrompts: {
         parameters: {
             query?: {
                 q?: string;
@@ -854,7 +1883,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ThemeSummaryDto"][];
+                    "application/json": components["schemas"]["PromptSummaryDto"][];
                 };
             };
             /** @description Not Found */
@@ -868,12 +1897,14 @@ export interface operations {
             };
         };
     };
-    getTheme: {
+    getPrompt: {
         parameters: {
-            query?: never;
+            query?: {
+                version?: number;
+            };
             header?: never;
             path: {
-                id: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -885,7 +1916,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ThemeDetailDto"];
+                    "application/json": components["schemas"]["PromptDetailDto"];
                 };
             };
             /** @description Not Found */

@@ -15,15 +15,81 @@ export const exams: Schemas['ExamDto'][] = [
   { slug: 'enem', name: 'Enem', status: 'coming_soon', sheetLines: 30, currentRubricVersionId: null },
 ];
 
-const essayTypes: Schemas['EssayTypeDto'][] = [
-  { id: 't1', slug: 'dissertacao', name: 'Dissertação', description: 'Texto dissertativo-argumentativo', rubricVersionId: rubricId, instruction: 'Defenda um ponto de vista.' },
-  { id: 't2', slug: 'narrativa', name: 'Narrativa', description: 'Texto narrativo com reflexão', rubricVersionId: rubricId, instruction: 'Conte uma história com reflexão.' },
+export const promptSlug = 'algoritmos-e-o-debate-publico';
+
+export const prompts: Schemas['PromptSummaryDto'][] = [
+  {
+    id: 'p1',
+    slug: promptSlug,
+    title: 'Algoritmos e o debate público',
+    summary: 'Coletânea com tirinha, poema e dois textos.',
+    genreLabel: 'Dissertação em prosa',
+    essayTypeName: 'Dissertação',
+    textCount: 4,
+    minLines: 20,
+    maxLines: 30,
+    titleRequired: true,
+    examSlug: 'fuvest',
+    examName: 'Fuvest',
+  },
+  {
+    id: 'p2',
+    slug: 'o-valor-do-tempo-livre',
+    title: 'O valor do tempo livre',
+    summary: null,
+    genreLabel: 'Narrativa',
+    essayTypeName: 'Narrativa',
+    textCount: 1,
+    minLines: 20,
+    maxLines: 30,
+    titleRequired: false,
+    examSlug: 'fuvest',
+    examName: 'Fuvest',
+  },
 ];
 
-export const themes: Schemas['ThemeSummaryDto'][] = [
-  { id: 'th1', title: 'Algoritmos e o debate público', examSlug: 'fuvest', examName: 'Fuvest', essayTypes, textCount: 4 },
-  { id: 'th2', title: 'O valor do tempo livre', examSlug: 'fuvest', examName: 'Fuvest', essayTypes: essayTypes.slice(0, 1), textCount: 1 },
-];
+/** A página da proposta, com um bloco de cada tipo e os três formatos de texto da coletânea. */
+export const prompt: Schemas['PromptDetailDto'] = {
+  id: 'p1',
+  slug: promptSlug,
+  version: 1,
+  status: 'published',
+  title: 'Algoritmos e o debate público',
+  summary: 'Coletânea com tirinha, poema e dois textos.',
+  genreLabel: 'Dissertação em prosa',
+  essayTypeId: 't1',
+  essayTypeName: 'Dissertação',
+  essayTitle: 'Fuvest – Dissertação – Algoritmos e o debate público',
+  examSlug: 'fuvest',
+  examName: 'Fuvest',
+  sheetLines: 30,
+  minLines: 20,
+  maxLines: 30,
+  titleRequired: true,
+  textCount: 3,
+  blocks: [
+    { position: 5, kind: 'heading', data: { text: 'Leia os textos' } },
+    {
+      position: 10,
+      kind: 'collection_item',
+      data: { label: 'Texto 1', format: 'image', source: 'Verissimo, *As cobras*.', imageUrl: 'https://res.cloudinary.com/test/image/upload/prompts/tirinha', alt: 'Tirinha com duas cobras.' },
+    },
+    {
+      position: 20,
+      kind: 'collection_item',
+      data: { label: 'Texto 2', format: 'prose', source: 'Carl Sagan, 1996.', body: 'Quase ninguém compreende a **ciência**.\nÉ uma receita para o desastre.' },
+    },
+    {
+      position: 30,
+      kind: 'collection_item',
+      data: { label: 'Texto 3', format: 'verse', source: 'Gilberto Gil, *Quanta*. 1997.', columns: [['Quanta do latim', 'Plural de quantum'], ['Cântico dos cânticos']] },
+    },
+    { position: 40, kind: 'divider', data: {} },
+    { position: 50, kind: 'command', data: { body: 'Redija uma dissertação em prosa sobre o tema: **algoritmos e o debate público**.' } },
+    { position: 55, kind: 'paragraph', data: { body: 'Use os textos como apoio, sem copiar.' } },
+    { position: 60, kind: 'instructions', data: { title: 'Instruções', items: ['Escreva, no mínimo, 20 linhas.', 'Dê um título a sua redação.'] } },
+  ],
+};
 
 const levels = [1, 2, 3, 4].map((level) => ({ level, descriptor: `Descritor ${level}` }));
 
@@ -76,7 +142,8 @@ export function mockApi(handlers: Record<string, Handler | Response>) {
 
 export const catalogHandlers = {
   'GET /v1/exams': json(exams),
-  'GET /v1/exams/fuvest/themes': json(themes),
+  'GET /v1/exams/fuvest/prompts': json(prompts),
+  [`GET /v1/prompts/${promptSlug}`]: json(prompt),
   [`GET /v1/rubrics/${rubricId}`]: json(rubric),
 };
 

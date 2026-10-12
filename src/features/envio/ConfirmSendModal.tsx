@@ -9,7 +9,7 @@ import { useAccount } from '../../lib/queries';
 import { clearDraft } from './draft';
 import styles from './SubmitPage.module.css';
 
-export type PendingEssay = { title: string; fileName: string; themeId: string; essayTypeId: string; assetId: string };
+export type PendingEssay = { title: string; fileName: string; promptId: string; assetId: string };
 
 type Props = {
   essays: PendingEssay[];
@@ -32,9 +32,9 @@ export function ConfirmSendModal({ essays, parentEssayId, onClose }: Props) {
         api.POST('/v1/essays/batch', {
           params: { header: { 'Idempotency-Key': idempotencyKey } },
           body: {
-            essays: essays.map(({ themeId, essayTypeId, assetId }) => ({
-              themeId,
-              essayTypeId,
+            // Sem tipo: quem define é a proposta, no backend.
+            essays: essays.map(({ promptId, assetId }) => ({
+              promptId,
               assetId,
               parentEssayId: parentEssayId ?? null,
             })),

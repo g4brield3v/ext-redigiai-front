@@ -25,7 +25,7 @@ export function Nav({ variant = 'app', current }: NavProps) {
   const { pathname } = useLocation();
   // O link fica marcado na própria rota e nas telas que pertencem a ela (ex.: correção → Minhas correções).
   const active = {
-    temas: current === 'temas' || (!current && pathname.startsWith('/temas')),
+    temas: current === 'temas' || (!current && pathname.startsWith('/propostas')),
     painel: current === 'painel' || (!current && pathname.startsWith('/painel')),
   };
   const mark = (name: 'temas' | 'painel') =>
@@ -45,7 +45,7 @@ export function Nav({ variant = 'app', current }: NavProps) {
             ))
           ) : (
             <>
-              <Link to="/temas" {...mark('temas')}>
+              <Link to="/propostas" {...mark('temas')}>
                 Temas
               </Link>
               {auth.isSignedIn ? (
@@ -70,7 +70,7 @@ export function Nav({ variant = 'app', current }: NavProps) {
                 Entrar
               </Link>
               {isHome && (
-                <Button to="/temas" size="sm">
+                <Button to="/propostas" size="sm">
                   Corrigir redação
                 </Button>
               )}

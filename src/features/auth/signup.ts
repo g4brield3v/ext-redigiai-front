@@ -45,7 +45,7 @@ export function clearPendingSignup() {
 }
 
 /** Só caminhos internos: impede que `?next=` leve para outro site. */
-export function safeNext(next: string | null | undefined, fallback = '/temas') {
+export function safeNext(next: string | null | undefined, fallback = '/propostas') {
   // Barra invertida e caracteres de controle são reinterpretados ou removidos pelo navegador ao resolver a URL.
   // eslint-disable-next-line no-control-regex -- a intenção é exatamente barrar caracteres de controle
   if (!next || !next.startsWith('/') || /[\\\u0000-\u001f\u007f]/.test(next)) {

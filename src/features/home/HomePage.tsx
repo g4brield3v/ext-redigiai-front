@@ -29,7 +29,7 @@ function Hero() {
           nota de cada critério, com as linhas que pesaram e o que corrigir.
         </p>
         <div className={styles.heroActions}>
-          <Button to="/temas" size="lg">
+          <Button to="/propostas" size="lg">
             Ver os temas
           </Button>
           <Button to="/#nota" size="lg" variant="ghost">
@@ -274,7 +274,7 @@ function Pricing() {
                 Redação marcada linha a linha
               </li>
             </ul>
-            <Button to="/temas" size="lg" variant="ghost" className={styles.planAction}>
+            <Button to="/propostas" size="lg" variant="ghost" className={styles.planAction}>
               Fazer o teste
             </Button>
           </article>
@@ -308,7 +308,7 @@ function Pricing() {
                 Reescritas contam como correção
               </li>
             </ul>
-            <Button to="/temas" size="lg" variant="inverse" className={styles.planAction}>
+            <Button to="/propostas" size="lg" variant="inverse" className={styles.planAction}>
               Assinar o plano semanal
             </Button>
           </article>
@@ -330,7 +330,7 @@ function Pricing() {
                 Compre só quando precisar
               </li>
             </ul>
-            <Button to="/temas" size="lg" variant="ghost" className={styles.planAction}>
+            <Button to="/propostas" size="lg" variant="ghost" className={styles.planAction}>
               Comprar avulsa
             </Button>
           </article>
@@ -373,7 +373,7 @@ function FinalCall() {
         <div className={styles.final}>
           <h2 className={`serif ${styles.h2}`}>Escolha um tema e escreva a sua próxima redação.</h2>
           <p>Cada tema traz o enunciado e a coletânea de textos, no formato da prova.</p>
-          <Button to="/temas" size="lg" variant="inverse">
+          <Button to="/propostas" size="lg" variant="inverse">
             Ver os temas
           </Button>
         </div>

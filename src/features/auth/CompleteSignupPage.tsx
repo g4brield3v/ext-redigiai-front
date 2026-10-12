@@ -127,7 +127,7 @@ export function CompleteSignupPage() {
   }
 
   return (
-    <LoginShell closeTo="/temas">
+    <LoginShell closeTo="/propostas">
       {content}
     </LoginShell>
   );

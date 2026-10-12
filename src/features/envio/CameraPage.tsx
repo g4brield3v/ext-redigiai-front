@@ -11,8 +11,8 @@ import { preparePhoto } from './photo';
 export function CameraPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const themeId = params.get('tema');
-  const back = themeId ? `/temas/${encodeURIComponent(themeId)}/enviar` : '/temas';
+  const promptSlug = params.get('proposta');
+  const back = promptSlug ? `/propostas/${encodeURIComponent(promptSlug)}/enviar` : '/propostas';
   const draft = useQuery({ queryKey: ['draft'], queryFn: loadDraft, staleTime: 0 });
 
   const video = useRef<HTMLVideoElement>(null);
@@ -60,7 +60,7 @@ export function CameraPage() {
     setError(null);
     try {
       const photo = await preparePhoto(file);
-      if (draft.data && draft.data.themeId === themeId) {
+      if (draft.data && draft.data.promptSlug === promptSlug) {
         await saveDraft({ ...draft.data, photos: [...draft.data.photos, photo] });
       }
       navigate(back);
@@ -113,7 +113,7 @@ export function CameraPage() {
           </svg>
         </button>
       </header>
-      <p className={styles.essay}>{draft.data?.themeId === themeId ? draft.data?.title : ' '}</p>
+      <p className={styles.essay}>{draft.data?.promptSlug === promptSlug ? draft.data?.title : ' '}</p>
 
       <div className={styles.viewfinder}>
         {stream ? (

@@ -1,11 +1,11 @@
-// Rascunho do envio: tema, tipo e fotos escolhidos antes do login ficam guardados no navegador
+// Rascunho do envio: a proposta e as fotos escolhidas antes do login ficam guardadas no navegador
 // (IndexedDB, com a memória da página como reserva) e o envio continua depois de entrar.
 
 export type DraftPhoto = { name: string; blob: Blob };
 
 export type Draft = {
-  themeId: string;
-  essayTypeId: string;
+  /** Endereço da proposta (`/propostas/:slug`). */
+  promptSlug: string;
   /** "Vestibular – Tipo – Tema", para mostrar na tela de login. */
   title: string;
   photos: DraftPhoto[];

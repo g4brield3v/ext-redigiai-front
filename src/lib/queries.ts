@@ -12,12 +12,13 @@ export function useExams() {
   });
 }
 
-export function useThemes(examSlug: string | undefined, search: string) {
+/** Propostas publicadas do vestibular. */
+export function usePrompts(examSlug: string | undefined, search: string) {
   return useQuery({
-    queryKey: ['themes', examSlug, search],
+    queryKey: ['prompts', examSlug, search],
     queryFn: () =>
       unwrap(
-        api.GET('/v1/exams/{slug}/themes', {
+        api.GET('/v1/exams/{slug}/prompts', {
           params: { path: { slug: examSlug! }, query: search ? { q: search } : {} },
         }),
       ),
@@ -85,11 +86,20 @@ export function usePayments() {
   return useQuery({ queryKey: ['payments'], queryFn: () => request<Payment[]>('GET', '/v1/payments') });
 }
 
-export function useTheme(id: string | undefined) {
+/**
+ * A proposta pelo endereço. Sem versão, a publicada; com versão, a que uma redação antiga usou, mesmo que a
+ * proposta já tenha outra no lugar.
+ */
+export function usePrompt(slug: string | undefined, version?: number) {
   return useQuery({
-    queryKey: ['theme', id],
-    queryFn: () => unwrap(api.GET('/v1/themes/{id}', { params: { path: { id: id! } } })),
-    enabled: !!id,
+    queryKey: ['prompt', slug, version ?? null],
+    queryFn: () =>
+      unwrap(
+        api.GET('/v1/prompts/{slug}', {
+          params: { path: { slug: slug! }, query: version ? { version } : {} },
+        }),
+      ),
+    enabled: !!slug,
     staleTime: FIVE_MINUTES,
   });
 }

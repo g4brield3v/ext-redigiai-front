@@ -53,9 +53,9 @@ describe('Button', () => {
   });
 
   it('com destino, é um link', () => {
-    renderApp(<Button to="/temas">Ver os temas</Button>);
+    renderApp(<Button to="/propostas">Ver as propostas</Button>);
 
-    expect(screen.getByRole('link', { name: 'Ver os temas' })).toHaveAttribute('href', '/temas');
+    expect(screen.getByRole('link', { name: 'Ver as propostas' })).toHaveAttribute('href', '/propostas');
   });
 });
 
@@ -87,11 +87,11 @@ describe('Nav', () => {
 
     expect(screen.getByRole('link', { name: 'Como é a nota' })).toHaveAttribute('href', '/#nota');
     expect(screen.getByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/entrar');
-    expect(screen.getByRole('link', { name: 'Corrigir redação' })).toHaveAttribute('href', '/temas');
+    expect(screen.getByRole('link', { name: 'Corrigir redação' })).toHaveAttribute('href', '/propostas');
   });
 
   it('marca a página atual', () => {
-    renderApp(<Nav />, { route: '/temas' });
+    renderApp(<Nav />, { route: '/propostas' });
 
     expect(screen.getByRole('link', { name: 'Temas' })).toHaveAttribute('aria-current', 'page');
   });

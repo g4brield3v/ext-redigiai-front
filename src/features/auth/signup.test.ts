@@ -53,7 +53,7 @@ describe('safeNext', () => {
   ])(
     'troca %s pelo destino padrão',
     (next) => {
-      expect(safeNext(next)).toBe('/temas');
+      expect(safeNext(next)).toBe('/propostas');
     },
   );
 });
@@ -70,7 +70,7 @@ describe('cadastro pendente', () => {
   it('não confia no destino guardado', () => {
     sessionStorage.setItem('redigiai.signup', JSON.stringify({ next: 'https://evil.test', birthDate: 42 }));
 
-    expect(readPendingSignup()).toEqual({ birthDate: undefined, next: '/temas' });
+    expect(readPendingSignup()).toEqual({ birthDate: undefined, next: '/propostas' });
     clearPendingSignup();
   });
 

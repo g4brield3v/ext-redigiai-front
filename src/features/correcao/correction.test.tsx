@@ -270,7 +270,7 @@ describe('CriterionCard', () => {
 });
 
 describe('RewritePlan', () => {
-  const props = { correctionId: 'plano-teste', steps: correction.nextSteps, rewriteTo: '/temas/t/enviar', rewriteLabel: 'Reescrever esta redação' };
+  const props = { correctionId: 'plano-teste', steps: correction.nextSteps, rewriteTo: '/propostas/t/enviar', rewriteLabel: 'Reescrever esta redação' };
 
   it('mostra os passos com o ganho de cada um e guarda os marcados no navegador', async () => {
     window.localStorage.clear();
@@ -278,7 +278,7 @@ describe('RewritePlan', () => {
 
     expect(screen.getByRole('heading', { name: 'Três passos, na ordem que mais aumenta a nota' })).toBeInTheDocument();
     expect(screen.getAllByText(/^até \+\d+ pontos$/).map((gain) => gain.textContent)).toEqual(['até +6 pontos', 'até +3 pontos', 'até +2 pontos']);
-    expect(screen.getByRole('link', { name: 'Reescrever esta redação' })).toHaveAttribute('href', '/temas/t/enviar');
+    expect(screen.getByRole('link', { name: 'Reescrever esta redação' })).toHaveAttribute('href', '/propostas/t/enviar');
 
     await userEvent.click(screen.getByRole('checkbox', { name: /Passo 2/ }));
     unmount();
@@ -316,7 +316,7 @@ describe('RewritePlan', () => {
 
 describe('ZeroResult', () => {
   it('destaca o motivo e a regra, e o que funcionou vira "Aproveite"', () => {
-    renderApp(<ZeroResult correction={zeroCorrection} proposalTo="/temas/tema-algoritmos" />);
+    renderApp(<ZeroResult correction={zeroCorrection} proposalTo="/propostas/algoritmos-e-o-debate-publico?versao=1" />);
 
     expect(screen.getByText('Nota zero')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Não abordagem (compreensão e desenvolvimento) do tema proposto.' })).toBeInTheDocument();
@@ -326,7 +326,7 @@ describe('ZeroResult', () => {
         'Regra da Fuvest: texto que não aborda o tema recebe nota zero, e os quatro critérios não são pontuados. Isso é diferente de tangenciar o tema, que só reduz o nível do critério 1.',
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Reler a proposta' })).toHaveAttribute('href', '/temas/tema-algoritmos');
+    expect(screen.getByRole('link', { name: 'Reler a proposta' })).toHaveAttribute('href', '/propostas/algoritmos-e-o-debate-publico?versao=1');
     expect(screen.getByText('✓ Aproveite:').parentElement).toHaveTextContent(zeroCorrection.strengths);
     expect(screen.queryByText('✓ Mantenha:')).toBeNull();
   });
@@ -402,7 +402,7 @@ describe('Tela da correção', () => {
     expect(screen.queryByRole('group', { name: 'Filtrar por critério' })).toBeNull();
     expect(screen.getByText('Mostrando 10 de 30 linhas')).toBeInTheDocument();
     expect(panel().getByText(/Com nota zero, os critérios não recebem nível\./)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Reler a proposta' })).toHaveAttribute('href', '/temas/tema-algoritmos');
+    expect(screen.getByRole('link', { name: 'Reler a proposta' })).toHaveAttribute('href', '/propostas/algoritmos-e-o-debate-publico?versao=1');
     expect(shownCards()).toEqual([1, 2]);
   });
 
