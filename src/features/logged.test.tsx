@@ -59,15 +59,15 @@ const awaitingReview = essay('essay-review', 'awaiting_review', {
 
 const essays = [
   awaitingReview,
-  essay('essay-done', 'completed', { score: 23, maxScore: 30, version: 2, hasVersions: true }),
+  essay('essay-done', 'completed', { score: 23, maxScore: 40, version: 2, hasVersions: true }),
   essay('essay-queued', 'queued'),
   essay('essay-failed', 'failed', { failureCode: 'GRADING_FAILED' }),
 ];
 
 const progress: Progress = {
   points: [
-    { essayId: 'a', date: '2026-09-21T15:00:00Z', score: 21, maxScore: 30 },
-    { essayId: 'essay-done', date: '2026-09-28T22:15:00Z', score: 23, maxScore: 30 },
+    { essayId: 'a', date: '2026-09-21T15:00:00Z', score: 21, maxScore: 40 },
+    { essayId: 'essay-done', date: '2026-09-28T22:15:00Z', score: 23, maxScore: 40 },
   ],
   lastDelta: 2,
   focus: { criterionPosition: 3, criterionName: 'Coesão, coerência e progressão', guidance: 'Abra cada parágrafo com uma ideia nova.', essayId: 'essay-done' },
@@ -108,7 +108,7 @@ describe('Minhas correções', () => {
     expect(rows).toHaveLength(5);
     expect(rows[2]).toHaveTextContent('· 2ª versão');
     expect(rows[2]).toHaveTextContent('Corrigida');
-    expect(rows[2]).toHaveTextContent('23 / 30');
+    expect(rows[2]).toHaveTextContent('23 / 40');
     expect(within(rows[2]!).getByRole('link', { name: 'Ver correção' })).toHaveAttribute('href', '/redacoes/essay-done');
     expect(rows[3]).toHaveTextContent('Na fila');
     expect(within(rows[3]!).queryByRole('link')).not.toBeInTheDocument();
@@ -211,8 +211,8 @@ describe('Correção', () => {
     expect(await screen.findByText('17')).toBeInTheDocument();
     expect(screen.getByText('+2 desde a 1ª versão')).toBeInTheDocument();
     const first = document.getElementById('criterio-1')!;
-    expect(first).toHaveTextContent('2 / 9');
-    expect(first).toHaveTextContent('Nível 3 de 3 · peso 3');
+    expect(first).toHaveTextContent('2 / 12');
+    expect(first).toHaveTextContent('Nível 3 de 4 · peso 3');
     expect(screen.getAllByText('O que corrigir')).toHaveLength(2);
     expect(screen.getByText('Crase antes de verbo · linha 14')).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: 'Reescrever esta redação' })[0]).toHaveAttribute(

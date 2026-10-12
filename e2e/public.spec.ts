@@ -24,7 +24,7 @@ test.describe('Início', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Uma correção que mostra onde e como melhorar.');
     const table = page.getByRole('table', { name: 'Cálculo da nota do exemplo' });
     await expect(table.getByRole('row')).toHaveCount(6);
-    await expect(table.getByRole('row').nth(5)).toContainText('23 / 30');
+    await expect(table.getByRole('row').nth(5)).toContainText('27 / 40');
     expect(await horizontalOverflow(page)).toBe(0);
 
     await page.getByRole('link', { name: 'Ver os temas' }).first().click();

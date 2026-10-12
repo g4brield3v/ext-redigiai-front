@@ -441,6 +441,8 @@ export interface components {
             /** Format: int32 */
             version: number;
             /** Format: int32 */
+            maxLevel: number;
+            /** Format: int32 */
             maxScore: number;
             criteria: components["schemas"]["RubricCriterionDto"][];
             zeroRules: components["schemas"]["ZeroRuleDto"][];

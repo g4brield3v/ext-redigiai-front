@@ -46,9 +46,9 @@ describe('Início', () => {
     const table = await screen.findByRole('table', { name: 'Cálculo da nota do exemplo' });
     const rows = within(table).getAllByRole('row');
     expect(rows).toHaveLength(6);
-    expect(rows[1]).toHaveTextContent('1 · Tema, coletânea e autoria3× 39 / 9');
-    expect(rows[3]).toHaveTextContent('3 · Coesão, coerência e progressão2× 36 / 9');
-    expect(rows[5]).toHaveTextContent('Nota da grade23 / 30');
+    expect(rows[1]).toHaveTextContent('1 · Tema, coletânea e autoria3× 39 / 12');
+    expect(rows[3]).toHaveTextContent('3 · Coesão, coerência e progressão2× 36 / 12');
+    expect(rows[5]).toHaveTextContent('Nota da grade27 / 40');
   });
 
   it('mostra a mensagem da API quando a grade não carrega', async () => {

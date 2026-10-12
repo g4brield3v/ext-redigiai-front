@@ -34,6 +34,8 @@ export type CorrectionCriterion = {
   name: string;
   weight: number;
   level: number;
+  /** Nível mais alto da grade usada (4 na Fuvest atual). */
+  maxLevel: number;
   points: number;
   maxPoints: number;
   /** Descritor oficial do nível, da grade. */

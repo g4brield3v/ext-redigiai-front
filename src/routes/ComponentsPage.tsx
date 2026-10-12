@@ -72,9 +72,9 @@ export default function ComponentsPage() {
           <Notice>Depois de confirmar, não é possível trocar a foto nem cancelar o envio.</Notice>
           <SheetThumb />
           <SheetThumb size="sm" />
-          <Dots level={1} />
-          <Dots level={2} />
-          <Dots level={3} />
+          <Dots level={1} max={4} />
+          <Dots level={2} max={4} />
+          <Dots level={4} max={4} />
         </Block>
 
         <Block title="Estados">
@@ -95,7 +95,7 @@ export default function ComponentsPage() {
 
         <section style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <h2 className="h3">ScoreSummary</h2>
-          <ScoreSummary score={23} maxScore={30} delta="+2 desde a 1ª versão" strengths={correction.strengths} mainIssue={correction.mainIssue} />
+          <ScoreSummary score={23} maxScore={40} delta="+2 desde a 1ª versão" strengths={correction.strengths} mainIssue={correction.mainIssue} />
         </section>
 
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, alignItems: 'start' }}>

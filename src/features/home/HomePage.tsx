@@ -4,7 +4,7 @@ import { EssaySheet } from '../../components/EssaySheet';
 import { Footer } from '../../components/Footer';
 import { Nav } from '../../components/Nav';
 import { Dots } from '../../components/primitives';
-import { exampleCriteria, exampleLines, exampleTitle, faq } from './example';
+import { exampleCriteria, exampleLines, exampleMaxLevel, exampleMaxScore, exampleScore, exampleTitle, faq } from './example';
 import styles from './HomePage.module.css';
 import { ScoreSection } from './ScoreSection';
 
@@ -54,7 +54,7 @@ function Hero() {
               <span className={criterion.lostPoints ? styles.lostLabel : 'muted'}>
                 {criterion.position} · {criterion.shortName}
               </span>
-              <Dots level={criterion.level} />
+              <Dots level={criterion.level} max={exampleMaxLevel} />
               <span className={styles.strong}>
                 {criterion.points} / {criterion.maxPoints}
               </span>
@@ -67,8 +67,8 @@ function Hero() {
             apoiado em um dado da coletânea.
           </span>
           <span className={styles.captionScore}>
-            <span className="serif">23</span>
-            <span className="muted"> / 30</span>
+            <span className="serif">{exampleScore}</span>
+            <span className="muted"> / {exampleMaxScore}</span>
           </span>
         </figcaption>
       </figure>
@@ -190,7 +190,7 @@ function CorrectionSection() {
             <li>
               <Check />
               <span>
-                <strong>Nível de 1 a 3 em cada critério</strong>, com o descritor oficial e a justificativa.
+                <strong>Nível de 1 a {exampleMaxLevel} em cada critério</strong>, com o descritor oficial e a justificativa.
               </span>
             </li>
             <li>
@@ -219,14 +219,14 @@ function CorrectionSection() {
               <span className={styles.h3}>Coesão, coerência e progressão</span>
             </span>
             <span className={styles.strong}>
-              6 <span className={`muted ${styles.regular}`}>/ 9</span>
+              6 <span className={`muted ${styles.regular}`}>/ 12</span>
             </span>
           </div>
           <div className={styles.criterionLevel}>
-            <Dots level={2} />
-            <span className={`muted ${styles.small}`}>Nível 2 de 3 · peso 3</span>
+            <Dots level={2} max={exampleMaxLevel} />
+            <span className={`muted ${styles.small}`}>Nível 2 de {exampleMaxLevel} · peso 3</span>
           </div>
-          <p className={`muted ${styles.descriptor}`}>“Boa articulação, com composição adequada.”</p>
+          <p className={`muted ${styles.descriptor}`}>“Satisfatória articulação formal e de sentido, com poucos recursos linguísticos (coesão e coerência) e algumas falhas na composição textual.”</p>
           <p>
             Os conectivos funcionam, mas o parágrafo das linhas 11 a 13 repete a ideia das linhas 8 a 10: os dois dizem
             que os algoritmos escolhem o conteúdo pelo engajamento.

@@ -737,3 +737,19 @@
   }
 
 }
+
+/* Hipóteses de nota zero, vindas da grade publicada. */
+.zeroRules {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #b7c2d8;
+}
+
+/* Nomes longos dos critérios não podem colar os cabeçalhos das colunas de números. */
+.calc .num {
+  padding-left: 14px;
+  white-space: nowrap;
+}

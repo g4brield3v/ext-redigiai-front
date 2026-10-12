@@ -21,8 +21,8 @@ export function ScoreSection() {
           <span className={`eyebrow ${styles.eyebrowDark}`}>Como a nota é calculada</span>
           <h2 className={`serif ${styles.h2}`}>A mesma conta da grade da Fuvest, à vista em toda correção.</h2>
           <p className={styles.leadDark}>
-            Cada critério recebe um nível de 1 a 3. O nível é multiplicado pelo peso do critério, e os resultados são
-            somados.
+            Cada critério recebe um nível{rubric.data ? ` de 1 a ${rubric.data.maxLevel}` : ''}. O nível é multiplicado pelo peso do
+            critério, e os resultados são somados.
           </p>
         </div>
         <div className={`${styles.split} ${styles.scoreSplit}`}>
@@ -85,11 +85,14 @@ export function ScoreSection() {
           <div className={styles.notes}>
             <div className={styles.noteCard}>
               <h3 className={styles.h3}>Quando a nota é zero</h3>
-              <p>
-                Antes dos critérios, verificamos as situações que zeram a redação: tema não desenvolvido, tipo de texto
-                não atendido, cópia integral da coletânea ou identificação do candidato, como nome ou assinatura na
-                folha.
-              </p>
+              <p>Antes dos critérios, verificamos as situações que zeram a redação:</p>
+              {rubric.data && (
+                <ul className={styles.zeroRules}>
+                  {rubric.data.zeroRules.map((rule) => (
+                    <li key={rule.code}>{rule.description}</li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className={styles.noteCard}>
               <h3 className={styles.h3}>Se a grade mudar</h3>

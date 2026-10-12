@@ -25,19 +25,20 @@ export const themes: Schemas['ThemeSummaryDto'][] = [
   { id: 'th2', title: 'O valor do tempo livre', examSlug: 'fuvest', examName: 'Fuvest', essayTypes: essayTypes.slice(0, 1), textCount: 1 },
 ];
 
-const levels = [1, 2, 3].map((level) => ({ level, descriptor: `Descritor ${level}` }));
+const levels = [1, 2, 3, 4].map((level) => ({ level, descriptor: `Descritor ${level}` }));
 
 export const rubric: Schemas['RubricDto'] = {
   id: rubricId,
   examSlug: 'fuvest',
   examName: 'Fuvest',
   version: 1,
-  maxScore: 30,
+  maxLevel: 4,
+  maxScore: 40,
   criteria: [
-    { position: 1, name: 'Tema, coletânea e autoria', weight: 3, maxPoints: 9, levels },
-    { position: 2, name: 'Gênero e tipo de texto', weight: 2, maxPoints: 6, levels },
-    { position: 3, name: 'Coesão, coerência e progressão', weight: 3, maxPoints: 9, levels },
-    { position: 4, name: 'Convenções da escrita e vocabulário', weight: 2, maxPoints: 6, levels },
+    { position: 1, name: 'Tema, coletânea e autoria', weight: 3, maxPoints: 12, levels },
+    { position: 2, name: 'Gênero e tipo de texto', weight: 2, maxPoints: 8, levels },
+    { position: 3, name: 'Coesão, coerência e progressão', weight: 3, maxPoints: 12, levels },
+    { position: 4, name: 'Convenções da escrita e vocabulário', weight: 2, maxPoints: 8, levels },
   ],
   zeroRules: [{ code: 'full_copy', description: 'Cópia integral da coletânea' }],
 };

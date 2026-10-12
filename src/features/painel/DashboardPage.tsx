@@ -65,7 +65,8 @@ function Score({ essay }: { essay: EssaySummary }) {
 
 /** Gráfico de linha das notas; a escala vai de zero à nota máxima da grade. */
 function ProgressChart({ points }: { points: Progress['points'] }) {
-  const max = points[0]?.maxScore ?? 30;
+  // A escala é a da grade da correção; sem pontos não há gráfico, e o 1 só evita divisão por zero.
+  const max = points[0]?.maxScore ?? 1;
   const y = (score: number) => 20 + (max - score) * (150 / max);
   const x = (index: number) => (points.length === 1 ? 275 : 80 + (index * 390) / (points.length - 1));
   const ticks = [max, Math.round((max * 2) / 3), Math.round(max / 3)];
