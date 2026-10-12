@@ -6,53 +6,12 @@ import type { components } from './schema';
 
 type Schemas = components['schemas'];
 
-export type EssayStatus =
-  | 'uploaded'
-  | 'awaiting_review'
-  | 'queued'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
-
-export type EssaySummary = {
-  id: string;
-  /** "Vestibular – Tipo – Tema", gerado pelo backend. */
-  title: string;
-  themeId: string;
-  essayTypeId: string;
-  status: EssayStatus;
-  version: number;
-  /** Verdadeiro quando a redação tem outras versões (reescritas). */
-  hasVersions: boolean;
-  createdAt: string;
-  reviewDeadlineAt: string | null;
-  illegibleCount: number;
-  score: number | null;
-  maxScore: number | null;
-  failureCode: string | null;
-};
-
-export type EssayList = { items: EssaySummary[]; nextCursor: string | null };
-
-export type TranscriptionLine = { number: number; text: string; indent: boolean };
-
-export type IllegibleWord = {
-  id: string;
-  lineNumber: number;
-  /** Posição do trecho ilegível no texto da linha. */
-  start: number;
-  end: number;
-  /** Trecho ao redor, para o aluno localizar a palavra. */
-  contextBefore: string;
-  contextAfter: string;
-};
-
-export type EssayDetail = EssaySummary & {
-  sheetLines: number;
-  lines: TranscriptionLine[];
-  illegibleWords: IllegibleWord[];
-};
+// Já publicados pelo backend: estes nomes só apontam para os tipos gerados.
+export type EssayStatus = Schemas['EssayStatus'];
+export type EssaySummary = Schemas['EssaySummaryDto'];
+export type EssayDetail = Schemas['EssayDetailDto'];
+export type TranscriptionLine = Schemas['TranscriptionLineDto'];
+export type IllegibleWord = Schemas['IllegibleWordDto'];
 
 export type IllegibleAnswer = { wordId: string; value: string };
 
@@ -75,6 +34,8 @@ export type CorrectionCriterion = {
   name: string;
   weight: number;
   level: number;
+  /** Nível mais alto da grade usada (4 na Fuvest atual). */
+  maxLevel: number;
   points: number;
   maxPoints: number;
   /** Descritor oficial do nível, da grade. */
@@ -149,19 +110,6 @@ export type Payment = {
   /** Dentro dos 7 dias do direito de arrependimento. */
   refundable: boolean;
 };
-
-export type UploadSignature = {
-  assetId: string;
-  uploadUrl: string;
-  fields: Record<string, string>;
-};
-
-export type BatchEssayRequest = {
-  essays: { themeId: string; essayTypeId: string; assetId: string; parentEssayId?: string }[];
-  aiNoticeAccepted?: boolean;
-};
-
-export type BatchEssayResponse = { essayIds: string[] };
 
 export type PixCheckout = {
   paymentId: string;

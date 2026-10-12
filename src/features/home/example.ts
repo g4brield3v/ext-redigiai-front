@@ -32,13 +32,18 @@ export const exampleLines: SheetLine[] = [
 
 /** Níveis e pontos do exemplo, por posição do critério na grade. */
 export const exampleCriteria = [
-  { position: 1, shortName: 'Tema e autoria', level: 3, points: 9, maxPoints: 9, lostPoints: false },
-  { position: 2, shortName: 'Gênero', level: 2, points: 4, maxPoints: 6, lostPoints: false },
-  { position: 3, shortName: 'Progressão', level: 2, points: 6, maxPoints: 9, lostPoints: true },
-  { position: 4, shortName: 'Escrita', level: 2, points: 4, maxPoints: 6, lostPoints: true },
+  { position: 1, shortName: 'Tema e autoria', level: 3, points: 9, maxPoints: 12, lostPoints: false },
+  { position: 2, shortName: 'Gênero', level: 3, points: 6, maxPoints: 8, lostPoints: false },
+  { position: 3, shortName: 'Progressão', level: 2, points: 6, maxPoints: 12, lostPoints: true },
+  { position: 4, shortName: 'Escrita', level: 3, points: 6, maxPoints: 8, lostPoints: true },
 ];
 
-export const exampleScore = 23;
+/** Níveis da grade do exemplo (Simulado Fuvest 2027: 1 a 4, máximo 40). */
+export const exampleMaxLevel = 4;
+
+export const exampleScore = 27;
+
+export const exampleMaxScore = 40;
 
 export const faq = [
   {

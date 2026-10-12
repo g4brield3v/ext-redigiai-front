@@ -7,12 +7,12 @@ import styles from './CameraPage.module.css';
 import { loadDraft, saveDraft } from './draft';
 import { preparePhoto } from './photo';
 
-/** 5 · Câmera no celular: fotografa a folha e volta para a tela do tema com a foto escolhida. */
+/** 5 · Câmera no celular: fotografa a folha e volta para a tela de envio com a foto escolhida. */
 export function CameraPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const themeId = params.get('tema');
-  const back = themeId ? `/temas/${themeId}` : '/temas';
+  const back = themeId ? `/temas/${encodeURIComponent(themeId)}/enviar` : '/temas';
   const draft = useQuery({ queryKey: ['draft'], queryFn: loadDraft, staleTime: 0 });
 
   const video = useRef<HTMLVideoElement>(null);

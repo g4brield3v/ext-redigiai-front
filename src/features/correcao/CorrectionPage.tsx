@@ -21,7 +21,7 @@ const ratings: { value: FeedbackRating; label: string }[] = [
 
 function rewriteLink(correction: Correction) {
   const [theme, type, essay] = [correction.themeId, correction.essayTypeId, correction.essayId].map(encodeURIComponent);
-  return `/temas/${theme}?tipo=${type}&reescrever=${essay}`;
+  return `/temas/${theme}/enviar?tipo=${type}&reescrita=${essay}`;
 }
 
 function PhotoModal({ essayId, onClose }: { essayId: string; onClose: () => void }) {

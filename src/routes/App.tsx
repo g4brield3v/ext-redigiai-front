@@ -11,15 +11,20 @@ import { LoginPage } from '../features/auth/LoginPage';
 import { CheckoutPage } from '../features/checkout/CheckoutPage';
 import { CorrectionPage } from '../features/correcao/CorrectionPage';
 import { CameraPage } from '../features/envio/CameraPage';
-import { ThemePage } from '../features/envio/ThemePage';
+import { SubmitPage } from '../features/envio/SubmitPage';
 import { HomePage } from '../features/home/HomePage';
 import { DashboardPage } from '../features/painel/DashboardPage';
 import { ProfilePage } from '../features/perfil/ProfilePage';
 import { ReviewPage } from '../features/revisao/ReviewPage';
+import { ProposalPage } from '../features/proposta/ProposalPage';
 import { ThemesPage } from '../features/temas/ThemesPage';
 import { ApiError } from '../lib/api';
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
+
+// Alunos de teste sem login: só no servidor de desenvolvimento, e só com VITE_DEV_AUTH=true.
+const devAuth = import.meta.env.DEV && import.meta.env.VITE_DEV_AUTH === 'true';
+const DevAuthProvider = devAuth ? lazy(() => import('../features/auth/DevAuthProvider')) : null;
 
 // O SDK do Clerk só é carregado quando a chave está configurada.
 const ClerkAuthProvider = lazy(() => import('../features/auth/ClerkAuthProvider'));
@@ -73,6 +78,14 @@ function NotFoundPage() {
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
+  if (DevAuthProvider) {
+    return (
+      <Suspense fallback={null}>
+        <DevAuthProvider>{children}</DevAuthProvider>
+      </Suspense>
+    );
+  }
+
   // Sem a chave do Clerk, as telas públicas funcionam e o login fica indisponível.
   return clerkKey ? (
     <Suspense fallback={null}>
@@ -105,13 +118,14 @@ export function AppRoutes() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/temas" element={<ThemesPage />} />
-        <Route path="/temas/:themeId" element={<ThemePage />} />
+        <Route path="/temas/:themeId" element={<ProposalPage />} />
+        <Route path="/temas/:themeId/enviar" element={<SubmitPage />} />
         <Route path="/enviar/foto" element={<CameraPage />} />
         <Route path="/exemplo" element={<ExampleCorrectionPage />} />
         <Route path="/entrar" element={<LoginPage />} />
         <Route path="/entrar/concluir" element={<CompleteSignupPage />} />
-        {clerkKey && <Route path="/entrar/sso" element={<SsoCallbackPage />} />}
-        {clerkKey && <Route path="/entrar/verificar" element={<VerifyEmailLinkPage />} />}
+        {clerkKey && !devAuth && <Route path="/entrar/sso" element={<SsoCallbackPage />} />}
+        {clerkKey && !devAuth && <Route path="/entrar/verificar" element={<VerifyEmailLinkPage />} />}
         <Route path="/painel" element={logged(<DashboardPage />)} />
         <Route path="/redacoes/:id/revisao" element={logged(<ReviewPage />)} />
         <Route path="/redacoes/:id" element={logged(<CorrectionPage />)} />

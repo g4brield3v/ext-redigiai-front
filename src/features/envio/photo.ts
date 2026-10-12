@@ -1,5 +1,4 @@
-import type { UploadSignature } from '../../api/provisional-types';
-import { ApiError, request } from '../../lib/api';
+import { ApiError, api, unwrap } from '../../lib/api';
 import type { DraftPhoto } from './draft';
 
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
@@ -47,7 +46,7 @@ export async function preparePhoto(file: File): Promise<DraftPhoto> {
 
 /** Envia a foto direto ao Cloudinary com a assinatura do backend e devolve o id do arquivo. */
 export async function uploadPhoto(photo: DraftPhoto): Promise<string> {
-  const signature = await request<UploadSignature>('POST', '/v1/uploads/sign');
+  const signature = await unwrap(api.POST('/v1/uploads/sign'));
   // A foto só sai do navegador para o Cloudinary, mesmo que a resposta da API venha adulterada.
   if (!signature.uploadUrl.startsWith('https://api.cloudinary.com/')) {
     throw new ApiError('INTERNAL_ERROR', 'Algo deu errado do nosso lado. Tente novamente em instantes.', false, 0);

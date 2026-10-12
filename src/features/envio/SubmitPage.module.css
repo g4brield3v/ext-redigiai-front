@@ -1,4 +1,4 @@
-/* Medidas copiadas de docs/telas/html/03-tema-envio.html e 03b-modal-confirmar-envio.html. */
+/* Medidas copiadas de docs/telas/html/03-tipo-envio.html e 03b-modal-confirmar-envio.html. */
 
 .page {
   padding-top: 36px;
@@ -11,7 +11,21 @@
 .heading {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+}
+
+.themeLine {
+  margin: 0;
+  font-size: 17px;
+}
+
+.themeLine strong {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.themeLine a {
+  font-weight: 600;
 }
 
 .crumbs {
@@ -21,7 +35,7 @@
 
 .columns {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 1fr) 380px;
   gap: 28px;
   align-items: start;
 }
@@ -29,7 +43,7 @@
 .card {
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 32px;
   padding: 32px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -37,84 +51,10 @@
 }
 
 .aside {
-  gap: 24px;
+  gap: 14px;
   padding: 28px;
   position: sticky;
   top: 20px;
-}
-
-.statement {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.statement p {
-  margin: 0;
-  font-size: 17.5px;
-  line-height: 1.7;
-}
-
-.collection {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.collection > :global(.eyebrow) {
-  margin-bottom: 8px;
-}
-
-.text {
-  border-top: 1px solid var(--border);
-  padding: 16px 0;
-}
-
-.text:last-child {
-  border-bottom: 1px solid var(--border);
-}
-
-.text summary {
-  cursor: pointer;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  list-style: none;
-}
-
-.text summary::-webkit-details-marker {
-  display: none;
-}
-
-.text p {
-  margin: 12px 0 0;
-}
-
-.text .firstBody {
-  line-height: 1.7;
-}
-
-.source {
-  font-weight: 400;
-  font-size: 14px;
-}
-
-.image {
-  margin-top: 12px;
-  height: 180px;
-  border-radius: 12px;
-  background: #eef1f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.download {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
 }
 
 .types {
@@ -156,7 +96,7 @@
 
 .types label > span,
 .photos li > div,
-.summary > div,
+.sending,
 .pending li > span {
   display: flex;
   flex-direction: column;
@@ -271,16 +211,19 @@
   margin-top: 4px;
 }
 
-.summary {
-  border-top: 1px solid var(--border);
-  padding-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.sending {
+  gap: 2px;
 }
 
-.summary > div {
-  gap: 2px;
+.cost {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+}
+
+.costLine {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
 }
 
 .hint {

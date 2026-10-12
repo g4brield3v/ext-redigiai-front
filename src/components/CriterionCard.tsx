@@ -7,6 +7,8 @@ export type CriterionCardData = {
   name: string;
   weight: number;
   level: number;
+  /** Nível mais alto da grade usada na correção. */
+  maxLevel: number;
   points: number;
   maxPoints: number;
   descriptor: string;
@@ -38,9 +40,9 @@ export function CriterionCard({ criterion, flagged = false, onShowLines }: Crite
         </span>
       </div>
       <div className={styles.level}>
-        <Dots level={criterion.level} />
+        <Dots level={criterion.level} max={criterion.maxLevel} />
         <span className="muted">
-          Nível {criterion.level} de 3 · peso {criterion.weight}
+          Nível {criterion.level} de {criterion.maxLevel} · peso {criterion.weight}
         </span>
       </div>
       <p className={`muted ${styles.descriptor}`}>“{criterion.descriptor}”</p>

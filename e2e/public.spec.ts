@@ -24,7 +24,7 @@ test.describe('Início', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Uma correção que mostra onde e como melhorar.');
     const table = page.getByRole('table', { name: 'Cálculo da nota do exemplo' });
     await expect(table.getByRole('row')).toHaveCount(6);
-    await expect(table.getByRole('row').nth(5)).toContainText('23 / 30');
+    await expect(table.getByRole('row').nth(5)).toContainText('27 / 40');
     expect(await horizontalOverflow(page)).toBe(0);
 
     await page.getByRole('link', { name: 'Ver os temas' }).first().click();
@@ -96,9 +96,45 @@ test.describe('Temas', () => {
   });
 });
 
+test.describe('Proposta e coletânea', () => {
+  test('mostra a proposta, a instrução de cada tipo e a coletânea inteira, e leva ao envio', async ({ page }) => {
+    await page.goto(`/temas/${THEME_ID}`);
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Algoritmos e o debate público' })).toBeVisible();
+    await expect(page.getByText('Enunciado da proposta.')).toBeVisible();
+    await expect(page.getByText('Defenda um ponto de vista.')).toBeVisible();
+    await expect(page.getByText('Conte uma história com reflexão.')).toBeVisible();
+    await expect(page.getByText('Trecho do texto 1.')).toBeVisible();
+    await expect(page.getByText('Texto 2', { exact: true })).toBeVisible();
+    // O tipo e a foto ficam na página de envio.
+    await expect(page.getByRole('radio')).toHaveCount(0);
+    expect(await horizontalOverflow(page)).toBe(0);
+
+    await page.getByRole('link', { name: 'Enviar minha redação' }).click();
+
+    await expect(page).toHaveURL(`/temas/${THEME_ID}/enviar`);
+    await expect(page.getByRole('heading', { level: 1, name: 'Envie sua redação' })).toBeVisible();
+    await expect(page.getByRole('radio')).toHaveCount(2);
+    await expect(page.getByText('Trecho do texto 1.')).toHaveCount(0);
+    await page.getByRole('link', { name: 'Ver proposta e coletânea' }).click();
+    await expect(page).toHaveURL(`/temas/${THEME_ID}`);
+  });
+
+  test('no celular, o botão de enviar fica preso ao pé da tela', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.goto(`/temas/${THEME_ID}`);
+
+    const button = page.getByRole('link', { name: 'Enviar minha redação' });
+    await expect(button).toBeInViewport();
+    await page.mouse.wheel(0, 600);
+    await expect(button).toBeInViewport();
+    expect(await horizontalOverflow(page)).toBe(0);
+  });
+});
+
 test.describe('Tema e envio', () => {
   test('o botão só libera com tipo e foto, e sem sessão a foto fica guardada e o login abre', async ({ page }) => {
-    await page.goto(`/temas/${THEME_ID}`);
+    await page.goto(`/temas/${THEME_ID}/enviar`);
     const send = page.getByRole('button', { name: 'Enviar para correção' });
     await expect(send).toBeDisabled();
 
@@ -114,7 +150,7 @@ test.describe('Tema e envio', () => {
   });
 
   test('arquivo que não é imagem é recusado com a mensagem da regra', async ({ page }) => {
-    await page.goto(`/temas/${THEME_ID}`);
+    await page.goto(`/temas/${THEME_ID}/enviar`);
     await page.getByLabel('Foto da folha').setInputFiles({ name: 'redacao.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(10) });
 
     await expect(page.getByRole('alert')).toHaveText('Envie uma foto JPG da folha, com até 10 MB.');

@@ -146,11 +146,11 @@ export function SheetThumb({ size = 'md' }: { size?: 'sm' | 'md' }) {
   return <span className={cx(styles.thumb, size === 'sm' && styles.thumbSmall)} aria-hidden="true" />;
 }
 
-/** Nível do critério em três bolinhas. */
-export function Dots({ level }: { level: number }) {
+/** Nível do critério em bolinhas: uma por nível da grade (`max` vem da versão da grade, nunca é fixo). */
+export function Dots({ level, max }: { level: number; max: number }) {
   return (
-    <span className={styles.dots} role="img" aria-label={`Nível ${level} de 3`}>
-      {[1, 2, 3].map((dot) => (
+    <span className={styles.dots} role="img" aria-label={`Nível ${level} de ${max}`}>
+      {Array.from({ length: max }, (_, index) => index + 1).map((dot) => (
         <span key={dot} className={dot <= level ? styles.dotOn : undefined} />
       ))}
     </span>

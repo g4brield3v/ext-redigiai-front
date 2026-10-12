@@ -1,0 +1,244 @@
+/* Medidas copiadas de docs/telas/html/02b-proposta-coletanea.html. */
+
+.page {
+  padding-top: 36px;
+  padding-bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.crumbs {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.title {
+  max-width: 16em;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 36px;
+  align-items: start;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+.reading {
+  gap: 8px;
+  padding: 40px 48px;
+}
+
+.statement {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 26px;
+}
+
+.statement > p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.instructions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.instructions > div {
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.instructions p {
+  margin: 4px 0 0;
+  font-size: 15px;
+  white-space: pre-line;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.collectionLabel {
+  padding-top: 8px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px 0;
+  border-top: 1px solid var(--border);
+}
+
+.text:last-child {
+  padding-bottom: 0;
+}
+
+.textNumber {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+}
+
+.textTitle {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.textBody {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.image {
+  height: 260px;
+  border-radius: 12px;
+  background: #eef1f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.source {
+  margin: 0;
+  font-size: 13.5px;
+  font-style: italic;
+}
+
+.aside {
+  gap: 22px;
+  padding: 28px;
+  position: sticky;
+  top: 20px;
+}
+
+.asideTitle {
+  font-size: 24px;
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 15px;
+}
+
+.steps li {
+  display: flex;
+  gap: 12px;
+}
+
+.stepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.stepWithLink {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.cta {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hint {
+  font-size: 13.5px;
+  text-align: center;
+}
+
+.errorBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+@media (max-width: 980px) {
+  .columns {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .reading {
+    padding: 28px 20px;
+  }
+
+  .aside {
+    position: static;
+  }
+
+  /* No celular o botão acompanha a leitura, preso ao pé da tela. */
+  .page {
+    padding-bottom: 128px;
+  }
+
+  .cta {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+
+  .cta .hint {
+    display: none;
+  }
+}

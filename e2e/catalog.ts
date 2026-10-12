@@ -6,8 +6,8 @@ export const THEME_ID = '0198f0c0-0000-7000-8000-000000000101';
 const rubricId = '0198f0c0-0000-7000-8000-00000000000a';
 
 const types = [
-  { id: 't1', slug: 'dissertacao', name: 'Dissertação', description: 'Texto dissertativo-argumentativo', rubricVersionId: rubricId },
-  { id: 't2', slug: 'narrativa', name: 'Narrativa', description: 'Texto narrativo com reflexão', rubricVersionId: rubricId },
+  { id: 't1', slug: 'dissertacao', name: 'Dissertação', description: 'Texto dissertativo-argumentativo', rubricVersionId: rubricId, instruction: 'Defenda um ponto de vista.' },
+  { id: 't2', slug: 'narrativa', name: 'Narrativa', description: 'Texto narrativo com reflexão', rubricVersionId: rubricId, instruction: 'Conte uma história com reflexão.' },
 ];
 
 const themes = [
@@ -30,19 +30,20 @@ const themeDetail = {
   ],
 };
 
-const levels = [1, 2, 3].map((level) => ({ level, descriptor: `Descritor do nível ${level}` }));
+const levels = [1, 2, 3, 4].map((level) => ({ level, descriptor: `Descritor do nível ${level}` }));
 
 const rubric = {
   id: rubricId,
   examSlug: 'fuvest',
   examName: 'Fuvest',
   version: 1,
-  maxScore: 30,
+  maxLevel: 4,
+  maxScore: 40,
   criteria: [
-    { position: 1, name: 'Tema, coletânea e autoria', weight: 3, maxPoints: 9, levels },
-    { position: 2, name: 'Gênero e tipo de texto', weight: 2, maxPoints: 6, levels },
-    { position: 3, name: 'Coesão, coerência e progressão', weight: 3, maxPoints: 9, levels },
-    { position: 4, name: 'Convenções da escrita e vocabulário', weight: 2, maxPoints: 6, levels },
+    { position: 1, name: 'Tema, coletânea e autoria', weight: 3, maxPoints: 12, levels },
+    { position: 2, name: 'Gênero e tipo de texto', weight: 2, maxPoints: 8, levels },
+    { position: 3, name: 'Coesão, coerência e progressão', weight: 3, maxPoints: 12, levels },
+    { position: 4, name: 'Convenções da escrita e vocabulário', weight: 2, maxPoints: 8, levels },
   ],
   zeroRules: [],
 };

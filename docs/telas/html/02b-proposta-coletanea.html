@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposta e coletânea</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&amp;family=Schibsted+Grotesk:wght@400;500;600;700&amp;family=Caveat:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2346C9}a:hover{color:#16308F}
+*{box-sizing:border-box}
+.pg{background:#F6F8FC;color:#0E1B33;font-family:'Schibsted Grotesk',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55}
+.in{max-width:1180px;margin:0 auto;padding-left:32px;padding-right:32px}
+.nav{background:#FFFFFF;border-bottom:1px solid #E1E6F0}
+.nav .in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:#0E1B33;text-decoration:none;letter-spacing:-.01em}
+.links{display:flex;gap:28px;font-size:15px;font-weight:500}
+.links a{color:#46536B;text-decoration:none;padding:6px 0}.links a:hover{color:#0E1B33}
+.links a.on{color:#0E1B33;font-weight:600;box-shadow:inset 0 -2px 0 #2346C9}
+.av{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:#2346C9;color:#FFFFFF;font-weight:700;text-decoration:none}
+.serif{font-family:Newsreader,Georgia,serif;font-weight:500;letter-spacing:-.015em}
+.h1{font-size:44px;line-height:1.06;margin:0;text-wrap:balance}
+.h2{font-size:28px;line-height:1.15;margin:0;text-wrap:balance}
+.h3{font-size:18px;font-weight:600;margin:0;line-height:1.3}
+.mut{color:#56627A}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#2346C9}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font:inherit;font-weight:600;font-size:15.5px;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.pri{background:#2346C9;color:#FFFFFF}.pri:hover{background:#1A37A6;color:#FFFFFF}
+.pri:disabled{background:#C5CEDF;color:#4A5670;cursor:not-allowed}
+.ghost{background:#FFFFFF;color:#0E1B33;border-color:#D3DBEA}.ghost:hover{border-color:#0E1B33;color:#0E1B33}
+.card{background:#FFFFFF;border:1px solid #E1E6F0;border-radius:18px}
+.win{background:#FFFFFF;border:1px solid #DCE3EF;border-radius:18px;box-shadow:0 1px 0 #E9EEF6,0 24px 48px -28px rgba(14,27,51,.25);overflow:hidden}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.s-ok{background:#E5F5EC;color:#17603B}.s-rev{background:#FFF1D6;color:#6B4300}.s-run{background:#E8EEFF;color:#1A37A6}.s-q{background:#EEF1F6;color:#3B4559}.s-err{background:#FDECEA;color:#9A2A20}.s-tag{background:#EEF1F6;color:#3B4559}
+.dots{display:inline-flex;gap:4px}.dots span{width:10px;height:10px;border-radius:50%;border:1.5px solid #2346C9}.dots span.f{background:#2346C9}
+.tick{display:flex;gap:10px;align-items:flex-start;font-size:15px}.tick svg{flex-shrink:0;margin-top:4px}
+.sheet{display:grid;grid-template-columns:36px minmax(0,1fr);background:#FFFFFF}
+.sheet.wm{grid-template-columns:36px minmax(0,1fr) 170px}
+.sheet .n,.sheet .t,.sheet .m{height:36px;border-bottom:1px solid #D5DEEC;display:flex;align-items:flex-end}
+.sheet .n{justify-content:flex-end;padding:0 8px 7px 0;font-size:11px;color:#9AA6BC;border-right:1px solid #F0C9C4;font-variant-numeric:tabular-nums}
+.sheet .t{padding:0 10px 4px 12px;font-family:Caveat,'Segoe Print',cursive;font-size:22px;line-height:1;color:#1C2F6E;white-space:nowrap;overflow:hidden}
+.sheet .m{padding:0 10px 5px;border-left:1px dashed #E3E8F1;font-family:Caveat,cursive;font-size:19px;line-height:1;color:#C8372D;white-space:nowrap}
+.ind{padding-left:36px !important}
+.circ{border:2px solid #C8372D;border-radius:50% 45% 52% 48%;padding:0 4px;margin:0 -2px}
+.wav{text-decoration:underline wavy #C8372D;text-decoration-thickness:1.5px;text-underline-offset:5px}
+.ok1{background:#E4F4EC;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.tag{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #C8372D;font-family:'Schibsted Grotesk',sans-serif;font-size:11px;font-weight:700;color:#C8372D;margin-left:6px;line-height:1}
+.tag.g{border-color:#1F7A4C;color:#1F7A4C}
+.blur{filter:blur(2px);background:#FFF3C4;border-radius:3px;padding:0 3px}
+.f{display:flex;flex-direction:column;gap:6px}
+.f label,.lab{font-size:14px;font-weight:600}
+.inp{height:48px;border:1px solid #D3DBEA;border-radius:12px;padding:0 14px;font:inherit;color:#0E1B33;background:#FFFFFF;width:100%}
+.inp:focus{border-color:#2346C9}
+:focus-visible{outline:3px solid #2346C9;outline-offset:3px}
+@media (max-width:980px){.in{padding-left:16px;padding-right:16px}.links{display:none}.h1{font-size:34px}.stack{grid-template-columns:1fr !important}}
+@media (max-width:620px){.sheet.wm{grid-template-columns:30px minmax(0,1fr)}.sheet .m{display:none}}
+
+</style>
+</head>
+<body>
+<div class="pg" style="min-height: 1900px">
+<header class="nav"><div class="in"><a class="logo" href="01-inicio.html"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="#2346C9"></rect><path d="M8 11h14M8 15.5h14M8 20h8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></path><path d="M18.5 21.5c1.6-1.2 3.2-3 4.2-5" stroke="#FFB4A8" stroke-width="2" fill="none" stroke-linecap="round"></path></svg>RedigiAI</a><nav class="links" aria-label="Principal"><a href="02-temas.html" class="on" aria-current="page">Temas</a><a href="01-inicio.html">Como a nota é calculada</a></nav><a href="04-login.html" style="font-weight: 600; color: #0E1B33; text-decoration: none">Entrar</a></div></header>
+<main class="in" style="padding-top: 36px; padding-bottom: 96px; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<nav aria-label="Você está em" style="font-size: 14px; font-weight: 500"><a href="02-temas.html">Fuvest</a> <span class="mut">/</span> <a href="02-temas.html">Temas</a> <span class="mut">/ Algoritmos e o debate público</span></nav>
+<span class="eyebrow">Proposta de redação · Fuvest</span>
+<h1 class="serif h1" style="max-width: 16em">Algoritmos e o debate público</h1>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip s-tag">Dissertação</span><span class="chip s-tag">Narrativa</span><span class="chip s-tag">Coletânea com 4 textos</span></div>
+</div>
+<div class="stack" style="display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 36px; align-items: start">
+<article class="card" style="padding: 40px 48px; display: flex; flex-direction: column; gap: 8px">
+<section style="display: flex; flex-direction: column; gap: 14px; padding-bottom: 26px">
+<span class="eyebrow">Proposta</span>
+<p style="margin: 0; font-size: 18px; line-height: 1.75">[Enunciado da proposta: o que o candidato deve discutir sobre o tema e como usar a coletânea.]</p>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px" class="stack">
+<div style="padding: 16px 18px; border-radius: 14px; background: #F6F8FC"><span style="font-weight: 600">Dissertação</span><p class="mut" style="margin: 4px 0 0; font-size: 15px">[Instrução da proposta para o texto dissertativo-argumentativo.]</p></div>
+<div style="padding: 16px 18px; border-radius: 14px; background: #F6F8FC"><span style="font-weight: 600">Narrativa</span><p class="mut" style="margin: 4px 0 0; font-size: 15px">[Instrução da proposta para o texto narrativo com reflexão.]</p></div>
+</div>
+</section>
+<span class="eyebrow" style="padding-top: 8px">Coletânea</span>
+<section style="display: flex; flex-direction: column; gap: 10px; padding: 26px 0; border-top: 1px solid #E1E6F0">
+<span style="font-size: 13px; font-weight: 600; color: #2346C9">Texto 1</span>
+<h3 class="serif" style="margin: 0; font-size: 22px; line-height: 1.25">[Título do texto 1]</h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.75">[Trecho do texto 1, como aparece na proposta da prova.]</p>
+<p class="mut" style="margin: 0; font-size: 13.5px; font-style: italic">[Fonte do texto 1]</p>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px; padding: 26px 0; border-top: 1px solid #E1E6F0">
+<span style="font-size: 13px; font-weight: 600; color: #2346C9">Texto 2</span>
+<h3 class="serif" style="margin: 0; font-size: 22px; line-height: 1.25">[Título do texto 2]</h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.75">[Trecho do texto 2.]</p>
+<p class="mut" style="margin: 0; font-size: 13.5px; font-style: italic">[Fonte do texto 2]</p>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px; padding: 26px 0; border-top: 1px solid #E1E6F0">
+<span style="font-size: 13px; font-weight: 600; color: #2346C9">Texto 3</span>
+<h3 class="serif" style="margin: 0; font-size: 22px; line-height: 1.25">[Gráfico ou charge]</h3>
+<div class="mut" style="height: 260px; border-radius: 12px; background: #EEF1F6; display: flex; align-items: center; justify-content: center">[Imagem]</div>
+<p class="mut" style="margin: 0; font-size: 13.5px; font-style: italic">[Fonte do texto 3]</p>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px; padding: 26px 0; border-top: 1px solid #E1E6F0">
+<span style="font-size: 13px; font-weight: 600; color: #2346C9">Texto 4</span>
+<h3 class="serif" style="margin: 0; font-size: 22px; line-height: 1.25">[Título do texto 4]</h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.75">[Trecho do texto 4.]</p>
+<p class="mut" style="margin: 0; font-size: 13.5px; font-style: italic">[Fonte do texto 4]</p>
+</section>
+</article>
+<aside class="card" aria-label="Como enviar" style="padding: 28px; display: flex; flex-direction: column; gap: 22px; position: sticky; top: 20px">
+<h2 class="serif h2" style="font-size: 24px">Escreva à mão, como na prova</h2>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 16px; font-size: 15px">
+<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">1</span><span style="display: flex; flex-direction: column; gap: 6px">Imprima a folha pautada de 30 linhas.<a href="#" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>Baixar a folha (PDF)</a></span></li>
+<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">2</span><span>Escreva a redação na folha, sem nome nem assinatura.</span></li>
+<li style="display: flex; gap: 12px"><span class="av" style="width: 28px; height: 28px; font-size: 13px; flex-shrink: 0">3</span><span>Fotografe a folha inteira e envie para correção.</span></li>
+</ol>
+<div style="border-top: 1px solid #E1E6F0; padding-top: 20px; display: flex; flex-direction: column; gap: 10px">
+<a class="btn pri" href="03-tipo-envio.html" style="width: 100%">Enviar minha redação</a>
+<span class="mut" style="font-size: 13.5px; text-align: center">Você escolhe o tipo de redação na próxima página.</span>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</body>
+</html>
