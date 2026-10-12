@@ -6,7 +6,7 @@ import { apiError, json, mockApi, renderApp } from '../test/helpers';
 import type { Auth } from './auth/AuthContext';
 import { CheckoutPage } from './checkout/CheckoutPage';
 import { CorrectionPage } from './correcao/CorrectionPage';
-import { exampleCorrection, exampleIllegibleWords, exampleLines } from './correcao/example';
+import { exampleCorrection, exampleIllegibleWords, exampleLines, exampleZeroCorrection } from './correcao/example';
 import { ConfirmSendModal } from './envio/ConfirmSendModal';
 import { DashboardPage } from './painel/DashboardPage';
 import { ProfilePage } from './perfil/ProfilePage';
@@ -159,7 +159,7 @@ describe('Palavras ilegíveis', () => {
     await userEvent.click(send);
 
     const dialog = screen.getByRole('dialog', { name: 'Confira as palavras' });
-    expect(dialog).toHaveTextContent('Linha 6');
+    expect(dialog).toHaveTextContent('Linha 4');
     expect(dialog).toHaveTextContent('controlão');
     expect(dialog).toHaveTextContent('não podem ser alteradas depois do envio');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Confirmar e enviar' }));
@@ -208,13 +208,14 @@ describe('Correção', () => {
     mockApi({ 'GET /v1/essays/essay-done/correction': json(fromApi) });
     renderApp(<CorrectionPage />, { ...route, auth: signedIn() });
 
-    expect(await screen.findByText('17')).toBeInTheDocument();
-    expect(screen.getByText('+2 desde a 1ª versão')).toBeInTheDocument();
+    expect(within(await screen.findByRole('region', { name: 'Resultado' })).getByText('17')).toBeInTheDocument();
+    expect(screen.getByText('+4 desde a 1ª versão')).toBeInTheDocument();
     const first = document.getElementById('criterio-1')!;
     expect(first).toHaveTextContent('2 / 12');
-    expect(first).toHaveTextContent('Nível 3 de 4 · peso 3');
-    expect(screen.getAllByText('O que corrigir')).toHaveLength(2);
-    expect(screen.getByText('Crase antes de verbo · linha 14')).toBeInTheDocument();
+    expect(first).toHaveTextContent('Nível 3 de 4');
+    expect(first).toHaveTextContent('−3 pontos');
+    expect(screen.getAllByText('O que corrigir')).toHaveLength(3);
+    expect(document.getElementById('criterio-4')).toHaveTextContent('Crase antes de verbo · linha 13');
     expect(screen.getAllByRole('link', { name: 'Reescrever esta redação' })[0]).toHaveAttribute(
       'href',
       '/temas/enviar?tipo=&reescrita=exemplo',
@@ -224,19 +225,24 @@ describe('Correção', () => {
   it('nota zero mostra o motivo no lugar dos critérios', async () => {
     mockApi({
       'GET /v1/essays/essay-done/correction': json({
-        ...exampleCorrection,
-        score: 0,
-        zeroReason: 'Identificação do candidato',
-        zeroExplanation: 'Há um nome escrito na linha 30 da folha.',
-        criteria: [],
+        ...exampleZeroCorrection,
+        zero: {
+          applies: true,
+          ruleCode: 'candidate_identification',
+          ruleLabel: 'Identificação do candidato',
+          ruleNote: 'Nome, assinatura ou qualquer marca que identifique o autor anula a redação.',
+          explanation: 'Há um nome escrito na linha 30 da folha.',
+        },
         nextSteps: [],
       }),
     });
     renderApp(<CorrectionPage />, { ...route, auth: signedIn() });
 
-    expect(await screen.findByText('Identificação do candidato')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Identificação do candidato' })).toBeInTheDocument();
     expect(screen.getByText('Há um nome escrito na linha 30 da folha.')).toBeInTheDocument();
+    expect(screen.getByText('Regra da Fuvest: nome, assinatura ou qualquer marca que identifique o autor anula a redação.')).toBeInTheDocument();
     expect(document.getElementById('criterio-1')).toBeNull();
+    expect(screen.queryByText('Plano de reescrita')).toBeNull();
   });
 
   it('a avaliação exige uma das três opções e envia o comentário', async () => {
@@ -246,9 +252,9 @@ describe('Correção', () => {
     });
     renderApp(<CorrectionPage />, { ...route, auth: signedIn() });
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Enviar avaliação' }));
-    expect(screen.getByText('Escolha uma das opções para enviar a avaliação.')).toBeInTheDocument();
-    expect(requests.some((r) => r.method === 'POST')).toBe(false);
+    // Sem uma opção escolhida, o botão fica desabilitado.
+    expect(await screen.findByRole('button', { name: 'Enviar avaliação' })).toBeDisabled();
+    expect(screen.getByRole('radiogroup', { name: 'A correção ajudou você a entender o que melhorar?' })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('radio', { name: 'Não ajudou' }));
     await userEvent.type(screen.getByLabelText('Comentário (opcional)'), 'Faltou explicar a linha 14.');
@@ -260,6 +266,18 @@ describe('Correção', () => {
         comment: 'Faltou explicar a linha 14.',
       }),
     );
+    expect(await screen.findByText('Obrigado. A sua avaliação ajuda a melhorar as próximas correções.')).toBeInTheDocument();
+    expect(screen.queryByRole('radiogroup')).toBeNull();
+  });
+
+  it('correção já avaliada mostra o agradecimento no lugar da pergunta', async () => {
+    mockApi({
+      'GET /v1/essays/essay-done/correction': json({ ...exampleCorrection, feedback: { rating: 'helped_a_lot', comment: null } }),
+    });
+    renderApp(<CorrectionPage />, { ...route, auth: signedIn() });
+
+    expect(await screen.findByText('Obrigado. A sua avaliação ajuda a melhorar as próximas correções.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Enviar avaliação' })).toBeNull();
   });
 });
 

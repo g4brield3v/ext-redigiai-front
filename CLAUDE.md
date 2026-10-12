@@ -8,6 +8,7 @@ Aplicação web do RedigiAI, o SaaS que corrige redações manuscritas da Fuvest
 |---|---|
 | `docs/02-frontend.md` | Design system, rotas e o comportamento de cada tela |
 | `docs/04-construir-front.md` | Como construir as telas idênticas às aprovadas |
+| `docs/06-tela-correcao.md` | Tela da correção, versão 2: substitui a seção 9 do `02-frontend.md` |
 | `docs/telas/html/` e `docs/telas/png/` | Telas aprovadas: HTML e imagem de cada tela (computador e celular). **O front-end tem que ficar idêntico a elas.** |
 | Repositório do back-end, `docs/01-especificacao-tecnica.md` | **Fonte da verdade** das regras de negócio, da API e dos erros |
 | Repositório do back-end, `docs/decisoes.md` | Decisões tomadas durante a implementação, inclusive as do front |

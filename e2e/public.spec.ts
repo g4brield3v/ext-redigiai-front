@@ -55,14 +55,12 @@ test.describe('Início', () => {
 
     await expect(page).toHaveURL(/\/exemplo$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fuvest – Dissertação – Algoritmos e o debate público');
-    await expect(page.getByText('+2 desde a 1ª versão')).toBeVisible();
+    await expect(page.getByText('+4 desde a 1ª versão')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Ver foto original' })).toHaveCount(0);
-    await expect(page.getByText('Avalie esta correção')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Enviar avaliação' })).toHaveCount(0);
 
-    await page.getByRole('button', { name: /À partir: ver o critério 4/ }).click();
+    await page.getByRole('link', { name: /Escrita e vocabulário/ }).click();
     await expect(page.locator('#criterio-4')).toBeFocused();
-    await page.getByRole('button', { name: 'Linhas 27 a 30' }).click();
-    await expect(page.locator('[data-line="30"]')).toBeVisible();
     expect(await horizontalOverflow(page)).toBe(0);
   });
 });

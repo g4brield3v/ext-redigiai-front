@@ -72,7 +72,7 @@ export function useEssay(id: string | undefined) {
 export function useCorrection(id: string | undefined) {
   return useQuery({
     queryKey: ['correction', id],
-    queryFn: () => request<Correction>('GET', `/v1/essays/${encodeURIComponent(id!)}/correction`),
+    queryFn: (): Promise<Correction> => unwrap(api.GET('/v1/essays/{id}/correction', { params: { path: { id: id! } } })),
     enabled: !!id,
   });
 }

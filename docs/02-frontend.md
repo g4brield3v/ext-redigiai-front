@@ -205,6 +205,7 @@ Página só de leitura, separada do envio: o aluno lê a proposta, escreve à m�
 - Redações em `uploaded`, `queued` e `processing`: polling a cada 5 s enquanto a aba estiver visível; parar quando nenhuma estiver em andamento.
 
 ### 9 · Correção (`/redacoes/:id`)
+> **Substituída por `docs/06-tela-correcao.md` (versão 2).** O que está abaixo descreve a versão 1 e fica só como histórico; as referências visuais são `09-correcao.html` e `09z-correcao-nota-zero.html`.
 
 Dados de `GET /v1/essays/{id}/correction`.
 1. Cabeçalho: "← Minhas correções", título, "Enviada em dd/mm · Nª versão · grade Fuvest vN", botões "Ver foto original" (abre a URL assinada de `GET /v1/essays/{id}/photo` num modal) e "Reescrever esta redação" (→ `/temas/:themeId/enviar?tipo=…&reescrita=<id>`).

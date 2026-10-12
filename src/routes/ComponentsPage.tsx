@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button } from '../components/Button';
-import { CriterionCard, ScoreSummary } from '../components/CriterionCard';
 import { EssaySheet } from '../components/EssaySheet';
 import { Footer } from '../components/Footer';
 import { LogoMark } from '../components/Logo';
@@ -93,27 +92,12 @@ export default function ComponentsPage() {
           )}
         </Block>
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <h2 className="h3">ScoreSummary</h2>
-          <ScoreSummary score={23} maxScore={40} delta="+2 desde a 1ª versão" strengths={correction.strengths} mainIssue={correction.mainIssue} />
-        </section>
-
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, alignItems: 'start' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <h2 className="h3">EssaySheet (correção)</h2>
-            <Window>
-              <EssaySheet lines={toSheetLines(correction.lines, { marks: correction.marks })} withMargin />
-            </Window>
             <h2 className="h3">EssaySheet (palavras ilegíveis)</h2>
             <Window>
               <EssaySheet lines={toSheetLines(correction.lines.slice(0, 7), { illegible: illegibleWords })} />
             </Window>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <h2 className="h3">CriterionCard</h2>
-            {correction.criteria.map((criterion) => (
-              <CriterionCard key={criterion.position} criterion={criterion} flagged={criterion.position >= 3} />
-            ))}
           </div>
         </section>
       </main>

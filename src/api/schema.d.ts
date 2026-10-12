@@ -208,6 +208,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/essays/{id}/correction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Correção completa: nota calculada pelo backend, nível e orientação de cada critério, apontamentos na
+         *     redação, por onde começar e o plano de reescrita, com os pontos que cada passo pode render. Só existe
+         *     depois que a redação chega a `completed`; antes disso responde 409.
+         */
+        get: operations["getCorrection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/corrections/{id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Avaliação do aluno sobre a correção, com comentário opcional. Uma por correção: a segunda responde 409. */
+        post: operations["sendCorrectionFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/essays/{id}/photo": {
         parameters: {
             query?: never;
@@ -279,6 +317,115 @@ export interface components {
         };
         BatchEssayResponseDto: {
             essayIds: string[];
+        };
+        CorrectionAnnotationDto: {
+            /** Format: int32 */
+            id: number;
+            kind: components["schemas"]["MarkKind"];
+            /** Format: int32 */
+            criterion: number;
+            /** Format: int32 */
+            lineStart: number;
+            /** Format: int32 */
+            lineEnd: number;
+            /** Format: int32 */
+            charStart: number;
+            /** Format: int32 */
+            charEnd: number;
+            quote: string;
+            note: null | string;
+            ruleName: null | string;
+            fix: null | string;
+        };
+        CorrectionCriterionDto: {
+            /** Format: int32 */
+            position: number;
+            shortName: string;
+            fullName: string;
+            /** Format: int32 */
+            weight: number;
+            /** Format: int32 */
+            level: number;
+            /** Format: int32 */
+            points: number;
+            /** Format: int32 */
+            maxPoints: number;
+            /** Format: int32 */
+            pointsLost: number;
+            currentDescriptor: string;
+            nextDescriptor: null | string;
+            justification: string;
+            guidance: null | string;
+            annotationIds: number[];
+        };
+        CorrectionDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            essayId: string;
+            title: string;
+            /** Format: uuid */
+            themeId: string;
+            /** Format: uuid */
+            essayTypeId: string;
+            /** Format: date-time */
+            sentAt: string;
+            /** Format: int32 */
+            version: number;
+            examName: string;
+            rubric: components["schemas"]["CorrectionRubricDto"];
+            /** Format: int32 */
+            score: number;
+            /** Format: int32 */
+            maxScore: number;
+            /** Format: int32 */
+            scoreDelta: null | number;
+            /** Format: int32 */
+            previousVersion: null | number;
+            /** Format: int32 */
+            previousVersionScore: null | number;
+            zero: components["schemas"]["CorrectionZeroDto"];
+            strengths: string;
+            mainIssue: components["schemas"]["CorrectionPointDto"];
+            /** Format: int32 */
+            sheetLines: number;
+            lines: components["schemas"]["TranscriptionLineDto"][];
+            annotations: components["schemas"]["CorrectionAnnotationDto"][];
+            criteria: components["schemas"]["CorrectionCriterionDto"][];
+            nextSteps: components["schemas"]["CorrectionPointDto"][];
+            feedback: null | components["schemas"]["CorrectionFeedbackDto"];
+        };
+        CorrectionFeedbackDto: {
+            rating: components["schemas"]["FeedbackRating"];
+            comment: null | string;
+        };
+        CorrectionFeedbackRequest: {
+            rating: null | components["schemas"]["FeedbackRating"];
+            /** @description Comentário opcional, com até 1.000 caracteres. */
+            comment?: null | string;
+        };
+        CorrectionPointDto: {
+            text: string;
+            /** Format: int32 */
+            criterion: null | number;
+            /** Format: int32 */
+            potentialGain: null | number;
+        };
+        CorrectionRubricDto: {
+            /** Format: int32 */
+            version: number;
+            /** Format: int32 */
+            maxLevel: number;
+            /** Format: int32 */
+            maxScore: number;
+            versionLabel: string;
+        };
+        CorrectionZeroDto: {
+            applies: boolean;
+            ruleCode: null | string;
+            ruleLabel: null | string;
+            ruleNote: null | string;
+            explanation: null | string;
         };
         CreditBalanceDto: {
             /** Format: int32 */
@@ -385,6 +532,8 @@ export interface components {
         };
         /** @enum {unknown} */
         ExamStatus: "active" | "coming_soon";
+        /** @enum {unknown} */
+        FeedbackRating: "helped_a_lot" | "helped_partly" | "did_not_help";
         HealthResponse: {
             status: string;
         };
@@ -405,6 +554,8 @@ export interface components {
             contextBefore: string;
             contextAfter: string;
         };
+        /** @enum {unknown} */
+        MarkKind: "good" | "issue";
         PhotoUrlDto: {
             url: string;
         };
@@ -1014,6 +1165,119 @@ export interface operations {
                 "application/json": components["schemas"]["IllegibleAnswer"][];
                 "text/json": components["schemas"]["IllegibleAnswer"][];
                 "application/*+json": components["schemas"]["IllegibleAnswer"][];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCorrection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorrectionDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    sendCorrectionFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectionFeedbackRequest"];
+                "text/json": components["schemas"]["CorrectionFeedbackRequest"];
+                "application/*+json": components["schemas"]["CorrectionFeedbackRequest"];
             };
         };
         responses: {
