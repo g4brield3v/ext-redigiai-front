@@ -126,6 +126,38 @@
   text-align: right;
 }
 
+/* Card com 3 blocos empilhados (tela 11b, prévia): borda própria, fundo claro, um item embaixo do outro. */
+.cardBlock {
+  margin: 22px 0;
+}
+
+.cardBox {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fbfcfe;
+}
+
+.cardTitle {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.cardItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardItem p {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.7;
+}
+
 .command {
   display: flex;
   flex-direction: column;

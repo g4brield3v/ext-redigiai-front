@@ -88,6 +88,7 @@ function goTo(issue: Issue, blocks: EditorBlock[]) {
 
 const ADDABLE: { kind: Exclude<BlockKind, 'instructions'>; label: string }[] = [
   { kind: 'collection_item', label: '+ Texto da coletânea' },
+  { kind: 'card', label: '+ Card com 3 blocos' },
   { kind: 'command', label: '+ Comando' },
   { kind: 'heading', label: '+ Título de seção' },
   { kind: 'paragraph', label: '+ Parágrafo' },

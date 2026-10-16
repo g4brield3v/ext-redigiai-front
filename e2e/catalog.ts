@@ -5,7 +5,7 @@ import type { Page } from '@playwright/test';
 export const PROMPT_SLUG = 'algoritmos-e-o-debate-publico';
 const rubricId = '0198f0c0-0000-7000-8000-00000000000a';
 
-const summary = { genreLabel: 'Dissertação em prosa', essayTypeName: 'Dissertação', minLines: 20, maxLines: 30, titleRequired: true, examSlug: 'fuvest', examName: 'Fuvest' };
+const summary = { essayType: { slug: 'dissertacao-em-prosa', name: 'Dissertação em prosa' }, examSlug: 'fuvest', examName: 'Fuvest' };
 
 const prompts = [
   { ...summary, id: 'p1', slug: PROMPT_SLUG, title: 'Algoritmos e o debate público', summary: 'Coletânea com tirinha, poema e dois textos.', textCount: 4 },
@@ -22,8 +22,7 @@ const promptDetail = {
   status: 'published',
   title: 'Algoritmos e o debate público',
   summary: 'Coletânea com tirinha, poema e dois textos.',
-  essayTypeId: 't1',
-  essayTitle: 'Fuvest – Dissertação – Algoritmos e o debate público',
+  essayTitle: 'Fuvest – Dissertação em prosa – Algoritmos e o debate público',
   sheetLines: 30,
   textCount: 4,
   blocks: [
@@ -54,7 +53,11 @@ const promptDetail = {
       kind: 'instructions',
       data: {
         title: 'Instruções',
-        items: ['A dissertação deve ser redigida de acordo com a norma-padrão da língua portuguesa.', 'Dê um título a sua redação.'],
+        items: [
+          'A dissertação deve ser redigida de acordo com a norma-padrão da língua portuguesa.',
+          'Escreva, no mínimo, 20 linhas, com letra legível e não ultrapasse o espaço de 30 linhas da folha de redação.',
+          'Dê um título a sua redação.',
+        ],
       },
     },
   ],

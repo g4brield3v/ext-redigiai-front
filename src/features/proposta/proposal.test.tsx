@@ -7,7 +7,7 @@ import type { Auth } from '../auth/AuthContext';
 import { clearDraft } from '../envio/draft';
 import { SubmitPage } from '../envio/SubmitPage';
 import { ProposalPage } from './ProposalPage';
-import { genreInSentence, sheetSummary } from './summary';
+import { genreInSentence } from './summary';
 
 // O envio da foto ao Cloudinary fica de fora: aqui interessa o que vai para a API.
 vi.mock('../envio/photo', async (original) => ({
@@ -38,11 +38,7 @@ describe('Texto das propostas', () => {
     expect(container).toHaveTextContent('<b>marcação</b> e um * solto.');
   });
 
-  it('resume linhas e título como nos chips', () => {
-    expect(sheetSummary({ minLines: 20, maxLines: 30, titleRequired: true })).toBe('20 a 30 linhas · com título');
-    expect(sheetSummary({ minLines: 20, maxLines: 30, titleRequired: false })).toBe('20 a 30 linhas');
-    expect(sheetSummary({ minLines: null, maxLines: 30, titleRequired: false })).toBe('até 30 linhas');
-    expect(sheetSummary({ minLines: null, maxLines: null, titleRequired: false })).toBe('');
+  it('põe o tipo de redação dentro da frase das instruções', () => {
     expect(genreInSentence('Dissertação em prosa')).toBe('dissertação em prosa.');
     expect(genreInSentence('Narrativa.')).toBe('narrativa.');
   });
@@ -55,10 +51,10 @@ describe('Proposta', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Algoritmos e o debate público' })).toBeInTheDocument();
     const article = screen.getByRole('article');
-    // Chips: o tipo como a prova pede, a coletânea e as linhas.
+    // Chips: o tipo (nome da categoria) e a coletânea. Linhas e título ficam nas instruções.
     expect(screen.getByText('Dissertação em prosa')).toBeInTheDocument();
     expect(screen.getByText('Coletânea com 3 textos')).toBeInTheDocument();
-    expect(screen.getByText('20 a 30 linhas · com título')).toBeInTheDocument();
+    expect(screen.queryByText(/20 a 30 linhas/)).toBeNull();
 
     // Imagem com o texto alternativo, prosa com negrito e quebra de linha, verso em colunas.
     expect(within(article).getByRole('img', { name: 'Tirinha com duas cobras.' })).toHaveAttribute(
@@ -76,9 +72,19 @@ describe('Proposta', () => {
     expect(within(article).getByText('Use os textos como apoio, sem copiar.')).toBeInTheDocument();
     expect(within(article).getByRole('separator')).toBeInTheDocument();
 
+    // O card: título, os 3 itens empilhados (texto com legenda, imagem pela URL pública, texto).
+    expect(within(article).getByText('Para refletir')).toBeInTheDocument();
+    expect(within(article).getByText('pesquisa').tagName).toBe('STRONG');
+    expect(within(article).getByText('Fonte: CNPq, 2024.')).toBeInTheDocument();
+    expect(within(article).getByRole('img', { name: 'Gráfico de barras.' })).toHaveAttribute(
+      'src',
+      'https://res.cloudinary.com/test/image/upload/prompts/grafico',
+    );
+    expect(within(article).getByText('Terceiro bloco do card.')).toBeInTheDocument();
+
     // A ordem na tela é a das posições.
     const text = article.textContent ?? '';
-    const order = ['Leia os textos', 'Texto 1:', 'Texto 2:', 'Texto 3:', 'Redija uma dissertação', 'Use os textos como apoio', 'Instruções'];
+    const order = ['Leia os textos', 'Texto 1:', 'Texto 2:', 'Texto 3:', 'Para refletir', 'Terceiro bloco do card.', 'Redija uma dissertação', 'Use os textos como apoio', 'Instruções'];
     expect(order.map((piece) => text.indexOf(piece))).toEqual([...order.map((piece) => text.indexOf(piece))].sort((a, b) => a - b));
     expect(order.every((piece) => text.includes(piece))).toBe(true);
   });
@@ -143,11 +149,11 @@ describe('Envio', () => {
 
     expect(await screen.findByText('Tipo de redação, definido pela proposta')).toBeInTheDocument();
     expect(screen.getByText('Dissertação em prosa')).toBeInTheDocument();
-    expect(screen.getByText('20 a 30 linhas · com título')).toBeInTheDocument();
+    expect(screen.queryByText(/20 a 30 linhas/)).toBeNull();
     // Nada para escolher: nem rádio, nem lista de tipos.
     expect(screen.queryByRole('radio')).toBeNull();
     expect(screen.queryByRole('combobox')).toBeNull();
-    expect(screen.getByText('Fuvest – Dissertação – Algoritmos e o debate público')).toBeInTheDocument();
+    expect(screen.getByText('Fuvest – Dissertação em prosa – Algoritmos e o debate público')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ver coletânea' })).toHaveAttribute('href', `/propostas/${promptSlug}`);
     expect(screen.getByRole('heading', { name: 'Sua redação' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Foto da folha' })).toBeInTheDocument();
@@ -196,7 +202,7 @@ describe('Envio', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Enviar para correção' })).toBeEnabled());
     await userEvent.click(screen.getByRole('button', { name: 'Enviar para correção' }));
     const dialog = await screen.findByRole('dialog', { name: 'Confirme o envio' });
-    expect(dialog).toHaveTextContent('Fuvest – Dissertação – Algoritmos e o debate público');
+    expect(dialog).toHaveTextContent('Fuvest – Dissertação em prosa – Algoritmos e o debate público');
     await userEvent.click(await within(dialog).findByRole('button', { name: 'Confirmar envio' }));
 
     await waitFor(() => expect(requests.some((r) => r.url.pathname === '/v1/essays/batch')).toBe(true));

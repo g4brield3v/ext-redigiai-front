@@ -42,9 +42,7 @@ const draft: Schemas['PromptAdminDto'] = {
   title: 'O papel da ciência no mundo contemporâneo',
   summary: 'Coletânea com tirinha e um texto.',
   sourceLabel: null,
-  essayType: 'dissertacao',
-  genreLabel: 'Dissertação em prosa',
-  sheet: { minLines: 20, maxLines: 30, titleRequired: true },
+  essayType: 'dissertacao-em-prosa',
   blocks: [
     { id: 'b1', position: 10, kind: 'collection_item', data: { label: 'Texto 1', format: 'image', source: 'Verissimo, *As cobras*.', assetId: 'a1', alt: 'Tirinha.', imageUrl: 'https://res.cloudinary.com/test/image/upload/prompts/a1' } },
     { id: 'b2', position: 20, kind: 'collection_item', data: { label: 'Texto 2', format: 'prose', source: 'Carl Sagan, 1996.', body: 'Quase ninguém compreende a ciência.' } },
@@ -78,8 +76,7 @@ const item = (id: string, status: Schemas['PromptStatus'], version: number, titl
   version,
   status,
   title,
-  genreLabel: 'Dissertação em prosa',
-  essayTypeName: 'Dissertação',
+  essayTypeName: 'Dissertação em prosa',
   textCount: 4,
   updatedAt: '2026-10-10T15:00:00Z',
   ...extra,
@@ -97,9 +94,16 @@ const list: Schemas['PromptListDto'] = {
 const listRoute = { route: '/admin/propostas', path: '/admin/*', auth: signedIn };
 const editorRoute = { route: '/admin/propostas/p-draft', path: '/admin/*', auth: signedIn };
 
+/** As categorias vêm da API; a narrativa aqui está sem perfil de correção ativo. */
+const essayTypes: Schemas['EssayTypeOptionDto'][] = [
+  { slug: 'dissertacao-em-prosa', name: 'Dissertação em prosa', hasActiveProfile: true },
+  { slug: 'narrativa', name: 'Narrativa', hasActiveProfile: false },
+];
+
 const adminHandlers = {
   'GET /v1/me': json(account('admin')),
   'GET /v1/exams': json(exams),
+  'GET /v1/admin/exams/fuvest/essay-types': json(essayTypes),
   'GET /v1/admin/prompts': json(list),
   'GET /v1/admin/prompts/p-draft': json(draft),
 };
@@ -114,7 +118,10 @@ describe('Estado do editor', () => {
     const document = toDocument(prompt, '2026-10-12T15:21:00.000+00:00');
 
     expect(document.expectedUpdatedAt).toBe('2026-10-12T15:21:00.000+00:00');
-    expect(document.sheet).toEqual({ minLines: 20, maxLines: 30, titleRequired: true });
+    // O tipo é só a categoria: sem gênero em texto livre nem linhas e título no cadastro.
+    expect(document.essayType).toBe('dissertacao-em-prosa');
+    expect(Object.keys(document)).not.toContain('genreLabel');
+    expect(Object.keys(document)).not.toContain('sheet');
     expect(document.blocks!.map((block) => [block.id, block.position, block.kind])).toEqual([
       ['b1', 10, 'collection_item'],
       ['b2', 20, 'collection_item'],
@@ -129,16 +136,52 @@ describe('Estado do editor', () => {
 
   it('separa versos por linha, mantendo a linha vazia entre estrofes, e itens e dados-chave por linha', () => {
     const verse = { ...prompt.blocks[1]!, format: 'verse' as const, columns: ['Quanta do latim\n\nPlural de quantum\n\n', 'Cântico'] };
-    const document = toDocument({ ...prompt, blocks: [verse, { ...prompt.blocks[3]!, items: ' Um \n\nDois' }], keyData: 'a\n\n b ', minLines: '', maxLines: 'trinta' });
+    const document = toDocument({ ...prompt, blocks: [verse, { ...prompt.blocks[3]!, items: ' Um \n\nDois' }], keyData: 'a\n\n b ' });
 
     expect(document.blocks![0]!.data!.columns).toEqual([['Quanta do latim', '', 'Plural de quantum'], ['Cântico']]);
     expect(document.blocks![1]!.data!.items).toEqual(['Um', 'Dois']);
     expect(document.gradingNotes!.keyData).toEqual(['a', 'b']);
-    expect(document.sheet).toEqual({ minLines: null, maxLines: null, titleRequired: true });
+  });
+
+  it('o card entra antes das instruções com 3 itens de texto e vai e volta da API com os campos de cada formato', () => {
+    const blocks = addBlock(prompt.blocks, 'card');
+    expect(blocks.map((block) => block.kind)).toEqual(['collection_item', 'collection_item', 'command', 'card', 'instructions']);
+    const card = blocks[3]!;
+    expect(card.cardItems.map((item) => item.format)).toEqual(['text', 'text', 'text']);
+
+    const filled = {
+      ...card,
+      title: 'Para refletir',
+      cardItems: [
+        { ...card.cardItems[0]!, body: 'Primeiro.', caption: 'Fonte: IBGE.' },
+        { ...card.cardItems[1]!, format: 'image' as const, body: 'some', assetId: 'a9', imageUrl: 'https://res.cloudinary.com/test/image/upload/prompts/a9', alt: 'Gráfico.', aiDescription: 'Barras em queda.' },
+        { ...card.cardItems[2]!, body: 'Terceiro.' },
+      ],
+    };
+    const document = toDocument({ ...prompt, blocks: [filled] });
+    expect(document.blocks![0]).toMatchObject({ kind: 'card' });
+    expect(document.blocks![0]!.data).toEqual({
+      title: 'Para refletir',
+      cardItems: [
+        { format: 'text', body: 'Primeiro.', caption: 'Fonte: IBGE.' },
+        { format: 'image', assetId: 'a9', alt: 'Gráfico.', aiDescription: 'Barras em queda.', caption: '' },
+        { format: 'text', body: 'Terceiro.', caption: '' },
+      ],
+    });
+
+    // A prévia recebe o que o aluno recebe: a imagem pela URL, sem o id do arquivo nem a descrição para a IA.
+    const preview = toPreviewBlocks({ ...prompt, blocks: [filled] })[0]!.data;
+    expect(preview.cardItems![1]).toEqual({ format: 'image', body: undefined, imageUrl: 'https://res.cloudinary.com/test/image/upload/prompts/a9', alt: 'Gráfico.', caption: undefined });
+    expect(JSON.stringify(preview)).not.toContain('Barras em queda');
+
+    // Lido de volta da API, o card fica igual; se vier com menos itens, o editor completa os 3 campos.
+    const read = fromApi({ ...draft, blocks: [{ id: 'c1', position: 10, kind: 'card', data: { title: 'Para refletir', cardItems: [{ format: 'image', assetId: 'a9', alt: 'Gráfico.' }] } }] });
+    expect(read.blocks[0]!.cardItems.map((item) => [item.format, item.assetId])).toEqual([['image', 'a9'], ['text', null], ['text', null]]);
+    expect(duplicateBlock(blocks, card.key).filter((block) => block.kind === 'card')).toHaveLength(2);
   });
 
   it('proposta sem instruções ganha o cartão fixo', () => {
-    const empty = fromApi({ ...draft, blocks: [], essayType: null, genreLabel: null });
+    const empty = fromApi({ ...draft, blocks: [], essayType: null });
 
     expect(empty.blocks.map((block) => [block.kind, block.title])).toEqual([['instructions', 'Instruções']]);
     expect(toDocument(empty).essayType).toBeNull();
@@ -177,7 +220,7 @@ describe('Estado do editor', () => {
     expect(issueTarget('blocks[0].data.aiDescription', prompt.blocks)).toEqual({ blockKey: keys[0], field: 'aiDescription' });
     expect(issueTarget('blocks[2].data', prompt.blocks)).toEqual({ blockKey: keys[2], field: '' });
     expect(issueTarget('gradingNotes.tangentSignals', prompt.blocks)).toEqual({ field: 'tangentSignals' });
-    expect(issueTarget('sheet.maxLines', prompt.blocks)).toEqual({ field: 'maxLines' });
+    expect(issueTarget('blocks[1].data.cardItems[2].aiDescription', prompt.blocks)).toEqual({ blockKey: keys[1], field: 'cardItems[2].aiDescription' });
     expect(issueTarget('title', prompt.blocks)).toEqual({ field: 'title' });
 
     const added = addBlock(prompt.blocks, 'paragraph');
@@ -294,10 +337,19 @@ describe('Editor da proposta', () => {
     expect(screen.getByText('redigiai.com.br/propostas/papel-da-ciencia')).toBeInTheDocument();
     expect(screen.getAllByRole('textbox', { name: /^Posição de/ }).map((input) => (input as HTMLInputElement).value)).toEqual(['10', '20', '30', '40']);
     expect(screen.getByText('Texto 1 · imagem')).toBeInTheDocument();
-    expect(screen.getByText('Tipo, linhas e itens')).toBeInTheDocument();
-    // O cartão das instruções traz o tipo de redação nos dois campos.
-    expect(screen.getByLabelText('Tipo de redação, como na prova')).toHaveValue('Dissertação em prosa');
-    expect(screen.getByLabelText('Categoria de correção')).toHaveValue('dissertacao');
+    expect(screen.getByText('Tipo e itens')).toBeInTheDocument();
+    // O cartão das instruções define o tipo só pela categoria, escolhida na lista que vem da API.
+    const category = screen.getByLabelText('Categoria de correção');
+    await waitFor(() => expect(within(category).getAllByRole('option')).toHaveLength(3));
+    expect(category).toHaveValue('dissertacao-em-prosa');
+    expect(within(category).getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'Escolha',
+      'Dissertação em prosa',
+      'Narrativa (sem perfil de correção ativo)',
+    ]);
+    expect(screen.queryByLabelText('Tipo de redação, como na prova')).toBeNull();
+    expect(screen.queryByLabelText('Mínimo de linhas')).toBeNull();
+    expect(screen.queryByLabelText('Título na redação')).toBeNull();
     expect(screen.getByRole('heading', { name: /Abordagens esperadas do tema/ })).toBeInTheDocument();
     expect(screen.queryByText(/Notas de correção/)).toBeNull();
 
@@ -318,12 +370,13 @@ describe('Editor da proposta', () => {
     expect(within(preview).getByText('Proposta de redação · Fuvest')).toBeInTheDocument();
     expect(within(preview).getByRole('img', { name: 'Tirinha.' })).toBeInTheDocument();
     expect(within(preview).getByText('o papel da ciência').tagName).toBe('STRONG');
-    expect(within(preview).getByText('20 a 30 linhas · com título')).toBeInTheDocument();
-    expect(preview).toHaveTextContent('Tipo de redação: dissertação em prosa.');
+    expect(within(preview).queryByText(/20 a 30 linhas/)).toBeNull();
+    await waitFor(() => expect(preview).toHaveTextContent('Tipo de redação: dissertação em prosa.'));
     expect(within(preview).getByRole('button', { name: 'Computador' })).toHaveAttribute('aria-pressed', 'true');
 
-    await userEvent.type(screen.getByLabelText('Tipo de redação, como na prova'), ' argumentativa');
-    expect(preview).toHaveTextContent('Tipo de redação: dissertação em prosa argumentativa.');
+    // Trocar a categoria troca o tipo que o aluno vê.
+    await userEvent.selectOptions(screen.getByLabelText('Categoria de correção'), 'narrativa');
+    expect(preview).toHaveTextContent('Tipo de redação: narrativa.');
     await userEvent.click(within(preview).getByRole('button', { name: 'Celular' }));
     expect(within(preview).getByRole('button', { name: 'Celular' })).toHaveAttribute('aria-pressed', 'true');
   });
@@ -346,6 +399,66 @@ describe('Editor da proposta', () => {
     expect(within(card).getByRole('button', { name: 'Enviar imagem' })).toBeInTheDocument();
   });
 
+  it('"+ Card com 3 blocos" adiciona o card, cada bloco troca entre texto e imagem, e tudo vai no salvamento e na prévia', async () => {
+    const requests = mockApi({ ...adminHandlers, 'PUT /v1/admin/prompts/p-draft': () => json(saved('2026-10-12T15:30:00.000+00:00')) });
+    renderApp(<AdminArea />, editorRoute);
+    await screen.findByText('Texto 1 · imagem');
+
+    await userEvent.click(screen.getByRole('button', { name: '+ Card com 3 blocos' }));
+    const card = screen.getByText('Card com 3 blocos', { selector: 'span' }).closest('[id^="bloco-"]') as HTMLElement;
+    expect(within(card).getByText('Três blocos empilhados na vertical, dentro de um mesmo card. Cada bloco pode ser texto ou imagem.')).toBeInTheDocument();
+
+    await userEvent.type(within(card).getByLabelText('Título do card (opcional)'), 'Para refletir');
+    const texts = within(card).getAllByLabelText('Texto');
+    expect(texts).toHaveLength(3);
+    await userEvent.type(texts[0]!, 'Primeiro bloco.');
+    await userEvent.type(within(card).getAllByLabelText('Legenda ou fonte (opcional)')[0]!, 'Fonte: IBGE.');
+
+    const second = within(card).getByRole('radiogroup', { name: 'Bloco 2' });
+    await userEvent.click(within(second).getByRole('radio', { name: 'Imagem' }));
+    expect(within(card).getByRole('button', { name: 'Enviar imagem' })).toBeInTheDocument();
+    await userEvent.type(within(card).getByLabelText('Texto alternativo'), 'Gráfico.');
+    await userEvent.type(within(card).getByLabelText('Descrição para a IA'), 'Barras do investimento em queda.');
+    expect(within(card).getAllByLabelText('Texto')).toHaveLength(2);
+
+    const preview = screen.getByRole('complementary', { name: 'Prévia da proposta' });
+    expect(within(preview).getByText('Para refletir')).toBeInTheDocument();
+    expect(within(preview).getByText('Fonte: IBGE.')).toBeInTheDocument();
+    expect(preview).not.toHaveTextContent('Barras do investimento');
+
+    await waitFor(() => expect(requests.filter((r) => r.method === 'PUT').length).toBeGreaterThan(0), { timeout: 4000 });
+    const body = requests.filter((r) => r.method === 'PUT').at(-1)!.body as Schemas['PromptDocument'];
+    expect(body.blocks!.map((block) => block.kind)).toEqual(['collection_item', 'collection_item', 'command', 'card', 'instructions']);
+    expect(body.blocks![3]!.data).toEqual({
+      title: 'Para refletir',
+      cardItems: [
+        { format: 'text', body: 'Primeiro bloco.', caption: 'Fonte: IBGE.' },
+        { format: 'image', assetId: null, alt: 'Gráfico.', aiDescription: 'Barras do investimento em queda.', caption: '' },
+        { format: 'text', body: '', caption: '' },
+      ],
+    });
+  }, 15_000);
+
+  it('a pendência de um item do card leva ao campo dele', async () => {
+    const withCard: Schemas['PromptAdminDto'] = {
+      ...draft,
+      blocks: [
+        ...draft.blocks.slice(0, 3),
+        { id: 'b5', position: 35, kind: 'card', data: { cardItems: [{ format: 'text', body: 'Um.' }, { format: 'image', alt: 'Gráfico.' }, { format: 'text', body: 'Três.' }] } },
+        draft.blocks[3]!,
+      ],
+      issues: [{ path: 'blocks[3].data.cardItems[1].aiDescription', message: 'Card, item 2: descrição para a IA obrigatória (mínimo de 40 caracteres, máximo de 3.000).' }],
+    };
+    mockApi({ ...adminHandlers, 'GET /v1/admin/prompts/p-draft': json(withCard) });
+    renderApp(<AdminArea />, editorRoute);
+
+    const issues = (await screen.findAllByRole('alert'))[0]!;
+    await userEvent.click(within(issues).getByRole('button', { name: /Card, item 2/ }));
+
+    const card = screen.getByText('Card com 3 blocos', { selector: 'span' }).closest('[id^="bloco-"]') as HTMLElement;
+    expect(within(card).getByLabelText('Descrição para a IA')).toHaveFocus();
+  });
+
   it('negrito e itálico envolvem o trecho selecionado', async () => {
     mockApi(adminHandlers);
     renderApp(<AdminArea />, editorRoute);
@@ -365,22 +478,22 @@ describe('Editor da proposta', () => {
     const order = () => screen.getAllByRole('textbox', { name: /^Posição de/ }).map((input) => input.getAttribute('aria-label')!.replace('Posição de ', ''));
 
     await userEvent.click(screen.getByRole('button', { name: 'Descer Texto 1 · imagem' }));
-    expect(order()).toEqual(['Texto 2 · texto', 'Texto 1 · imagem', 'Enunciado', 'Tipo, linhas e itens']);
+    expect(order()).toEqual(['Texto 2 · texto', 'Texto 1 · imagem', 'Enunciado', 'Tipo e itens']);
 
     const position = screen.getByRole('textbox', { name: 'Posição de Enunciado' });
     await userEvent.clear(position);
     await userEvent.type(position, '5{Enter}');
-    expect(order()).toEqual(['Enunciado', 'Texto 2 · texto', 'Texto 1 · imagem', 'Tipo, linhas e itens']);
+    expect(order()).toEqual(['Enunciado', 'Texto 2 · texto', 'Texto 1 · imagem', 'Tipo e itens']);
     expect(screen.getAllByRole('textbox', { name: /^Posição de/ }).map((input) => (input as HTMLInputElement).value)).toEqual(['10', '20', '30', '40']);
 
     await userEvent.click(screen.getByRole('button', { name: 'Duplicar Texto 2 · texto' }));
     expect(order()).toContain('Texto 2 (cópia) · texto');
     await userEvent.click(screen.getByRole('button', { name: 'Remover Texto 2 (cópia) · texto' }));
     await userEvent.click(screen.getByRole('button', { name: '+ Separador' }));
-    expect(order()).toEqual(['Enunciado', 'Texto 2 · texto', 'Texto 1 · imagem', 'Linha separadora', 'Tipo, linhas e itens']);
+    expect(order()).toEqual(['Enunciado', 'Texto 2 · texto', 'Texto 1 · imagem', 'Linha separadora', 'Tipo e itens']);
     // O cartão das instruções é fixo: não se duplica nem se remove.
-    expect(screen.getByRole('button', { name: 'Remover Tipo, linhas e itens' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Duplicar Tipo, linhas e itens' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Remover Tipo e itens' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Duplicar Tipo e itens' })).toBeDisabled();
   });
 
   it('salva sozinho 2 segundos depois da última alteração, com a data que o editor tinha', async () => {

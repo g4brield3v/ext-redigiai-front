@@ -46,6 +46,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/exams/{slug}/essay-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * As categorias de correção do vestibular, para a lista do cartão Instruções, com a indicação de quais têm
+         *     perfil de correção ativo. Vestibular desconhecido responde 404.
+         */
+        get: operations["listEssayTypes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/admin/prompts": {
         parameters: {
             query?: never;
@@ -690,6 +710,15 @@ export interface components {
             maxScore: null | number;
             failureCode: null | string;
         };
+        EssayTypeDto: {
+            slug: string;
+            name: string;
+        };
+        EssayTypeOptionDto: {
+            slug: string;
+            name: string;
+            hasActiveProfile: boolean;
+        };
         ExamDto: {
             slug: string;
             name: string;
@@ -753,8 +782,6 @@ export interface components {
             summary: null | string;
             sourceLabel: null | string;
             essayType: null | string;
-            genreLabel: null | string;
-            sheet: components["schemas"]["PromptSheetDto"];
             blocks: components["schemas"]["PromptBlockDto"][];
             gradingNotes: components["schemas"]["PromptNotesDto"];
             /** Format: date-time */
@@ -776,6 +803,7 @@ export interface components {
             title?: null | string;
             items?: null | string[];
             text?: null | string;
+            cardItems?: null | components["schemas"]["PromptCardItemDto"][];
             imageUrl?: null | string;
         };
         PromptBlockDto: {
@@ -797,12 +825,30 @@ export interface components {
             title?: null | string;
             items?: null | string[];
             text?: null | string;
+            cardItems?: null | components["schemas"]["PromptCardItemPublicDto"][];
         };
         PromptBlockPublicDto: {
             /** Format: int32 */
             position: number;
             kind: string;
             data: components["schemas"]["PromptBlockPublicDataDto"];
+        };
+        PromptCardItemDto: {
+            format?: null | string;
+            body?: null | string;
+            /** Format: uuid */
+            assetId?: null | string;
+            alt?: null | string;
+            aiDescription?: null | string;
+            caption?: null | string;
+            imageUrl?: null | string;
+        };
+        PromptCardItemPublicDto: {
+            format?: null | string;
+            body?: null | string;
+            imageUrl?: null | string;
+            alt?: null | string;
+            caption?: null | string;
         };
         PromptCountsDto: {
             /** Format: int32 */
@@ -823,20 +869,12 @@ export interface components {
             status: components["schemas"]["PromptStatus"];
             title: string;
             summary: null | string;
-            genreLabel: string;
-            /** Format: uuid */
-            essayTypeId: string;
-            essayTypeName: string;
+            essayType: components["schemas"]["EssayTypeDto"];
             essayTitle: string;
             examSlug: string;
             examName: string;
             /** Format: int32 */
             sheetLines: number;
-            /** Format: int32 */
-            minLines: null | number;
-            /** Format: int32 */
-            maxLines: null | number;
-            titleRequired: boolean;
             /** Format: int32 */
             textCount: number;
             blocks: components["schemas"]["PromptBlockPublicDto"][];
@@ -848,8 +886,6 @@ export interface components {
             summary?: null | string;
             sourceLabel?: null | string;
             essayType?: null | string;
-            genreLabel?: null | string;
-            sheet?: null | components["schemas"]["PromptSheetDto"];
             blocks?: null | components["schemas"]["PromptBlockDto"][];
             gradingNotes?: null | components["schemas"]["PromptNotesDto"];
             /** Format: date-time */
@@ -882,7 +918,6 @@ export interface components {
             version: number;
             status: components["schemas"]["PromptStatus"];
             title: string;
-            genreLabel: null | string;
             essayTypeName: null | string;
             /** Format: int32 */
             textCount: number;
@@ -908,13 +943,6 @@ export interface components {
             blocks: components["schemas"]["SavedBlockDto"][];
             issues: components["schemas"]["PromptIssueDto"][];
         };
-        PromptSheetDto: {
-            /** Format: int32 */
-            minLines?: null | number;
-            /** Format: int32 */
-            maxLines?: null | number;
-            titleRequired?: null | boolean;
-        };
         /** @enum {unknown} */
         PromptStatus: "draft" | "published" | "archived";
         PromptSummaryDto: {
@@ -923,15 +951,9 @@ export interface components {
             slug: string;
             title: string;
             summary: null | string;
-            genreLabel: string;
-            essayTypeName: string;
+            essayType: components["schemas"]["EssayTypeDto"];
             /** Format: int32 */
             textCount: number;
-            /** Format: int32 */
-            minLines: null | number;
-            /** Format: int32 */
-            maxLines: null | number;
-            titleRequired: boolean;
             examSlug: string;
             examName: string;
         };
@@ -1217,6 +1239,55 @@ export interface operations {
             };
             /** @description Unprocessable Entity */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listEssayTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EssayTypeOptionDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

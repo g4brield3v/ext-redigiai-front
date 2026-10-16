@@ -105,7 +105,9 @@ test.describe('Proposta e coletânea', () => {
     await page.goto(`/propostas/${PROMPT_SLUG}`);
 
     await expect(page.getByRole('heading', { level: 1, name: 'Algoritmos e o debate público' })).toBeVisible();
-    await expect(page.getByText('20 a 30 linhas · com título')).toBeVisible();
+    // Linhas e título vêm nos itens das instruções, não num chip.
+    await expect(page.getByText('20 a 30 linhas · com título')).toHaveCount(0);
+    await expect(page.getByText('Escreva, no mínimo, 20 linhas', { exact: false })).toBeVisible();
     await expect(page.getByText('Trecho do texto 2, exatamente como na prova.')).toBeVisible();
     await expect(page.getByText('Primeiro verso da coluna três')).toBeVisible();
     await expect(page.getByText('Trecho do texto 4.')).toBeVisible();
@@ -151,7 +153,7 @@ test.describe('Envio', () => {
     const send = page.getByRole('button', { name: 'Enviar para correção' });
     await expect(send).toBeDisabled();
     // O título vem da API e já aparece antes da foto: não depende de nenhuma escolha do aluno.
-    await expect(page.getByText('Fuvest – Dissertação – Algoritmos e o debate público')).toBeVisible();
+    await expect(page.getByText('Fuvest – Dissertação em prosa – Algoritmos e o debate público')).toBeVisible();
 
     await choosePhoto(page);
     expect(await horizontalOverflow(page)).toBe(0);

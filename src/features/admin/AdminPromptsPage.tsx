@@ -46,7 +46,7 @@ function detailOf(item: Item, items: Item[]) {
     return `${item.examName} · v${item.version} substituída pela v${replacement.version}`;
   }
   const texts = `${item.textCount} ${item.textCount === 1 ? 'texto' : 'textos'}`;
-  return [item.examName, item.genreLabel ?? item.essayTypeName, texts].filter(Boolean).join(' · ');
+  return [item.examName, item.essayTypeName, texts].filter(Boolean).join(' · ');
 }
 
 /** Um documento de proposta lido de um arquivo: só precisa ser um objeto JSON; quem valida o conteúdo é a API. */

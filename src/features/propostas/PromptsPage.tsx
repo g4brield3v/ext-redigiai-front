@@ -69,7 +69,7 @@ function PromptCard({ prompt, essay }: { prompt: Schemas['PromptSummaryDto']; es
       <h3 className={`serif ${styles.themeTitle}`}>{prompt.title}</h3>
       {prompt.summary && <span className={`muted ${styles.themeTexts}`}>{prompt.summary}</span>}
       <div className={styles.themeTypes}>
-        <Chip>{prompt.genreLabel}</Chip>
+        <Chip>{prompt.essayType.name}</Chip>
       </div>
       <span className={`muted ${styles.themeTexts}`}>
         Coletânea com {prompt.textCount} {prompt.textCount === 1 ? 'texto' : 'textos'}

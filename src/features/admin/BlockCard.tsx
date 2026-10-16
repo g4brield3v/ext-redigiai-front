@@ -3,15 +3,9 @@ import { useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { errorMessage } from '../../lib/api';
 import styles from './Admin.module.css';
-import { uploadImage } from './adminApi';
-import { FORMAT_LABEL, KIND_LABEL, MAX_COLUMNS, blockTitle } from './editorState';
-import type { CollectionFormat, EditorBlock, EditorPrompt } from './editorState';
-
-/** Categorias de correção da Fuvest (docs/07-propostas-de-redacao.md, B3). */
-export const ESSAY_TYPES = [
-  { slug: 'dissertacao', name: 'Dissertação' },
-  { slug: 'narrativa', name: 'Narrativa' },
-];
+import { uploadImage, useEssayTypes } from './adminApi';
+import { CARD_FORMAT_LABEL, FORMAT_LABEL, KIND_LABEL, MAX_COLUMNS, blockTitle, updateCardItem } from './editorState';
+import type { CardItemFormat, CollectionFormat, EditorBlock, EditorPrompt } from './editorState';
 
 type FieldProps = {
   label: string;
@@ -109,39 +103,67 @@ type CardProps = {
   onDropHere: () => void;
 };
 
-function ImageFields({ block, readOnly, onChange }: Pick<CardProps, 'block' | 'readOnly' | 'onChange'>) {
+type ImageUploadProps = {
+  /** Nome acessível do campo de arquivo ("Imagem do Texto 1"). */
+  label: string;
+  /** Campo da pendência de arquivo que falta (`assetId`, `cardItems[1].assetId`). */
+  field: string;
+  imageUrl: string | null;
+  readOnly: boolean;
+  onUploaded: (image: { assetId: string; imageUrl: string }) => void;
+};
+
+/** A miniatura que abre a escolha do arquivo e envia a imagem para a pasta pública das propostas. */
+function ImageUpload({ label, field, imageUrl, readOnly, onUploaded }: ImageUploadProps) {
   const file = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const upload = useMutation({
     mutationFn: uploadImage,
-    onSuccess: (image) => onChange({ assetId: image.assetId, imageUrl: image.url }),
+    onSuccess: (image) => onUploaded({ assetId: image.assetId, imageUrl: image.url }),
   });
 
   return (
+    <div className={styles.field}>
+      <input
+        ref={file}
+        className="visually-hidden"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        aria-label={label}
+        data-field={field}
+        disabled={readOnly}
+        onChange={(event) => {
+          const chosen = event.target.files?.[0];
+          event.target.value = '';
+          if (chosen) {
+            setFileName(chosen.name);
+            upload.mutate(chosen);
+          }
+        }}
+      />
+      <button type="button" className={styles.thumb} disabled={readOnly} onClick={() => file.current?.click()}>
+        {upload.isPending ? 'Enviando…' : imageUrl ? <img src={imageUrl} alt="" /> : (fileName ?? 'Enviar imagem')}
+      </button>
+      {upload.error && (
+        <span className={styles.errorText} role="alert">
+          {errorMessage(upload.error)}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ImageFields({ block, readOnly, onChange }: Pick<CardProps, 'block' | 'readOnly' | 'onChange'>) {
+  return (
     <>
       <div className={styles.imageRow}>
-        <div className={styles.field}>
-          <input
-            ref={file}
-            className="visually-hidden"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            aria-label={`Imagem do ${block.label || 'texto'}`}
-            data-field="assetId"
-            disabled={readOnly}
-            onChange={(event) => {
-              const chosen = event.target.files?.[0];
-              event.target.value = '';
-              if (chosen) {
-                setFileName(chosen.name);
-                upload.mutate(chosen);
-              }
-            }}
-          />
-          <button type="button" className={styles.thumb} disabled={readOnly} onClick={() => file.current?.click()}>
-            {upload.isPending ? 'Enviando…' : block.imageUrl ? <img src={block.imageUrl} alt="" /> : (fileName ?? 'Enviar imagem')}
-          </button>
-        </div>
+        <ImageUpload
+          label={`Imagem do ${block.label || 'texto'}`}
+          field="assetId"
+          imageUrl={block.imageUrl}
+          readOnly={readOnly}
+          onUploaded={(image) => onChange(image)}
+        />
         <AdminField label="Rótulo" name="label">
           {(props) => <input {...props} className={styles.input} value={block.label} disabled={readOnly} onChange={(event) => onChange({ label: event.target.value })} />}
         </AdminField>
@@ -149,11 +171,6 @@ function ImageFields({ block, readOnly, onChange }: Pick<CardProps, 'block' | 'r
           {(props) => <input {...props} className={styles.input} value={block.source} disabled={readOnly} onChange={(event) => onChange({ source: event.target.value })} />}
         </AdminField>
       </div>
-      {upload.error && (
-        <span className={styles.errorText} role="alert">
-          {errorMessage(upload.error)}
-        </span>
-      )}
       <AdminField label="Texto alternativo (para leitores de tela)" name="alt">
         {(props) => (
           <input {...props} className={styles.input} value={block.alt} disabled={readOnly} placeholder="Descreva a imagem em uma frase" onChange={(event) => onChange({ alt: event.target.value })} />
@@ -267,53 +284,122 @@ function CollectionFields({ block, readOnly, onChange }: Pick<CardProps, 'block'
 }
 
 function InstructionsFields({ block, prompt, readOnly, onChange, onPromptChange }: Pick<CardProps, 'block' | 'prompt' | 'readOnly' | 'onChange' | 'onPromptChange'>) {
+  const types = useEssayTypes(prompt.exam);
+  // Enquanto a lista não chega (ou se falhou), a categoria salva continua aparecendo selecionada.
+  const options = types.data ?? (prompt.essayType ? [{ slug: prompt.essayType, name: prompt.essayType, hasActiveProfile: true }] : []);
+
   return (
     <>
       <AdminField label="Título da seção" name="title">
         {(props) => <input {...props} className={styles.input} value={block.title} disabled={readOnly} onChange={(event) => onChange({ title: event.target.value })} />}
       </AdminField>
-      <div className={styles.typeBox}>
-        <AdminField label="Tipo de redação, como na prova" name="genreLabel" hint="O aluno vê este texto como primeiro item das instruções.">
-          {(props) => (
-            <input {...props} className={styles.input} value={prompt.genreLabel} disabled={readOnly} placeholder="Dissertação em prosa" onChange={(event) => onPromptChange({ genreLabel: event.target.value })} />
-          )}
-        </AdminField>
-        <AdminField label="Categoria de correção" name="essayType" hint="Define a grade e o perfil de correção.">
-          {(props) => (
-            <select {...props} className={styles.input} value={prompt.essayType} disabled={readOnly} onChange={(event) => onPromptChange({ essayType: event.target.value })}>
-              <option value="">Escolha</option>
-              {ESSAY_TYPES.map((type) => (
-                <option key={type.slug} value={type.slug}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </AdminField>
-      </div>
-      <div className={styles.columns3}>
-        <AdminField label="Mínimo de linhas" name="minLines">
-          {(props) => (
-            <input {...props} className={styles.input} inputMode="numeric" value={prompt.minLines} disabled={readOnly} onChange={(event) => onPromptChange({ minLines: event.target.value.replace(/\D/g, '') })} />
-          )}
-        </AdminField>
-        <AdminField label="Máximo de linhas" name="maxLines">
-          {(props) => (
-            <input {...props} className={styles.input} inputMode="numeric" value={prompt.maxLines} disabled={readOnly} onChange={(event) => onPromptChange({ maxLines: event.target.value.replace(/\D/g, '') })} />
-          )}
-        </AdminField>
-        <AdminField label="Título na redação" name="titleRequired">
-          {(props) => (
-            <select {...props} className={styles.input} value={prompt.titleRequired ? 'sim' : 'nao'} disabled={readOnly} onChange={(event) => onPromptChange({ titleRequired: event.target.value === 'sim' })}>
-              <option value="sim">Obrigatório</option>
-              <option value="nao">Opcional</option>
-            </select>
-          )}
-        </AdminField>
-      </div>
-      <AdminField label="Itens (um por linha)" name="items">
+      <AdminField
+        label="Categoria de correção"
+        name="essayType"
+        hint="Define o tipo de redação e o perfil de correção. O aluno vê o nome da categoria como primeiro item das instruções."
+      >
+        {(props) => (
+          <select {...props} className={styles.input} value={prompt.essayType} disabled={readOnly} onChange={(event) => onPromptChange({ essayType: event.target.value })}>
+            <option value="">Escolha</option>
+            {options.map((type) => (
+              <option key={type.slug} value={type.slug}>
+                {type.hasActiveProfile ? type.name : `${type.name} (sem perfil de correção ativo)`}
+              </option>
+            ))}
+          </select>
+        )}
+      </AdminField>
+      {types.error && (
+        <span className={styles.errorText} role="alert">
+          {errorMessage(types.error)}
+        </span>
+      )}
+      <AdminField label="Itens (um por linha)" name="items" hint="Escreva aqui as regras da prova, como número de linhas e título. A IA lê estes itens.">
         {(props) => <textarea {...props} className={styles.textarea} value={block.items} disabled={readOnly} onChange={(event) => onChange({ items: event.target.value })} />}
       </AdminField>
+    </>
+  );
+}
+
+/** Card com 3 blocos: título opcional e, para cada bloco, texto ou imagem, mais a legenda opcional. */
+function CardFields({ block, readOnly, onChange }: Pick<CardProps, 'block' | 'readOnly' | 'onChange'>) {
+  return (
+    <>
+      <p className={`${styles.hint} ${styles.cardHint}`}>
+        Três blocos empilhados na vertical, dentro de um mesmo card. Cada bloco pode ser texto ou imagem.
+      </p>
+      <AdminField label="Título do card (opcional)" name="title">
+        {(props) => (
+          <input {...props} className={styles.input} value={block.title} disabled={readOnly} placeholder="Ex.: Para refletir" onChange={(event) => onChange({ title: event.target.value })} />
+        )}
+      </AdminField>
+      {block.cardItems.map((item, index) => {
+        const field = `cardItems[${index}]`;
+        const change = (changes: Parameters<typeof updateCardItem>[2]) => onChange(updateCardItem(block, index, changes));
+        const groupId = `card-${block.key}-${index}`;
+        return (
+          <div key={index} className={styles.cardItem}>
+            <div className={styles.cardItemHead}>
+              <span className={styles.cardNumber} aria-hidden="true">
+                {index + 1}
+              </span>
+              <strong id={groupId}>Bloco {index + 1}</strong>
+              <div className={styles.segmented} role="radiogroup" aria-labelledby={groupId}>
+                {(Object.keys(CARD_FORMAT_LABEL) as CardItemFormat[]).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    role="radio"
+                    aria-checked={item.format === option}
+                    data-field={option === item.format ? `${field}.format` : undefined}
+                    disabled={readOnly}
+                    onClick={() => change({ format: option })}
+                  >
+                    {CARD_FORMAT_LABEL[option]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {item.format === 'image' ? (
+              <div className={styles.cardImageRow}>
+                <ImageUpload
+                  label={`Imagem do bloco ${index + 1}`}
+                  field={`${field}.assetId`}
+                  imageUrl={item.imageUrl}
+                  readOnly={readOnly}
+                  onUploaded={(image) => change(image)}
+                />
+                <div className={styles.cardImageFields}>
+                  <AdminField label="Texto alternativo" name={`${field}.alt`}>
+                    {(props) => (
+                      <input {...props} className={styles.input} value={item.alt} disabled={readOnly} placeholder="Descreva a imagem em uma frase" onChange={(event) => change({ alt: event.target.value })} />
+                    )}
+                  </AdminField>
+                  <AdminField label="Descrição para a IA" name={`${field}.aiDescription`}>
+                    {(props) => (
+                      <textarea
+                        {...props}
+                        className={styles.textarea}
+                        value={item.aiDescription}
+                        disabled={readOnly}
+                        placeholder="Descreva tudo o que a imagem mostra, com as falas transcritas"
+                        onChange={(event) => change({ aiDescription: event.target.value })}
+                      />
+                    )}
+                  </AdminField>
+                </div>
+              </div>
+            ) : (
+              <MarkdownArea label="Texto" name={`${field}.body`} value={item.body} disabled={readOnly} onChange={(body) => change({ body })} />
+            )}
+            <AdminField label="Legenda ou fonte (opcional)" name={`${field}.caption`}>
+              {(props) => (
+                <input {...props} className={styles.input} value={item.caption} disabled={readOnly} placeholder="Ex.: Fonte: IBGE, 2024." onChange={(event) => change({ caption: event.target.value })} />
+              )}
+            </AdminField>
+          </div>
+        );
+      })}
     </>
   );
 }
@@ -396,6 +482,7 @@ export function BlockCard(props: CardProps) {
       {block.kind !== 'divider' && (
         <div className={styles.blockBody}>
           {block.kind === 'collection_item' && <CollectionFields block={block} readOnly={readOnly} onChange={onChange} />}
+          {block.kind === 'card' && <CardFields block={block} readOnly={readOnly} onChange={onChange} />}
           {block.kind === 'command' && <MarkdownArea label="Enunciado" name="body" value={block.body} disabled={readOnly} onChange={(body) => onChange({ body })} />}
           {block.kind === 'paragraph' && <MarkdownArea label="Parágrafo" name="body" value={block.body} disabled={readOnly} onChange={(body) => onChange({ body })} />}
           {block.kind === 'heading' && (

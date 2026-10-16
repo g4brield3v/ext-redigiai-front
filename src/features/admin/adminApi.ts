@@ -30,6 +30,16 @@ export function useAdminPrompt(id: string | undefined) {
   });
 }
 
+/** As categorias de correção do vestibular, para a lista do cartão Instruções. Vêm do banco, não da tela. */
+export function useEssayTypes(exam: string) {
+  return useQuery({
+    queryKey: ['admin', 'essay-types', exam],
+    queryFn: () => unwrap(api.GET('/v1/admin/exams/{slug}/essay-types', { params: { path: { slug: exam } } })),
+    enabled: !!exam,
+    staleTime: 5 * 60_000,
+  });
+}
+
 /** Cria um rascunho, vazio ou a partir do JSON importado. A chave evita rascunhos em dobro num clique repetido. */
 export function createPrompt(document: Schemas['PromptDocument'], idempotencyKey: string) {
   return unwrap(api.POST('/v1/admin/prompts', { params: { header: { 'Idempotency-Key': idempotencyKey } }, body: document }));

@@ -3,8 +3,20 @@
 
 import type { Schemas } from '../../lib/api';
 
-export type BlockKind = 'collection_item' | 'command' | 'instructions' | 'heading' | 'paragraph' | 'divider';
+export type BlockKind = 'collection_item' | 'card' | 'command' | 'instructions' | 'heading' | 'paragraph' | 'divider';
 export type CollectionFormat = 'prose' | 'verse' | 'image';
+export type CardItemFormat = 'text' | 'image';
+
+/** Um dos 3 itens do card: texto ou imagem, com a legenda opcional. */
+export type EditorCardItem = {
+  format: CardItemFormat;
+  body: string;
+  assetId: string | null;
+  imageUrl: string | null;
+  alt: string;
+  aiDescription: string;
+  caption: string;
+};
 
 export type EditorBlock = {
   /** Identidade na tela, estável enquanto o editor está aberto. */
@@ -23,10 +35,12 @@ export type EditorBlock = {
   imageUrl: string | null;
   alt: string;
   aiDescription: string;
-  /** Instruções: título da seção. Título de seção: o texto dele. */
+  /** Instruções e card: título. Título de seção: o texto dele. */
   title: string;
   /** Instruções: um item por linha. */
   items: string;
+  /** Card: sempre 3 itens. */
+  cardItems: EditorCardItem[];
 };
 
 export type EditorPrompt = {
@@ -35,11 +49,8 @@ export type EditorPrompt = {
   title: string;
   summary: string;
   sourceLabel: string;
+  /** Categoria de correção: o nome dela é o tipo de redação. */
   essayType: string;
-  genreLabel: string;
-  minLines: string;
-  maxLines: string;
-  titleRequired: boolean;
   blocks: EditorBlock[];
   expectedFocus: string;
   tangentSignals: string;
@@ -51,6 +62,7 @@ export type EditorPrompt = {
 
 export const KIND_LABEL: Record<BlockKind, string> = {
   collection_item: 'Coletânea',
+  card: 'Card',
   command: 'Comando',
   instructions: 'Instruções',
   heading: 'Título de seção',
@@ -60,7 +72,12 @@ export const KIND_LABEL: Record<BlockKind, string> = {
 
 export const FORMAT_LABEL: Record<CollectionFormat, string> = { prose: 'Texto', verse: 'Verso', image: 'Imagem' };
 
+export const CARD_FORMAT_LABEL: Record<CardItemFormat, string> = { text: 'Texto', image: 'Imagem' };
+
 export const MAX_COLUMNS = 4;
+
+/** Um card tem exatamente 3 itens. */
+export const CARD_ITEMS = 3;
 
 let nextKey = 0;
 const newKey = () => `b${++nextKey}`;
@@ -69,6 +86,10 @@ const lines = (text: string) => text.split('\n').map((line) => line.trim()).filt
 
 const isKind = (kind: unknown): kind is BlockKind => typeof kind === 'string' && kind in KIND_LABEL;
 const isFormat = (format: unknown): format is CollectionFormat => format === 'prose' || format === 'verse' || format === 'image';
+
+export function emptyCardItem(): EditorCardItem {
+  return { format: 'text', body: '', assetId: null, imageUrl: null, alt: '', aiDescription: '', caption: '' };
+}
 
 function emptyBlock(kind: BlockKind, position: number): EditorBlock {
   return {
@@ -86,6 +107,7 @@ function emptyBlock(kind: BlockKind, position: number): EditorBlock {
     aiDescription: '',
     title: kind === 'instructions' ? 'Instruções' : '',
     items: '',
+    cardItems: kind === 'card' ? Array.from({ length: CARD_ITEMS }, emptyCardItem) : [],
   };
 }
 
@@ -104,12 +126,25 @@ function withInstructions(blocks: EditorBlock[]): EditorBlock[] {
     : [...blocks, emptyBlock('instructions', (blocks.at(-1)?.position ?? 0) + 10)];
 }
 
+function cardItemFromApi(item: Schemas['PromptCardItemDto']): EditorCardItem {
+  return {
+    format: item.format === 'image' ? 'image' : 'text',
+    body: item.body ?? '',
+    assetId: item.assetId ?? null,
+    imageUrl: item.imageUrl ?? null,
+    alt: item.alt ?? '',
+    aiDescription: item.aiDescription ?? '',
+    caption: item.caption ?? '',
+  };
+}
+
 export function fromApi(prompt: Schemas['PromptAdminDto']): EditorPrompt {
   const blocks = prompt.blocks.flatMap((block): EditorBlock[] => {
     if (!isKind(block.kind)) {
       return [];
     }
     const data = block.data ?? {};
+    const cardItems = (data.cardItems ?? []).map(cardItemFromApi);
     return [
       {
         ...emptyBlock(block.kind, block.position ?? 0),
@@ -125,6 +160,8 @@ export function fromApi(prompt: Schemas['PromptAdminDto']): EditorPrompt {
         aiDescription: data.aiDescription ?? '',
         title: (block.kind === 'heading' ? data.text : data.title) ?? (block.kind === 'instructions' ? 'Instruções' : ''),
         items: (data.items ?? []).join('\n'),
+        // O backend só guarda card com 3 itens; se faltar algum, o editor completa para mostrar os 3 campos.
+        cardItems: block.kind === 'card' ? [...cardItems, ...Array.from({ length: Math.max(0, CARD_ITEMS - cardItems.length) }, emptyCardItem)] : [],
       },
     ];
   });
@@ -137,10 +174,6 @@ export function fromApi(prompt: Schemas['PromptAdminDto']): EditorPrompt {
     summary: prompt.summary ?? '',
     sourceLabel: prompt.sourceLabel ?? '',
     essayType: prompt.essayType ?? '',
-    genreLabel: prompt.genreLabel ?? '',
-    minLines: prompt.sheet.minLines?.toString() ?? '',
-    maxLines: prompt.sheet.maxLines?.toString() ?? '',
-    titleRequired: prompt.sheet.titleRequired ?? false,
     blocks: withInstructions([...blocks].sort((a, b) => a.position - b.position)),
     expectedFocus: notes.expectedFocus ?? '',
     tangentSignals: notes.tangentSignals ?? '',
@@ -150,7 +183,11 @@ export function fromApi(prompt: Schemas['PromptAdminDto']): EditorPrompt {
   };
 }
 
-const number = (text: string) => (/^\d+$/.test(text.trim()) ? Number(text.trim()) : null);
+function cardItemData(item: EditorCardItem): Schemas['PromptCardItemDto'] {
+  return item.format === 'image'
+    ? { format: 'image', assetId: item.assetId, alt: item.alt, aiDescription: item.aiDescription, caption: item.caption }
+    : { format: 'text', body: item.body, caption: item.caption };
+}
 
 function blockData(block: EditorBlock): Schemas['PromptBlockDataDto'] {
   switch (block.kind) {
@@ -164,6 +201,8 @@ function blockData(block: EditorBlock): Schemas['PromptBlockDataDto'] {
         ? { ...common, assetId: block.assetId, alt: block.alt, aiDescription: block.aiDescription }
         : { ...common, body: block.body };
     }
+    case 'card':
+      return { title: block.title, cardItems: block.cardItems.map(cardItemData) };
     case 'command':
     case 'paragraph':
       return { body: block.body };
@@ -185,8 +224,6 @@ export function toDocument(prompt: EditorPrompt, expectedUpdatedAt?: string): Sc
     summary: prompt.summary,
     sourceLabel: prompt.sourceLabel,
     essayType: prompt.essayType || null,
-    genreLabel: prompt.genreLabel,
-    sheet: { minLines: number(prompt.minLines), maxLines: number(prompt.maxLines), titleRequired: prompt.titleRequired },
     blocks: prompt.blocks.map((block) => ({ id: block.id ?? null, position: block.position, kind: block.kind, data: blockData(block) })),
     gradingNotes: {
       expectedFocus: prompt.expectedFocus,
@@ -206,7 +243,25 @@ export function toPreviewBlocks(prompt: EditorPrompt): Schemas['PromptBlockPubli
     const data = { ...blockData(block) };
     delete data.assetId;
     delete data.aiDescription;
-    return { position: block.position, kind: block.kind, data: { ...data, imageUrl: block.kind === 'collection_item' && block.format === 'image' ? block.imageUrl : undefined } };
+    const cardItems = block.kind === 'card'
+      ? block.cardItems.map((item) => ({
+          format: item.format,
+          body: item.format === 'text' ? item.body : undefined,
+          imageUrl: item.format === 'image' ? item.imageUrl : undefined,
+          alt: item.format === 'image' ? item.alt : undefined,
+          caption: item.caption || undefined,
+        }))
+      : undefined;
+    return {
+      position: block.position,
+      kind: block.kind,
+      data: {
+        ...data,
+        title: data.title || undefined,
+        cardItems,
+        imageUrl: block.kind === 'collection_item' && block.format === 'image' ? block.imageUrl : undefined,
+      },
+    };
   });
 }
 
@@ -278,6 +333,11 @@ export function updateBlock(blocks: EditorBlock[], key: string, changes: Partial
   return blocks.map((block) => (block.key === key ? { ...block, ...changes } : block));
 }
 
+/** Muda um item do card, sem tocar nos outros dois. */
+export function updateCardItem(block: EditorBlock, index: number, changes: Partial<EditorCardItem>): Partial<EditorBlock> {
+  return { cardItems: block.cardItems.map((item, position) => (position === index ? { ...item, ...changes } : item)) };
+}
+
 /** Depois de salvar: cada bloco fica com o id que o backend deu a ele, pela posição. */
 export function withSavedIds(blocks: EditorBlock[], saved: Schemas['SavedBlockDto'][]): EditorBlock[] {
   const ids = new Map(saved.map((block) => [block.position, block.id]));
@@ -286,32 +346,34 @@ export function withSavedIds(blocks: EditorBlock[], saved: Schemas['SavedBlockDt
 
 export type IssueTarget = { blockKey?: string; field: string };
 
-/** Para onde uma pendência aponta: `blocks[2].data.source` → o campo "source" do terceiro bloco. */
+/**
+ * Para onde uma pendência aponta: `blocks[2].data.source` → o campo "source" do terceiro bloco;
+ * `blocks[6].data.cardItems[1].aiDescription` → o campo "cardItems[1].aiDescription" do sétimo.
+ */
 export function issueTarget(path: string, blocks: EditorBlock[]): IssueTarget {
-  const block = /^blocks\[(\d+)\](?:\.data)?(?:\.(\w+))?/.exec(path);
+  const block = /^blocks\[(\d+)\](?:\.data)?(?:\.([\w.[\]]+))?/.exec(path);
   if (block) {
     return { blockKey: blocks[Number(block[1])]?.key, field: block[2] ?? '' };
   }
   if (path.startsWith('gradingNotes.')) {
     return { field: path.slice('gradingNotes.'.length) };
   }
-  if (path.startsWith('sheet')) {
-    return { field: path === 'sheet.maxLines' ? 'maxLines' : 'minLines' };
-  }
   return { field: path };
 }
 
-/** "Texto 1 · imagem", "Enunciado", "Tipo, linhas e itens": o nome do cartão na barra dele. */
+/** "Texto 1 · imagem", "Enunciado", "Tipo e itens": o nome do cartão na barra dele. */
 export function blockTitle(block: EditorBlock): string {
   switch (block.kind) {
     case 'collection_item': {
       const detail = block.format === 'verse' ? `verso, ${block.columns.length} ${block.columns.length === 1 ? 'coluna' : 'colunas'}` : FORMAT_LABEL[block.format].toLowerCase();
       return `${block.label || 'Texto'} · ${detail}`;
     }
+    case 'card':
+      return 'Card com 3 blocos';
     case 'command':
       return 'Enunciado';
     case 'instructions':
-      return 'Tipo, linhas e itens';
+      return 'Tipo e itens';
     case 'heading':
       return block.title || 'Título de seção';
     case 'paragraph':

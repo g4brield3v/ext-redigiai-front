@@ -7,7 +7,7 @@ import { ApiError, errorMessage } from '../../lib/api';
 import type { Schemas } from '../../lib/api';
 import { usePrompt } from '../../lib/queries';
 import styles from './ProposalPage.module.css';
-import { genreInSentence, sheetSummary } from './summary';
+import { genreInSentence } from './summary';
 
 const apiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5080';
 
@@ -72,12 +72,41 @@ function CollectionItem({ data }: { data: Block['data'] }) {
   );
 }
 
+/** Card com 3 itens empilhados, na ordem cadastrada: texto ou imagem, cada um com a legenda opcional embaixo. */
+function CardBlock({ data }: { data: Block['data'] }) {
+  return (
+    <section className={styles.cardBlock}>
+      <div className={styles.cardBox}>
+        {data.title && <strong className={styles.cardTitle}>{data.title}</strong>}
+        {(data.cardItems ?? []).map((item, index) => (
+          <div key={index} className={styles.cardItem}>
+            {item.format === 'image' ? (
+              item.imageUrl ? (
+                <img className={styles.image} src={item.imageUrl} alt={item.alt ?? ''} />
+              ) : (
+                <div className={`muted ${styles.imageMissing}`}>{item.alt ?? '[Imagem]'}</div>
+              )
+            ) : (
+              <p>
+                <RichText text={item.body ?? ''} />
+              </p>
+            )}
+            <Source text={item.caption} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /** Os blocos na ordem em que o administrador os cadastrou: a mesma que a correção recebe. */
-function PromptBlock({ block, genreLabel }: { block: Block; genreLabel: string }) {
+function PromptBlock({ block, genre }: { block: Block; genre: string }) {
   const data = block.data;
   switch (block.kind) {
     case 'collection_item':
       return <CollectionItem data={data} />;
+    case 'card':
+      return <CardBlock data={data} />;
     case 'command':
       return (
         <section className={styles.command}>
@@ -92,7 +121,7 @@ function PromptBlock({ block, genreLabel }: { block: Block; genreLabel: string }
           <span className={styles.instructionsTitle}>{data.title ?? 'Instruções'}</span>
           <ul>
             <li>
-              <strong>Tipo de redação:</strong> {genreInSentence(genreLabel)}
+              <strong>Tipo de redação:</strong> {genreInSentence(genre)}
             </li>
             {(data.items ?? []).map((item, index) => (
               <li key={index}>
@@ -119,13 +148,13 @@ function PromptBlock({ block, genreLabel }: { block: Block; genreLabel: string }
 
 /**
  * O conteúdo da proposta, bloco a bloco, como o aluno lê. A prévia do cadastro usa este mesmo componente, para o
- * administrador ver exatamente o que vai ao ar.
+ * administrador ver exatamente o que vai ao ar. O tipo de redação é o nome da categoria de correção.
  */
-export function PromptBlocks({ blocks, genreLabel }: { blocks: Block[]; genreLabel: string }) {
+export function PromptBlocks({ blocks, genre }: { blocks: Block[]; genre: string }) {
   return (
     <div className={styles.blocks}>
       {blocks.map((block, index) => (
-        <PromptBlock key={`${block.position}-${index}`} block={block} genreLabel={genreLabel} />
+        <PromptBlock key={`${block.position}-${index}`} block={block} genre={genre} />
       ))}
     </div>
   );
@@ -159,7 +188,6 @@ export function ProposalPage() {
   const notAvailable = prompt.error instanceof ApiError && prompt.error.code === 'PROMPT_NOT_AVAILABLE';
   const archived = data?.status === 'archived';
   const submit = `/propostas/${encodeURIComponent(slug ?? '')}/enviar`;
-  const summary = data ? sheetSummary(data) : '';
 
   return (
     <>
@@ -177,11 +205,10 @@ export function ProposalPage() {
           </h1>
           {data && (
             <div className={styles.chips}>
-              <Chip>{data.genreLabel}</Chip>
+              <Chip>{data.essayType.name}</Chip>
               <Chip>
                 Coletânea com {data.textCount} {data.textCount === 1 ? 'texto' : 'textos'}
               </Chip>
-              {summary && <Chip>{summary}</Chip>}
             </div>
           )}
         </div>
@@ -202,7 +229,7 @@ export function ProposalPage() {
                   <Link to={`/propostas/${encodeURIComponent(data.slug)}`}>Ver a versão atual</Link>
                 </Notice>
               )}
-              <PromptBlocks blocks={data.blocks} genreLabel={data.genreLabel} />
+              <PromptBlocks blocks={data.blocks} genre={data.essayType.name} />
               {!archived && (
                 <div className={styles.ready}>
                   <span>

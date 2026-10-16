@@ -8,7 +8,6 @@ import { AlertIcon, CheckIcon, ErrorState, SheetThumb, Skeleton } from '../../co
 import { ApiError, errorMessage } from '../../lib/api';
 import { formatSize } from '../../lib/format';
 import { usePrompt } from '../../lib/queries';
-import { sheetSummary } from '../proposta/summary';
 import { useAuthState } from '../auth/AuthContext';
 import { ConfirmSendModal } from './ConfirmSendModal';
 import type { PendingEssay } from './ConfirmSendModal';
@@ -142,7 +141,6 @@ export function SubmitPage() {
 
   const notAvailable = prompt.error instanceof ApiError && prompt.error.code === 'PROMPT_NOT_AVAILABLE';
   const proposal = `/propostas/${encodeURIComponent(slug ?? '')}${version ? `?versao=${version}` : ''}`;
-  const sheet = prompt.data ? sheetSummary(prompt.data) : '';
   const cost = Math.max(photos.length, 1);
 
   return (
@@ -177,8 +175,7 @@ export function SubmitPage() {
                 <h2 className="h3">Sua redação</h2>
                 <div className={styles.genre}>
                   <span className={`muted ${styles.small13}`}>Tipo de redação, definido pela proposta</span>
-                  <span className={styles.strong}>{prompt.data.genreLabel}</span>
-                  {sheet && <span className={`muted ${styles.small}`}>{sheet}</span>}
+                  <span className={styles.strong}>{prompt.data.essayType.name}</span>
                 </div>
               </section>
 

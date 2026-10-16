@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Chip } from '../../components/primitives';
 import { PromptBlocks } from '../proposta/ProposalPage';
-import { sheetSummary } from '../proposta/summary';
 import styles from './Admin.module.css';
+import { useEssayTypes } from './adminApi';
 import { toPreviewBlocks } from './editorState';
 import type { EditorPrompt } from './editorState';
 
@@ -19,9 +19,8 @@ const PANEL = 376;
 export function PromptPreview({ prompt, examName }: { prompt: EditorPrompt; examName: string }) {
   const [mode, setMode] = useState<'desktop' | 'mobile'>('desktop');
   const collection = prompt.blocks.filter((block) => block.kind === 'collection_item').length;
-  const minLines = /^\d+$/.test(prompt.minLines) ? Number(prompt.minLines) : null;
-  const maxLines = /^\d+$/.test(prompt.maxLines) ? Number(prompt.maxLines) : null;
-  const summary = sheetSummary({ minLines, maxLines, titleRequired: prompt.titleRequired });
+  // O tipo de redação é o nome da categoria escolhida.
+  const genre = useEssayTypes(prompt.exam).data?.find((type) => type.slug === prompt.essayType)?.name ?? '';
   const zoom = Math.min(1, PANEL / WIDTH[mode]);
 
   return (
@@ -42,13 +41,12 @@ export function PromptPreview({ prompt, examName }: { prompt: EditorPrompt; exam
           <span className="eyebrow">Proposta de redação · {examName}</span>
           <h3 className="serif">{prompt.title || 'Título da proposta'}</h3>
           <div className={styles.previewChips}>
-            {prompt.genreLabel && <Chip>{prompt.genreLabel}</Chip>}
+            {genre && <Chip>{genre}</Chip>}
             <Chip>
               Coletânea com {collection} {collection === 1 ? 'texto' : 'textos'}
             </Chip>
-            {summary && <Chip>{summary}</Chip>}
           </div>
-          <PromptBlocks blocks={toPreviewBlocks(prompt)} genreLabel={prompt.genreLabel || 'tipo de redação'} />
+          <PromptBlocks blocks={toPreviewBlocks(prompt)} genre={genre || 'tipo de redação'} />
           <span className={styles.previewSend}>Enviar minha redação</span>
         </div>
       </div>
