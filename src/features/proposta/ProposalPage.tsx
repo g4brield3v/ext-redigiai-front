@@ -1,26 +1,162 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
-import { Chip, ErrorState, Skeleton } from '../../components/primitives';
+import { Chip, ErrorState, Notice, Skeleton } from '../../components/primitives';
+import { RichText } from '../../components/RichText';
 import { ApiError, errorMessage } from '../../lib/api';
 import type { Schemas } from '../../lib/api';
-import { useTheme } from '../../lib/queries';
+import { usePrompt } from '../../lib/queries';
 import styles from './ProposalPage.module.css';
+import { genreInSentence } from './summary';
 
 const apiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5080';
 
-function CollectionText({ text }: { text: Schemas['ThemeTextDto'] }) {
+type Block = Schemas['PromptBlockPublicDto'];
+
+function Source({ text }: { text?: string | null }) {
+  return text ? (
+    <p className={styles.source}>
+      <RichText text={text} />
+    </p>
+  ) : null;
+}
+
+/** Um texto da coletânea: prosa, verso em colunas ou imagem, com o rótulo e a fonte. */
+function CollectionItem({ data }: { data: Block['data'] }) {
+  const label = data.label ? <strong className={styles.label}>{data.label}:</strong> : null;
+
+  if (data.format === 'image') {
+    return (
+      <section className={styles.block}>
+        <div className={styles.labeled}>
+          {label}
+          {data.imageUrl ? (
+            <img className={styles.image} src={data.imageUrl} alt={data.alt ?? ''} />
+          ) : (
+            <div className={`muted ${styles.imageMissing}`}>{data.alt ?? '[Imagem]'}</div>
+          )}
+        </div>
+        <Source text={data.source} />
+      </section>
+    );
+  }
+
+  if (data.format === 'verse') {
+    return (
+      <section className={styles.block}>
+        <div className={styles.labeled}>
+          {label}
+          <div className={styles.verse}>
+            {(data.columns ?? []).map((column, index) => (
+              <div key={index} className={styles.column}>
+                {column.map((verse, line) => (
+                  // Verso vazio separa as estrofes: ocupa a linha dele.
+                  <span key={line}>{verse ? <RichText text={verse} /> : ' '}</span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        <Source text={data.source} />
+      </section>
+    );
+  }
+
   return (
-    <section className={styles.text}>
-      <span className={styles.textNumber}>Texto {text.position}</span>
-      <h3 className={`serif ${styles.textTitle}`}>{text.title}</h3>
-      {text.kind === 'image' ? (
-        <div className={`muted ${styles.image}`}>[Imagem]</div>
-      ) : (
-        <p className={styles.textBody}>{text.body}</p>
-      )}
-      <p className={`muted ${styles.source}`}>{text.source}</p>
+    <section className={styles.block}>
+      <p className={styles.prose}>
+        {label} <RichText text={data.body ?? ''} />
+      </p>
+      <Source text={data.source} />
     </section>
+  );
+}
+
+/** Card com 3 itens empilhados, na ordem cadastrada: texto ou imagem, cada um com a legenda opcional embaixo. */
+function CardBlock({ data }: { data: Block['data'] }) {
+  return (
+    <section className={styles.cardBlock}>
+      <div className={styles.cardBox}>
+        {data.title && <strong className={styles.cardTitle}>{data.title}</strong>}
+        {(data.cardItems ?? []).map((item, index) => (
+          <div key={index} className={styles.cardItem}>
+            {item.format === 'image' ? (
+              item.imageUrl ? (
+                <img className={styles.image} src={item.imageUrl} alt={item.alt ?? ''} />
+              ) : (
+                <div className={`muted ${styles.imageMissing}`}>{item.alt ?? '[Imagem]'}</div>
+              )
+            ) : (
+              <p>
+                <RichText text={item.body ?? ''} />
+              </p>
+            )}
+            <Source text={item.caption} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Os blocos na ordem em que o administrador os cadastrou: a mesma que a correção recebe. */
+function PromptBlock({ block, genre }: { block: Block; genre: string }) {
+  const data = block.data;
+  switch (block.kind) {
+    case 'collection_item':
+      return <CollectionItem data={data} />;
+    case 'card':
+      return <CardBlock data={data} />;
+    case 'command':
+      return (
+        <section className={styles.command}>
+          <p>
+            <RichText text={data.body ?? ''} />
+          </p>
+        </section>
+      );
+    case 'instructions':
+      return (
+        <section className={styles.instructions}>
+          <span className={styles.instructionsTitle}>{data.title ?? 'Instruções'}</span>
+          <ul>
+            <li>
+              <strong>Tipo de redação:</strong> {genreInSentence(genre)}
+            </li>
+            {(data.items ?? []).map((item, index) => (
+              <li key={index}>
+                <RichText text={item} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      );
+    case 'heading':
+      return <h2 className={`h3 ${styles.sectionTitle}`}>{data.text}</h2>;
+    case 'paragraph':
+      return (
+        <p className={styles.paragraph}>
+          <RichText text={data.body ?? ''} />
+        </p>
+      );
+    case 'divider':
+      return <hr className={styles.divider} />;
+    default:
+      return null;
+  }
+}
+
+/**
+ * O conteúdo da proposta, bloco a bloco, como o aluno lê. A prévia do cadastro usa este mesmo componente, para o
+ * administrador ver exatamente o que vai ao ar. O tipo de redação é o nome da categoria de correção.
+ */
+export function PromptBlocks({ blocks, genre }: { blocks: Block[]; genre: string }) {
+  return (
+    <div className={styles.blocks}>
+      {blocks.map((block, index) => (
+        <PromptBlock key={`${block.position}-${index}`} block={block} genre={genre} />
+      ))}
+    </div>
   );
 }
 
@@ -41,12 +177,17 @@ function PageSkeleton() {
   );
 }
 
-/** 2b · Proposta e coletânea do tema. */
+/** 2b · Proposta de redação: a coletânea, o comando e as instruções, na ordem da prova. */
 export function ProposalPage() {
-  const { themeId } = useParams();
-  const theme = useTheme(themeId);
-  const data = theme.data;
-  const notAvailable = theme.error instanceof ApiError && theme.error.code === 'THEME_NOT_AVAILABLE';
+  const { slug } = useParams();
+  const [params] = useSearchParams();
+  // Quem chega de uma redação antiga abre a versão que usou, mesmo que a proposta já tenha outra.
+  const version = Number(params.get('versao')) || undefined;
+  const prompt = usePrompt(slug, version);
+  const data = prompt.data;
+  const notAvailable = prompt.error instanceof ApiError && prompt.error.code === 'PROMPT_NOT_AVAILABLE';
+  const archived = data?.status === 'archived';
+  const submit = `/propostas/${encodeURIComponent(slug ?? '')}/enviar`;
 
   return (
     <>
@@ -54,61 +195,63 @@ export function ProposalPage() {
       <main className={`container ${styles.page}`}>
         <div className={styles.heading}>
           <nav aria-label="Você está em" className={styles.crumbs}>
-            <Link to="/temas">{data?.examName ?? 'Fuvest'}</Link> <span className="muted">/</span> <Link to="/temas">Temas</Link>
+            <Link to="/propostas">{data?.examName ?? 'Fuvest'}</Link> <span className="muted">/</span>{' '}
+            <Link to="/propostas">Propostas</Link>
             {data && <span className="muted"> / {data.title}</span>}
           </nav>
           <span className="eyebrow">Proposta de redação{data ? ` · ${data.examName}` : ''}</span>
           <h1 className={`serif h1 ${styles.title}`}>
-            {data ? data.title : theme.error ? 'Tema' : <Skeleton width={420} height={46} />}
+            {data ? data.title : prompt.error ? 'Proposta' : <Skeleton width={420} height={46} />}
           </h1>
           {data && (
             <div className={styles.chips}>
-              {data.essayTypes.map((type) => (
-                <Chip key={type.id}>{type.name}</Chip>
-              ))}
+              <Chip>{data.essayType.name}</Chip>
               <Chip>
-                Coletânea com {data.texts.length} {data.texts.length === 1 ? 'texto' : 'textos'}
+                Coletânea com {data.textCount} {data.textCount === 1 ? 'texto' : 'textos'}
               </Chip>
             </div>
           )}
         </div>
 
-        {theme.error ? (
+        {prompt.error ? (
           <div className={styles.errorBlock}>
-            <ErrorState message={errorMessage(theme.error)} onRetry={notAvailable ? undefined : () => void theme.refetch()} />
-            {notAvailable && <Button to="/temas">Ver os temas</Button>}
+            <ErrorState message={errorMessage(prompt.error)} onRetry={notAvailable ? undefined : () => void prompt.refetch()} />
+            {notAvailable && <Button to="/propostas">Ver as propostas</Button>}
           </div>
         ) : !data ? (
           <PageSkeleton />
         ) : (
           <div className={styles.columns}>
             <article className={`${styles.card} ${styles.reading}`}>
-              <section className={styles.statement}>
-                <span className="eyebrow">Proposta</span>
-                <p>{data.statement}</p>
-                <div className={styles.instructions}>
-                  {data.essayTypes.map((type) => (
-                    <div key={type.id}>
-                      <span className={styles.strong}>{type.name}</span>
-                      <p className="muted">{type.instruction || type.description}</p>
-                    </div>
-                  ))}
+              {archived && (
+                <Notice>
+                  Esta é a versão da proposta usada na sua redação. Ela foi substituída e não recebe novas redações.{' '}
+                  <Link to={`/propostas/${encodeURIComponent(data.slug)}`}>Ver a versão atual</Link>
+                </Notice>
+              )}
+              <PromptBlocks blocks={data.blocks} genre={data.essayType.name} />
+              {!archived && (
+                <div className={styles.ready}>
+                  <span>
+                    <strong>Já escreveu?</strong> Envie a foto da folha para correção.
+                  </span>
+                  <Button to={submit}>Enviar minha redação</Button>
                 </div>
-              </section>
-              <span className={`eyebrow ${styles.collectionLabel}`}>Coletânea</span>
-              {data.texts.map((text) => (
-                <CollectionText key={text.position} text={text} />
-              ))}
+              )}
             </article>
 
-            <aside className={`${styles.card} ${styles.aside}`} aria-label="Como enviar">
-              <h2 className={`serif h2 ${styles.asideTitle}`}>Escreva à mão, como na prova</h2>
+            <aside className={`${styles.card} ${styles.aside}`} aria-label="Como fazer">
+              <h2 className={`serif h2 ${styles.asideTitle}`}>Como na prova</h2>
               <ol className={styles.steps}>
                 <li>
                   <span className={styles.stepNumber}>1</span>
+                  <span>Leia a coletânea, o comando e as instruções.</span>
+                </li>
+                <li>
+                  <span className={styles.stepNumber}>2</span>
                   <span className={styles.stepWithLink}>
-                    Imprima a folha pautada de {data.sheetLines} linhas.
-                    <a className={styles.download} href={`${apiUrl}/v1/themes/${encodeURIComponent(data.id)}/sheet.pdf`}>
+                    Imprima a folha pautada: ela sai com o tema e o tipo no topo.
+                    <a className={styles.download} href={`${apiUrl}/v1/prompts/${encodeURIComponent(data.id)}/sheet.pdf`}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
                       </svg>
@@ -117,20 +260,19 @@ export function ProposalPage() {
                   </span>
                 </li>
                 <li>
-                  <span className={styles.stepNumber}>2</span>
-                  <span>Escreva a redação na folha, sem nome nem assinatura.</span>
+                  <span className={styles.stepNumber}>3</span>
+                  <span>Escreva à mão, sem nome nem assinatura.</span>
                 </li>
                 <li>
-                  <span className={styles.stepNumber}>3</span>
-                  <span>Fotografe a folha inteira e envie para correção.</span>
+                  <span className={styles.stepNumber}>4</span>
+                  <span>Fotografe a folha e envie.</span>
                 </li>
               </ol>
-              <div className={styles.cta}>
-                <Button block to={`/temas/${encodeURIComponent(data.id)}/enviar`}>
+              {!archived && (
+                <Button block to={submit}>
                   Enviar minha redação
                 </Button>
-                <span className={`muted ${styles.hint}`}>Você escolhe o tipo de redação na próxima página.</span>
-              </div>
+              )}
             </aside>
           </div>
         )}

@@ -7,7 +7,7 @@ Complementa `01-especificacao-tecnica.md`. As telas foram desenhadas e aprovadas
 1. **Confiança e ensino.** Visual sóbrio, azul, muito espaço em branco, tipografia editorial. Nada de gradientes chamativos, emojis, ícones de "IA", brilhos ou cartões coloridos em excesso.
 2. **O backend decide, a tela mostra.** Nota, saldo, prazos, status e regras vêm da API. O front nunca calcula nota, nunca decide se há saldo e nunca muda status sozinho.
 3. **Título sempre no formato "Vestibular – Tipo – Tema"**, sem ano (ex.: "Fuvest – Dissertação – Algoritmos e o debate público"). Usar o campo `title` da API.
-4. **Ordem fixa da escolha:** vestibular → tema → tipo → foto. Não existe atalho que pule etapas.
+4. **Ordem fixa da escolha:** vestibular → proposta → foto. O tipo de redação é o da proposta, definido no cadastro; o aluno não escolhe tipo nem opção. Não existe atalho que pule etapas.
 5. **Orientações são afirmações.** O front não gera textos de feedback; só exibe o que vem da API.
 6. **Fricção mínima.** O aluno só cria conta na hora de enviar. Nenhum formulário pede o que não é usado.
 7. **Erros pelo `code`, texto pelo `message`.** Ver seção 12 da especificação.
@@ -92,9 +92,11 @@ Fontes hospedadas no próprio site com `@fontsource/newsreader`, `@fontsource/sc
 | Rota | Tela (arquivo de design) | Acesso |
 |---|---|---|
 | `/` | 1 · Início (`01-inicio.html`) | Público |
-| `/temas` | 2 · Vestibular e tema (`02-temas.html`) | Público |
-| `/temas/:themeId` | 2b · Proposta e coletânea (`02b-proposta-coletanea.html`) | Público |
-| `/temas/:themeId/enviar` | 3 · Tipo de redação e envio (`03-tipo-envio.html`), modal 3b (`03b-modal-confirmar-envio.html`) | Público até enviar |
+| `/propostas` (antes `/temas`) | 2 · Vestibular e proposta (`02-temas.html`) | Público |
+| `/propostas/:slug` | 2b · Proposta e coletânea (`02b-proposta-coletanea.html`) | Público |
+| `/propostas/:slug/enviar` | 3 · Envio (`03-tipo-envio.html`), modal 3b (`03b-modal-confirmar-envio.html`) | Público até enviar |
+| `/admin/propostas` | 11 · Admin: propostas (`11-admin-propostas.html`) | Só administrador (ver `07-propostas-de-redacao.md`, A5) |
+| `/admin/propostas/:id` | 11b · Admin: editar proposta (`11b-admin-editar-proposta.html`) | Só administrador |
 | `/entrar` | 4 · Login (`04-login.html`) | Público |
 | `/enviar/foto` | 5 · Câmera no celular (`05-camera-celular.html`) | Público |
 | `/painel` | 8 · Minhas correções (`08-painel.html`) | Logado |
@@ -121,33 +123,51 @@ Seções, nesta ordem:
 7. **CTA final:** "Escolha um tema e escreva a sua próxima redação." + "Ver os temas".
 8. **Rodapé:** "Correções feitas por IA com base nos critérios públicos da Fuvest. Não é afiliado à Fuvest." + Termos, Privacidade, Contato + identificação da empresa.
 
-### 2 · Vestibular e tema (`/temas`)
+### 2 · Vestibular e proposta (`/propostas`)
 
-- Barra de etapas: 1 · Vestibular, 2 · Tema, 3 · Tipo de redação, 4 · Envio.
-- Clicar num tema abre a página da proposta (`/temas/:themeId`), não o envio.
-- Vestibulares de `GET /v1/exams`; `coming_soon` aparece desabilitado com "Em breve".
-- Grade de cartões de tema de `GET /v1/exams/{slug}/themes?q=`: título, tipos aceitos como chips, "Coletânea com N textos". Se o aluno logado já enviou redação do tema, chip com o status (ex.: "Corrigida · 23/30", "Em correção").
-- Busca por tema com atraso de 300 ms.
+Modelo, API e regras em `docs/07-propostas-de-redacao.md`. O endereço antigo `/temas` leva para cá.
 
-### 2b · Proposta e coletânea (`/temas/:themeId`)
+- Barra de etapas: 1 · Vestibular, 2 · Proposta, 3 · Escrever, 4 · Envio.
+- Clicar numa proposta abre a página dela (`/propostas/:slug`), não o envio.
+- Vestibulares de `GET /v1/exams`; os que estão "em breve" aparecem desabilitados.
+- Grade de cartões de `GET /v1/exams/{slug}/prompts?q=`: título, resumo (quando houver), o tipo de redação como chip (`genreLabel`, um só) e "Coletânea com N textos". Se o aluno logado já enviou redação da proposta, em qualquer versão dela, chip com o status.
+- Busca por título com atraso de 300 ms.
 
-Página só de leitura, separada do envio: o aluno lê a proposta, escreve à mão e depois vai enviar.
-- Trilha "Fuvest / Temas / [tema]"; eyebrow "Proposta de redação · Fuvest"; H1 com o tema; chips dos tipos aceitos e "Coletânea com N textos".
-- Coluna principal (cartão de leitura, texto 17–18 px, `line-height` 1,75): "Proposta" com o enunciado e um quadro por tipo aceito com a instrução daquele tipo; "Coletânea" com todos os textos abertos, um abaixo do outro ("Texto N", título em Newsreader, corpo ou imagem, fonte em itálico). Sem acordeão.
-- Coluna lateral fixa: "Escreva à mão, como na prova", com 3 passos (imprimir a folha pautada com o link "Baixar a folha (PDF)"; escrever sem nome nem assinatura; fotografar e enviar), botão "Enviar minha redação" (→ `/temas/:themeId/enviar`) e a nota "Você escolhe o tipo de redação na próxima página."
-- No celular, a coluna lateral vai para depois da coletânea e o botão "Enviar minha redação" fica fixo no rodapé da tela.
-- Dados de `GET /v1/themes/{id}`. Tema inexistente ou inativo → erro `THEME_NOT_AVAILABLE` com link para `/temas`.
+### 2b · Proposta e coletânea (`/propostas/:slug`)
 
-### 3 · Tipo de redação e envio (`/temas/:themeId/enviar`)
+Página só de leitura, separada do envio: o aluno lê a proposta, escreve à mão e depois vai enviar. Referência: `02b-proposta-coletanea`.
 
-- Trilha "Fuvest / Temas / [tema] / Envio"; H1 "Envie sua redação"; linha "Tema: [tema] · Ver proposta e coletânea" (→ `/temas/:themeId`). A coletânea **não** aparece nesta página.
-- Cartão principal: "3. Tipo de redação" (só os tipos aceitos, rádio em cartão) e "4. Envie a foto da folha".
+- Trilha "Fuvest / Propostas / [título]"; eyebrow "Proposta de redação · Fuvest"; H1 com o título; chips: o tipo (`genreLabel`), "Coletânea com N textos" e "20 a 30 linhas · com título".
+- Coluna principal: os blocos na ordem de `position`, a mesma que a correção recebe. Cada texto da coletânea tem o rótulo em negrito, o conteúdo e a fonte em itálico à direita. Verso (`format: verse`): colunas lado a lado no computador e em sequência no celular. Imagem: `imageUrl` com o `alt` da API. Depois vêm o comando e as instruções, que começam por "**Tipo de redação:** [gênero]." montado com `genreLabel`. Título de seção, parágrafo e separador aparecem onde foram cadastrados.
+- Os textos aceitam só `**negrito**`, `*itálico*` e quebra de linha; nada do que vem da API vira HTML.
+- No fim da coluna: "Já escreveu? Envie a foto da folha para correção." com o botão "Enviar minha redação". Na coluna lateral: "Como na prova", com 4 passos (ler; imprimir a folha pautada, com o link "Baixar a folha (PDF)"; escrever sem nome nem assinatura; fotografar e enviar) e o mesmo botão (→ `/propostas/:slug/enviar`). O aluno não escolhe tipo nem opção em lugar nenhum.
+- Dados de `GET /v1/prompts/{slug}`. Proposta inexistente, em rascunho ou arquivada → erro `PROMPT_NOT_AVAILABLE` com link para `/propostas`.
+- `?versao=N` abre a versão que uma redação antiga usou (`GET /v1/prompts/{slug}?version=N`). Versão arquivada mostra o aviso de que foi substituída, com link para a atual, e não tem botão de envio.
+
+### 11 · Administração das propostas (`/admin/propostas` e `/admin/propostas/:id`)
+
+Regras, API e campos em `docs/07-propostas-de-redacao.md`, seção A5. Referências: `11-admin-propostas` e `11b-admin-editar-proposta`. O código fica em `src/features/admin` e é carregado à parte: quem não é administrador não o baixa.
+
+- `/admin/*` só existe para quem tem `role: admin` em `GET /v1/me`. Para aluno logado e para quem não entrou, é a página de "não encontrado", sem nenhuma chamada a `/v1/admin`. O link "Admin" aparece ao lado do avatar só para administradores.
+- Sessão sem o segundo fator, quando a API o exige (`ADMIN_2FA_REQUIRED`): a tela pede a ativação da verificação em duas etapas.
+- **Lista:** abas por situação com as contagens que vêm da API, busca com atraso de 300 ms, tabela (proposta, versão, status, atualizada, ação), "Importar JSON" e "Nova proposta".
+- **Editor:** barra fixa (voltar, status e versão, "Salvo às hh:mm", "Exportar JSON", "Validar", "Publicar" com confirmação); pendências clicáveis, que levam ao campo; título e dados gerais; um cartão por bloco, com posição editável, alça para arrastar, ↑ ↓, duplicar e remover; cartão fixo de Instruções, com o tipo de redação (gênero como na prova e categoria de correção), linhas, título obrigatório e itens; "Abordagens esperadas do tema"; prévia à direita com os mesmos componentes da página do aluno, em "Computador" e "Celular".
+- Mudar a ordem renumera os blocos de 10 em 10. O editor manda sempre a proposta inteira (`PUT`), com `expectedUpdatedAt`.
+- **Salvamento automático:** 2 segundos depois da última alteração. Se falhar, o que foi digitado fica no navegador (`localStorage`) e volta ao reabrir; com `PROMPT_CHANGED`, o editor para de salvar e pede para recarregar.
+- Proposta publicada ou arquivada abre só para leitura, com "Criar nova versão"; a publicada tem também "Arquivar". O rascunho tem "Apagar este rascunho" no fim do formulário.
+
+### 3 · Envio (`/propostas/:slug/enviar`)
+
+Referência: `03-tipo-envio`. A página **não pergunta o tipo**.
+
+- Trilha "Fuvest / Propostas / [título] / Envio"; H1 "Envie sua redação"; linha "Proposta: [título] · Ver coletânea" (→ `/propostas/:slug`). A coletânea **não** aparece nesta página.
+- Cartão principal: "Sua redação", com o quadro só para leitura "Tipo de redação, definido pela proposta" (`genreLabel` e "20 a 30 linhas · com título"), e "Foto da folha".
 - Upload: arrastar ou escolher arquivo; no celular, botão que abre `/enviar/foto`. Aceita só JPG; o front converte e comprime para JPG ≤ 10 MB (canvas) antes de enviar e mostra nome, tamanho e "Trocar foto".
 - Dicas: "Folha inteira, reta e com boa luz", "Uma face da folha por envio", "Não escreva seu nome na folha: na Fuvest, identificação zera a redação."
-- Coluna lateral fixa: "Você vai enviar [título]", "Custo: N correções", botão "Enviar para correção" (habilitado com tipo e foto escolhidos) e a nota "Você confere tudo antes de confirmar. Se ainda não entrou, pedimos o login nesse momento."
-- Envio em lote: "Adicionar outra foto" cria mais uma redação do mesmo tema e tipo (ver seção 15 da especificação).
-- Ao clicar: sem sessão → guarda rascunho e vai para `/entrar`; com sessão → `POST /v1/uploads/sign`, upload direto ao Cloudinary, depois abre o modal 3b.
-- "Reescrever esta redação" e "Reenviar" levam direto para esta página, com o tipo já escolhido.
+- Coluna lateral fixa: "Você vai enviar [título]" (o `essayTitle` da API, já visível antes da foto), "Custo: N correções", botão "Enviar para correção" (habilitado com a foto escolhida) e a nota "Você confere tudo antes de confirmar. Se ainda não entrou, pedimos o login nesse momento."
+- Envio em lote: "Adicionar outra foto" cria mais uma redação da mesma proposta (ver seção 15 da especificação).
+- Ao clicar: sem sessão → guarda rascunho e vai para `/entrar`; com sessão → `POST /v1/uploads/sign`, upload direto ao Cloudinary, depois abre o modal 3b. O envio manda `{ promptId, assetId, parentEssayId? }`, sem tipo.
+- "Reescrever esta redação" leva a esta página com `?versao=N&reescrita=id`: a reescrita responde à versão da proposta da redação original. "Reenviar" (redação que falhou) leva à versão publicada.
 
 ### 3b · Modal de confirmação
 
@@ -201,7 +221,7 @@ Página só de leitura, separada do envio: o aluno lê a proposta, escreve à m�
 - Alerta amarelo quando há redação em `awaiting_review`: "Uma redação precisa de você", com título e prazo, e o botão "Preencher palavras".
 - "Sua evolução": gráfico de linha simples das notas (`GET /v1/me/progress`) e a variação da última.
 - "Seu foco agora": o critério que mais tirou pontos nas últimas 3 correções, com a orientação e "Ver na última correção →".
-- Tabela "Correções": Redação (título + "· Nª versão" quando houver reescrita), Enviada, Status (chip), Nota, Ação ("Preencher palavras", "Ver correção" ou "Reenviar" para `failed`, que leva a `/temas/:themeId/enviar` com o tipo pré-selecionado).
+- Tabela "Correções": Redação (título + "· Nª versão" quando houver reescrita), Enviada, Status (chip), Nota, Ação ("Preencher palavras", "Ver correção" ou "Reenviar" para `failed`, que leva a `/propostas/:slug/enviar` com o tipo pré-selecionado).
 - Redações em `uploaded`, `queued` e `processing`: polling a cada 5 s enquanto a aba estiver visível; parar quando nenhuma estiver em andamento.
 
 ### 9 · Correção (`/redacoes/:id`)

@@ -1,13 +1,13 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { apiError, catalogHandlers, json, mockApi, renderApp, themes } from '../test/helpers';
+import { apiError, catalogHandlers, json, mockApi, prompts, renderApp } from '../test/helpers';
 import type { Auth } from './auth/AuthContext';
 import { CompleteSignupPage } from './auth/CompleteSignupPage';
 import { LoginPage } from './auth/LoginPage';
 import { clearPendingSignup, savePendingSignup } from './auth/signup';
 import { HomePage } from './home/HomePage';
-import { ThemesPage } from './temas/ThemesPage';
+import { PromptsPage } from './propostas/PromptsPage';
 
 const profile = {
   id: '0198f0c0-0000-7000-8000-0000000000aa',
@@ -24,7 +24,7 @@ function signedIn(signOut = vi.fn(async () => {})): Auth {
 }
 
 describe('Início', () => {
-  it('mostra o título, os preços e os caminhos para os temas', async () => {
+  it('mostra o título, os preços e os caminhos para as propostas', async () => {
     mockApi(catalogHandlers);
     renderApp(<HomePage />);
 
@@ -60,10 +60,10 @@ describe('Início', () => {
   });
 });
 
-describe('Temas', () => {
+describe('Propostas', () => {
   it('lista os vestibulares, com os que estão em breve desabilitados', async () => {
     mockApi(catalogHandlers);
-    renderApp(<ThemesPage />, { route: '/temas' });
+    renderApp(<PromptsPage />, { route: '/propostas' });
 
     const fuvest = await screen.findByRole('button', { name: /Fuvest/ });
     expect(fuvest).toHaveAttribute('aria-pressed', 'true');
@@ -72,52 +72,55 @@ describe('Temas', () => {
     expect(screen.getByRole('button', { name: 'Enem Em breve' })).toBeDisabled();
   });
 
-  it('mostra cada tema com os tipos aceitos e o tamanho da coletânea', async () => {
+  it('mostra cada proposta com o tipo definido no cadastro, o resumo e o tamanho da coletânea', async () => {
     mockApi(catalogHandlers);
-    renderApp(<ThemesPage />, { route: '/temas' });
+    renderApp(<PromptsPage />, { route: '/propostas' });
 
     const card = await screen.findByRole('link', { name: /Algoritmos e o debate público/ });
-    expect(card).toHaveAttribute('href', '/temas/th1');
-    expect(within(card).getByText('Dissertação')).toBeInTheDocument();
-    expect(within(card).getByText('Narrativa')).toBeInTheDocument();
+    expect(card).toHaveAttribute('href', '/propostas/algoritmos-e-o-debate-publico');
+    // Um tipo só, como a prova pede: o aluno não escolhe.
+    expect(within(card).getByText('Dissertação em prosa')).toBeInTheDocument();
+    expect(within(card).queryByText('Narrativa')).toBeNull();
+    expect(within(card).getByText('Coletânea com tirinha, poema e dois textos.')).toBeInTheDocument();
     expect(within(card).getByText('Coletânea com 4 textos')).toBeInTheDocument();
     expect(screen.getByText('Coletânea com 1 texto')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '2. Tema da Fuvest' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '2. Propostas da Fuvest' })).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Etapas' })).toHaveTextContent('1 · Vestibular2 · Proposta3 · Escrever4 · Envio');
   });
 
   it('busca com atraso e envia o termo para a API', async () => {
     const requests = mockApi({
       ...catalogHandlers,
-      'GET /v1/exams/fuvest/themes': (_request, url) =>
-        json(url.searchParams.get('q') ? themes.slice(1) : themes),
+      'GET /v1/exams/fuvest/prompts': (_request, url) =>
+        json(url.searchParams.get('q') ? prompts.slice(1) : prompts),
     });
-    renderApp(<ThemesPage />, { route: '/temas' });
+    renderApp(<PromptsPage />, { route: '/propostas' });
     await screen.findByRole('link', { name: /Algoritmos/ });
 
-    await userEvent.type(screen.getByRole('searchbox', { name: 'Buscar tema' }), 'tempo');
+    await userEvent.type(screen.getByRole('searchbox', { name: 'Buscar proposta' }), 'tempo');
 
     await waitFor(() => expect(screen.queryByRole('link', { name: /Algoritmos/ })).not.toBeInTheDocument());
     expect(screen.getByRole('link', { name: /O valor do tempo livre/ })).toBeInTheDocument();
-    const searches = requests.filter((r) => r.url.pathname.endsWith('/themes') && r.url.searchParams.has('q'));
+    const searches = requests.filter((r) => r.url.pathname.endsWith('/prompts') && r.url.searchParams.has('q'));
     // Uma chamada só, com o termo inteiro: nada de uma requisição por tecla.
     expect(searches.map((r) => r.url.searchParams.get('q'))).toEqual(['tempo']);
   });
 
-  it('avisa quando a busca não encontra temas', async () => {
-    mockApi({ ...catalogHandlers, 'GET /v1/exams/fuvest/themes': json([]) });
-    renderApp(<ThemesPage />, { route: '/temas' });
+  it('avisa quando não há propostas', async () => {
+    mockApi({ ...catalogHandlers, 'GET /v1/exams/fuvest/prompts': json([]) });
+    renderApp(<PromptsPage />, { route: '/propostas' });
 
-    expect(await screen.findByText('Ainda não há temas disponíveis.')).toBeInTheDocument();
+    expect(await screen.findByText('Ainda não há propostas disponíveis.')).toBeInTheDocument();
   });
 
   it('mostra a mensagem da API e deixa tentar de novo', async () => {
     let calls = 0;
     mockApi({
       ...catalogHandlers,
-      'GET /v1/exams/fuvest/themes': () =>
-        ++calls === 1 ? apiError('RATE_LIMITED', 'Muitas tentativas seguidas. Aguarde um minuto.', 429, true) : json(themes),
+      'GET /v1/exams/fuvest/prompts': () =>
+        ++calls === 1 ? apiError('RATE_LIMITED', 'Muitas tentativas seguidas. Aguarde um minuto.', 429, true) : json(prompts),
     });
-    renderApp(<ThemesPage />, { route: '/temas' });
+    renderApp(<PromptsPage />, { route: '/propostas' });
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Muitas tentativas seguidas. Aguarde um minuto.');
     await userEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
@@ -143,11 +146,11 @@ describe('Login', () => {
 
 describe('Primeiro acesso', () => {
   it('quem já tem cadastro volta para onde estava', async () => {
-    savePendingSignup({ next: '/temas/th1' });
+    savePendingSignup({ next: '/propostas/algoritmos' });
     const requests = mockApi({ 'GET /v1/me': json(profile) });
     renderApp(<CompleteSignupPage />, { route: '/entrar/concluir', path: '/entrar/concluir', auth: signedIn() });
 
-    expect(await screen.findByTestId('location')).toHaveTextContent('/temas/th1');
+    expect(await screen.findByTestId('location')).toHaveTextContent('/propostas/algoritmos');
     expect(requests.some((r) => r.method === 'POST')).toBe(false);
     clearPendingSignup();
   });
@@ -160,7 +163,7 @@ describe('Primeiro acesso', () => {
     });
     renderApp(<CompleteSignupPage />, { route: '/entrar/concluir', path: '/entrar/concluir', auth: signedIn() });
 
-    expect(await screen.findByTestId('location')).toHaveTextContent('/temas');
+    expect(await screen.findByTestId('location')).toHaveTextContent('/propostas');
     expect(requests.filter((r) => r.method === 'POST').map((r) => r.body)).toEqual([
       { birthDate: '2008-05-17', termsAccepted: true },
     ]);
@@ -184,7 +187,7 @@ describe('Primeiro acesso', () => {
     expect(input).toHaveValue('17/05/2008');
     await userEvent.click(screen.getByRole('button', { name: 'Continuar' }));
 
-    expect(await screen.findByTestId('location')).toHaveTextContent('/temas');
+    expect(await screen.findByTestId('location')).toHaveTextContent('/propostas');
     expect(requests.find((r) => r.method === 'POST')?.body).toEqual({ birthDate: '2008-05-17', termsAccepted: true });
   });
 

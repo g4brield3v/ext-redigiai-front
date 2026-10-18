@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { Button } from '../components/Button';
 import { Nav } from '../components/Nav';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { useAuthState } from '../features/auth/AuthContext';
@@ -17,8 +16,9 @@ import { DashboardPage } from '../features/painel/DashboardPage';
 import { ProfilePage } from '../features/perfil/ProfilePage';
 import { ReviewPage } from '../features/revisao/ReviewPage';
 import { ProposalPage } from '../features/proposta/ProposalPage';
-import { ThemesPage } from '../features/temas/ThemesPage';
+import { PromptsPage } from '../features/propostas/PromptsPage';
 import { ApiError } from '../lib/api';
+import { NotFoundPage } from './NotFoundPage';
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
 
@@ -38,6 +38,8 @@ const ExampleCorrectionPage = lazy(() => import('../features/correcao/ExampleCor
 const ExampleZeroCorrectionPage = import.meta.env.DEV
   ? lazy(() => import('../features/correcao/ExampleZeroCorrectionPage'))
   : null;
+// A administração é um pedaço à parte: quem não é administrador nem baixa esse código.
+const AdminArea = lazy(() => import('../features/admin/AdminArea'));
 // Mostruário dos componentes: só existe em desenvolvimento.
 const ComponentsPage = import.meta.env.DEV ? lazy(() => import('./ComponentsPage')) : null;
 
@@ -67,18 +69,6 @@ function ScrollManager() {
   }, [pathname, hash]);
 
   return null;
-}
-
-function NotFoundPage() {
-  return (
-    <>
-      <Nav />
-      <main className="container" style={{ paddingTop: 72, paddingBottom: 96, display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'flex-start' }}>
-        <h1 className="serif h1">Não encontramos essa página.</h1>
-        <Button to="/temas">Ver os temas</Button>
-      </main>
-    </>
-  );
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
@@ -121,9 +111,11 @@ export function AppRoutes() {
     <Suspense fallback={null}>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/temas" element={<ThemesPage />} />
-        <Route path="/temas/:themeId" element={<ProposalPage />} />
-        <Route path="/temas/:themeId/enviar" element={<SubmitPage />} />
+        <Route path="/propostas" element={<PromptsPage />} />
+        <Route path="/propostas/:slug" element={<ProposalPage />} />
+        <Route path="/propostas/:slug/enviar" element={<SubmitPage />} />
+        {/* Endereço antigo da lista, que ainda pode estar em favoritos e e-mails. */}
+        <Route path="/temas" element={<Navigate to="/propostas" replace />} />
         <Route path="/enviar/foto" element={<CameraPage />} />
         <Route path="/exemplo" element={<ExampleCorrectionPage />} />
         {ExampleZeroCorrectionPage && <Route path="/exemplo/nota-zero" element={<ExampleZeroCorrectionPage />} />}
@@ -136,6 +128,7 @@ export function AppRoutes() {
         <Route path="/redacoes/:id" element={logged(<CorrectionPage />)} />
         <Route path="/perfil" element={logged(<ProfilePage />)} />
         <Route path="/comprar" element={logged(<CheckoutPage />)} />
+        <Route path="/admin/*" element={<AdminArea />} />
         {ComponentsPage && <Route path="/_componentes" element={<ComponentsPage />} />}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

@@ -7,7 +7,7 @@ import { Nav } from '../../components/Nav';
 import { AlertIcon, CheckIcon, ErrorState, SheetThumb, Skeleton } from '../../components/primitives';
 import { ApiError, errorMessage } from '../../lib/api';
 import { formatSize } from '../../lib/format';
-import { useTheme } from '../../lib/queries';
+import { usePrompt } from '../../lib/queries';
 import { useAuthState } from '../auth/AuthContext';
 import { ConfirmSendModal } from './ConfirmSendModal';
 import type { PendingEssay } from './ConfirmSendModal';
@@ -33,16 +33,20 @@ function PageSkeleton() {
   );
 }
 
-/** 3 · Tipo de redação e envio da foto. A proposta e a coletânea ficam na página do tema. */
+/**
+ * 3 · Envio da foto. O tipo de redação é o da proposta, só para leitura: o aluno não escolhe tipo. A coletânea
+ * fica na página da proposta.
+ */
 export function SubmitPage() {
-  const { themeId } = useParams();
+  const { slug } = useParams();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const auth = useAuthState();
-  const theme = useTheme(themeId);
+  // A reescrita responde à versão da proposta da redação original, que pode não ser mais a publicada.
+  const version = Number(params.get('versao')) || undefined;
+  const prompt = usePrompt(slug, version);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const [typeId, setTypeId] = useState<string | null>(params.get('tipo'));
   const [photos, setPhotos] = useState<DraftPhoto[]>([]);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingEssay[] | null>(null);
@@ -50,25 +54,24 @@ export function SubmitPage() {
   const parentEssayId = params.get('reescrita') ?? draftParentId;
   const continuing = params.get('continuar') === '1';
 
-  const types = theme.data?.essayTypes ?? [];
-  const selectedType = types.find((type) => type.id === typeId) ?? null;
-  const title = theme.data && selectedType ? `${theme.data.examName} – ${selectedType.name} – ${theme.data.title}` : null;
+  // O título vem pronto da API: "Vestibular – Tipo – Tema".
+  const title = prompt.data?.essayTitle ?? null;
+  const promptId = prompt.data?.id;
 
   // Retoma o que foi escolhido antes do login ou da câmera.
   const restored = useRef(false);
   useEffect(() => {
-    if (restored.current || !themeId) {
+    if (restored.current || !slug) {
       return;
     }
     restored.current = true;
     void loadDraft().then((draft) => {
-      if (draft?.themeId === themeId) {
-        setTypeId((current) => current ?? draft.essayTypeId);
+      if (draft?.promptSlug === slug) {
         setPhotos(draft.photos);
         setDraftParentId(draft.parentEssayId);
       }
     });
-  }, [themeId]);
+  }, [slug]);
 
   const upload = useMutation({
     mutationFn: async (): Promise<PendingEssay[]> => {
@@ -76,14 +79,14 @@ export function SubmitPage() {
       return photos.map((photo, index) => ({
         title: title!,
         fileName: photo.name,
-        themeId: themeId!,
-        essayTypeId: typeId!,
+        promptId: promptId!,
         assetId: assetIds[index]!,
       }));
     },
     onSuccess: setPending,
   });
   const { mutate: startUpload, isPending: uploading } = upload;
+  const submit = `/propostas/${encodeURIComponent(slug ?? '')}/enviar`;
 
   // De volta do login com o rascunho carregado: segue direto para a confirmação.
   const ready = !!title && photos.length > 0;
@@ -116,13 +119,13 @@ export function SubmitPage() {
   }
 
   async function send() {
-    if (!ready || !themeId || !typeId) {
+    if (!ready || !slug) {
       return;
     }
     if (!auth.isSignedIn) {
-      await saveDraft({ themeId, essayTypeId: typeId, title: title!, photos, parentEssayId });
+      await saveDraft({ promptSlug: slug, title: title!, photos, parentEssayId });
       const rewrite = parentEssayId ? `&reescrita=${encodeURIComponent(parentEssayId)}` : '';
-      const next = `/temas/${encodeURIComponent(themeId)}/enviar?continuar=1${rewrite}`;
+      const next = `${submit}?continuar=1${version ? `&versao=${version}` : ''}${rewrite}`;
       navigate(`/entrar?next=${encodeURIComponent(next)}`);
       return;
     }
@@ -130,14 +133,14 @@ export function SubmitPage() {
   }
 
   async function openCamera() {
-    if (themeId && typeId && title) {
-      await saveDraft({ themeId, essayTypeId: typeId, title, photos, parentEssayId });
+    if (slug && title) {
+      await saveDraft({ promptSlug: slug, title, photos, parentEssayId });
     }
-    navigate(`/enviar/foto?tema=${encodeURIComponent(themeId ?? '')}`);
+    navigate(`/enviar/foto?proposta=${encodeURIComponent(slug ?? '')}`);
   }
 
-  const notAvailable = theme.error instanceof ApiError && theme.error.code === 'THEME_NOT_AVAILABLE';
-  const proposal = `/temas/${encodeURIComponent(themeId ?? '')}`;
+  const notAvailable = prompt.error instanceof ApiError && prompt.error.code === 'PROMPT_NOT_AVAILABLE';
+  const proposal = `/propostas/${encodeURIComponent(slug ?? '')}${version ? `?versao=${version}` : ''}`;
   const cost = Math.max(photos.length, 1);
 
   return (
@@ -146,42 +149,38 @@ export function SubmitPage() {
       <main className={`container ${styles.page}`}>
         <div className={styles.heading}>
           <nav aria-label="Você está em" className={styles.crumbs}>
-            <Link to="/temas">{theme.data?.examName ?? 'Fuvest'}</Link> <span className="muted">/</span> <Link to="/temas">Temas</Link>{' '}
-            <span className="muted">/</span> <Link to={proposal}>{theme.data?.title ?? 'Tema'}</Link> <span className="muted">/ Envio</span>
+            <Link to="/propostas">{prompt.data?.examName ?? 'Fuvest'}</Link> <span className="muted">/</span>{' '}
+            <Link to="/propostas">Propostas</Link> <span className="muted">/</span>{' '}
+            <Link to={proposal}>{prompt.data?.title ?? 'Proposta'}</Link> <span className="muted">/ Envio</span>
           </nav>
           <h1 className="serif h1">Envie sua redação</h1>
-          {theme.data && (
+          {prompt.data && (
             <p className={`muted ${styles.themeLine}`}>
-              Tema: <strong>{theme.data.title}</strong> · <Link to={proposal}>Ver proposta e coletânea</Link>
+              Proposta: <strong>{prompt.data.title}</strong> · <Link to={proposal}>Ver coletânea</Link>
             </p>
           )}
         </div>
 
-        {theme.error ? (
+        {prompt.error ? (
           <div className={styles.errorBlock}>
-            <ErrorState message={errorMessage(theme.error)} onRetry={notAvailable ? undefined : () => void theme.refetch()} />
-            {notAvailable && <Button to="/temas">Ver os temas</Button>}
+            <ErrorState message={errorMessage(prompt.error)} onRetry={notAvailable ? undefined : () => void prompt.refetch()} />
+            {notAvailable && <Button to="/propostas">Ver as propostas</Button>}
           </div>
-        ) : !theme.data ? (
+        ) : !prompt.data ? (
           <PageSkeleton />
         ) : (
           <div className={styles.columns}>
             <div className={styles.card}>
-              <fieldset className={styles.types}>
-                <legend className="h3">3. Tipo de redação</legend>
-                {types.map((type) => (
-                  <label key={type.id} className={type.id === typeId ? styles.typeOn : undefined}>
-                    <input type="radio" name="tipo" checked={type.id === typeId} onChange={() => setTypeId(type.id)} />
-                    <span>
-                      <span className={styles.strong}>{type.name}</span>
-                      <span className={`muted ${styles.small}`}>{type.description}</span>
-                    </span>
-                  </label>
-                ))}
-              </fieldset>
+              <section className={styles.essaySection}>
+                <h2 className="h3">Sua redação</h2>
+                <div className={styles.genre}>
+                  <span className={`muted ${styles.small13}`}>Tipo de redação, definido pela proposta</span>
+                  <span className={styles.strong}>{prompt.data.essayType.name}</span>
+                </div>
+              </section>
 
               <section className={styles.photoSection}>
-                <h2 className="h3">4. Envie a foto da folha</h2>
+                <h2 className="h3">Foto da folha</h2>
                 <input
                   ref={fileInput}
                   className="visually-hidden"

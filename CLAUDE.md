@@ -9,6 +9,7 @@ Aplicação web do RedigiAI, o SaaS que corrige redações manuscritas da Fuvest
 | `docs/02-frontend.md` | Design system, rotas e o comportamento de cada tela |
 | `docs/04-construir-front.md` | Como construir as telas idênticas às aprovadas |
 | `docs/06-tela-correcao.md` | Tela da correção, versão 2: substitui a seção 9 do `02-frontend.md` |
+| `docs/07-propostas-de-redacao.md` | Propostas de redação: blocos ordenados, um tipo por proposta, área de administração e mudanças no fluxo do aluno (cópia do repositório do back-end) |
 | `docs/telas/html/` e `docs/telas/png/` | Telas aprovadas: HTML e imagem de cada tela (computador e celular). **O front-end tem que ficar idêntico a elas.** |
 | Repositório do back-end, `docs/01-especificacao-tecnica.md` | **Fonte da verdade** das regras de negócio, da API e dos erros |
 | Repositório do back-end, `docs/decisoes.md` | Decisões tomadas durante a implementação, inclusive as do front |
@@ -25,7 +26,7 @@ React + Vite + TypeScript (strict), React Router, TanStack Query, CSS Modules, c
 openapi.json     cópia do contrato da API (vem do repositório do back-end)
 src/api/         schema.d.ts (gerado, não editar à mão) e provisional-types.ts (endpoints ainda sem backend)
 src/components/  componentes do design system
-src/features/    uma pasta por área (home, temas, envio, revisao, correcao, painel, perfil, checkout, auth)
+src/features/    uma pasta por área (home, propostas, proposta, admin, envio, revisao, correcao, painel, perfil, checkout, auth)
 src/routes/      rotas e provedores
 e2e/             Playwright (telas públicas)
 docs/            especificação do front e telas aprovadas
@@ -38,7 +39,7 @@ Dockerfile
 ```bash
 npm ci && npm run dev        # http://localhost:5173 (precisa da API em VITE_API_URL)
 # Sem login, só na sua máquina: VITE_DEV_AUTH=true em .env.development.local (e DevAuth__Enabled=true na API).
-# Uma barra no topo troca entre os alunos de teste (ana | bruno | nova | visitante). O build recusa essa variável.
+# Uma barra no topo troca entre os alunos de teste (ana | bruno | nova | admin | visitante). O build recusa essa variável.
 npm run sync:api             # copia o openapi.json do repositório do back-end (pasta ao lado)
 npm run gen:api              # regenera src/api/schema.d.ts a partir do openapi.json
 npm test && npm run typecheck && npm run lint
@@ -51,8 +52,8 @@ A configuração local vem do arquivo `.env` (copie de `.env.example`). Atualize
 ## Regras inegociáveis
 
 1. **O backend decide, a tela mostra.** Nota, saldo, prazos, status, preços e idade vêm da API. O front nunca calcula nota nem decide se há saldo.
-2. Título sempre "Vestibular – Tipo – Tema", vindo do campo `title` da API.
-3. Ordem fixa da escolha: vestibular → tema → tipo → foto. Depois de confirmar o envio, não há troca de foto nem cancelamento.
+2. Título sempre "Vestibular – Tipo – Tema", vindo da API: `title` da redação e `essayTitle` da proposta. O front nunca monta o título.
+3. Ordem fixa da escolha: vestibular → proposta → foto. O tipo de redação vem da proposta; o aluno não escolhe tipo nem opção. Depois de confirmar o envio, não há troca de foto nem cancelamento.
 4. Siga `docs/02-frontend.md` e `docs/telas/`. Copie os textos das telas; não reescreva.
 5. Nunca escreva tipos da API à mão: atualize o `openapi.json` e regenere o cliente.
 6. Sem bibliotecas de componentes prontas (MUI, Chakra etc.). Sem emojis, gradientes ou ícones de "IA".

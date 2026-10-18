@@ -159,7 +159,7 @@ export function Dots({ level, max }: { level: number; max: number }) {
 
 /** Barra das quatro etapas do envio; `current` é a última etapa já alcançada. */
 export function StepBar({ current }: { current: 1 | 2 | 3 | 4 }) {
-  const steps = ['Vestibular', 'Tema', 'Tipo de redação', 'Envio'];
+  const steps = ['Vestibular', 'Proposta', 'Escrever', 'Envio'];
   return (
     <ol className={styles.steps} aria-label="Etapas">
       {steps.map((label, index) => (

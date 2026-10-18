@@ -26,9 +26,13 @@ const ratings: { value: FeedbackRating; label: string }[] = [
   { value: 'did_not_help', label: 'Não ajudou' },
 ];
 
+/** A versão da proposta que o aluno usou: a reescrita e a releitura são sempre nela. */
+function proposalLink(correction: Correction, page = '') {
+  return `/propostas/${encodeURIComponent(correction.promptSlug)}${page}?versao=${correction.promptVersion}`;
+}
+
 function rewriteLink(correction: Correction) {
-  const [theme, type, essay] = [correction.themeId, correction.essayTypeId, correction.essayId].map(encodeURIComponent);
-  return `/temas/${theme}/enviar?tipo=${type}&reescrita=${essay}`;
+  return `${proposalLink(correction, '/enviar')}&reescrita=${encodeURIComponent(correction.essayId)}`;
 }
 
 /** Em telas estreitas os apontamentos abrem numa folha inferior, em vez do painel ao lado. */
@@ -211,8 +215,8 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
 
   const visible = visibleAnnotations(correction.annotations, filters);
   const selected = visible.find((annotation) => annotation.id === selectedId);
-  const rewriteTo = example ? '/temas' : rewriteLink(correction);
-  const rewriteLabel = example ? 'Ver os temas' : 'Reescrever esta redação';
+  const rewriteTo = example ? '/propostas' : rewriteLink(correction);
+  const rewriteLabel = example ? 'Ver as propostas' : 'Reescrever esta redação';
 
   /** Seleciona o mesmo apontamento na folha e no painel e rola o outro lado até ele. */
   const select = useCallback(
@@ -313,7 +317,7 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
       </div>
 
       {zero ? (
-        <ZeroResult correction={correction} proposalTo={example ? '/temas' : `/temas/${encodeURIComponent(correction.themeId)}`} />
+        <ZeroResult correction={correction} proposalTo={example ? '/propostas' : proposalLink(correction)} />
       ) : (
         <ResultSummary
           correction={correction}

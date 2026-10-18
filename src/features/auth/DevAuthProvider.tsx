@@ -8,11 +8,13 @@ import type { Auth, DevUserOption } from './AuthContext';
 import styles from './DevAuthProvider.module.css';
 import { savePendingSignup } from './signup';
 
-// Os mesmos alunos que a API cadastra ao subir com DevAuth__Enabled=true.
+// Os mesmos usuários que a API cadastra ao subir com DevAuth__Enabled=true.
 const USERS: (DevUserOption & { initial: string })[] = [
   { key: 'ana', label: 'Ana Souza · adulta, com correções', initial: 'A' },
   { key: 'bruno', label: 'Bruno Lima · 16 anos', initial: 'B' },
   { key: 'nova', label: 'Conta nova · ainda sem cadastro', initial: 'C' },
+  // Só existe na API quando Admin__Emails está preenchido: abre a área /admin.
+  { key: 'admin', label: 'Administração · cadastra as propostas', initial: 'G' },
 ];
 
 const STORAGE_KEY = 'redigiai.dev-user';

@@ -57,44 +57,22 @@
   top: 20px;
 }
 
-.types {
-  border: 0;
-  padding: 0;
-  margin: 0;
+/* O tipo vem da proposta: aparece só para leitura. */
+.essaySection {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.types legend {
-  padding: 0;
-  margin-bottom: 12px;
-}
-
-.types label {
-  display: flex;
   gap: 12px;
-  align-items: flex-start;
-  padding: 14px 16px;
+}
+
+.genre {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px;
   border: 1px solid var(--border-input);
+  background: var(--bg);
   border-radius: 14px;
-  cursor: pointer;
 }
 
-.types label.typeOn {
-  border: 1.5px solid var(--blue);
-  background: var(--blue-soft);
-}
-
-.types input {
-  width: 20px;
-  height: 20px;
-  margin: 2px 0 0;
-  accent-color: var(--blue);
-  flex-shrink: 0;
-}
-
-.types label > span,
 .photos li > div,
 .sending,
 .pending li > span {

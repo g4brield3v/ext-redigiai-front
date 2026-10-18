@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthState } from '../features/auth/AuthContext';
+import { useAccount } from '../lib/queries';
 import { Button } from './Button';
 import { Logo } from './Logo';
 import styles from './Nav.module.css';
@@ -21,11 +22,13 @@ type NavProps = {
 
 export function Nav({ variant = 'app', current }: NavProps) {
   const auth = useAuthState();
+  // O papel vem do backend: o link da administração só aparece para quem é administrador.
+  const account = useAccount(auth.isSignedIn);
   const isHome = variant === 'home';
   const { pathname } = useLocation();
   // O link fica marcado na própria rota e nas telas que pertencem a ela (ex.: correção → Minhas correções).
   const active = {
-    temas: current === 'temas' || (!current && pathname.startsWith('/temas')),
+    temas: current === 'temas' || (!current && pathname.startsWith('/propostas')),
     painel: current === 'painel' || (!current && pathname.startsWith('/painel')),
   };
   const mark = (name: 'temas' | 'painel') =>
@@ -45,7 +48,7 @@ export function Nav({ variant = 'app', current }: NavProps) {
             ))
           ) : (
             <>
-              <Link to="/temas" {...mark('temas')}>
+              <Link to="/propostas" {...mark('temas')}>
                 Temas
               </Link>
               {auth.isSignedIn ? (
@@ -61,16 +64,23 @@ export function Nav({ variant = 'app', current }: NavProps) {
 
         <div className={styles.actions}>
           {auth.isSignedIn ? (
-            <Link className={styles.avatar} to="/perfil" aria-label="Meu perfil">
-              {auth.initial ?? '·'}
-            </Link>
+            <>
+              {account.data?.role === 'admin' && (
+                <Link className={styles.signIn} to="/admin/propostas">
+                  Admin
+                </Link>
+              )}
+              <Link className={styles.avatar} to="/perfil" aria-label="Meu perfil">
+                {auth.initial ?? '·'}
+              </Link>
+            </>
           ) : (
             <>
               <Link className={styles.signIn} to="/entrar">
                 Entrar
               </Link>
               {isHome && (
-                <Button to="/temas" size="sm">
+                <Button to="/propostas" size="sm">
                   Corrigir redação
                 </Button>
               )}

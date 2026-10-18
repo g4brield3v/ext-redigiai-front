@@ -2,31 +2,64 @@ import type { Page } from '@playwright/test';
 
 // Respostas do catálogo para os testes de tela: o mesmo conteúdo do seed do backend.
 
-export const THEME_ID = '0198f0c0-0000-7000-8000-000000000101';
+export const PROMPT_SLUG = 'algoritmos-e-o-debate-publico';
 const rubricId = '0198f0c0-0000-7000-8000-00000000000a';
 
-const types = [
-  { id: 't1', slug: 'dissertacao', name: 'Dissertação', description: 'Texto dissertativo-argumentativo', rubricVersionId: rubricId, instruction: 'Defenda um ponto de vista.' },
-  { id: 't2', slug: 'narrativa', name: 'Narrativa', description: 'Texto narrativo com reflexão', rubricVersionId: rubricId, instruction: 'Conte uma história com reflexão.' },
+const summary = { essayType: { slug: 'dissertacao-em-prosa', name: 'Dissertação em prosa' }, examSlug: 'fuvest', examName: 'Fuvest' };
+
+const prompts = [
+  { ...summary, id: 'p1', slug: PROMPT_SLUG, title: 'Algoritmos e o debate público', summary: 'Coletânea com tirinha, poema e dois textos.', textCount: 4 },
+  { ...summary, id: 'p2', slug: 'o-valor-do-tempo-livre', title: 'O valor do tempo livre', summary: null, textCount: 3 },
+  { ...summary, id: 'p3', slug: 'cidades-e-o-direito-ao-silencio', title: 'Cidades e o direito ao silêncio', summary: null, textCount: 5 },
 ];
 
-const themes = [
-  { id: THEME_ID, title: 'Algoritmos e o debate público', examSlug: 'fuvest', examName: 'Fuvest', essayTypes: types, textCount: 4 },
-  { id: 'th2', title: 'O valor do tempo livre', examSlug: 'fuvest', examName: 'Fuvest', essayTypes: types.slice(0, 1), textCount: 3 },
-  { id: 'th3', title: 'Cidades e o direito ao silêncio', examSlug: 'fuvest', examName: 'Fuvest', essayTypes: types, textCount: 5 },
-];
-
-const themeDetail = {
-  id: THEME_ID,
+// A proposta como na tela aprovada (02b): imagem, prosa, verso em três colunas, comando e instruções.
+const promptDetail = {
+  ...summary,
+  id: 'p1',
+  slug: PROMPT_SLUG,
+  version: 1,
+  status: 'published',
   title: 'Algoritmos e o debate público',
-  statement: 'Enunciado da proposta.',
-  examSlug: 'fuvest',
-  examName: 'Fuvest',
+  summary: 'Coletânea com tirinha, poema e dois textos.',
+  essayTitle: 'Fuvest – Dissertação em prosa – Algoritmos e o debate público',
   sheetLines: 30,
-  essayTypes: types,
-  texts: [
-    { position: 1, kind: 'text', title: 'Título', source: 'Fonte', body: 'Trecho do texto 1.' },
-    { position: 2, kind: 'image', title: 'Gráfico', source: 'Fonte', body: null },
+  textCount: 4,
+  blocks: [
+    { position: 10, kind: 'collection_item', data: { label: 'Texto 1', format: 'image', source: '[Autor], *[Obra]*.', alt: 'Tirinha em três quadros.' } },
+    { position: 20, kind: 'collection_item', data: { label: 'Texto 2', format: 'prose', source: '[Autor], *[Título]*. [Ano]. Adaptado.', body: 'Trecho do texto 2, exatamente como na prova.' } },
+    {
+      position: 30,
+      kind: 'collection_item',
+      data: {
+        label: 'Texto 3',
+        format: 'verse',
+        source: '[Autor], *[Obra]*. [Ano].',
+        columns: [
+          ['Primeiro verso da coluna um', 'Segundo verso da coluna um'],
+          ['Primeiro verso da coluna dois', 'Segundo verso da coluna dois'],
+          ['Primeiro verso da coluna três', 'Segundo verso da coluna três'],
+        ],
+      },
+    },
+    { position: 40, kind: 'collection_item', data: { label: 'Texto 4', format: 'prose', source: '[Autor], [Ano].', body: 'Trecho do texto 4.' } },
+    {
+      position: 50,
+      kind: 'command',
+      data: { body: 'Considerando as ideias apresentadas nos textos, redija uma **dissertação em prosa** sobre o tema: **algoritmos e o debate público**.' },
+    },
+    {
+      position: 60,
+      kind: 'instructions',
+      data: {
+        title: 'Instruções',
+        items: [
+          'A dissertação deve ser redigida de acordo com a norma-padrão da língua portuguesa.',
+          'Escreva, no mínimo, 20 linhas, com letra legível e não ultrapasse o espaço de 30 linhas da folha de redação.',
+          'Dê um título a sua redação.',
+        ],
+      },
+    },
   ],
 };
 
@@ -58,10 +91,10 @@ const exams = [
 export async function interceptCatalog(page: Page) {
   await page.route('**/v1/exams', (route) => route.fulfill({ json: exams }));
   await page.route('**/v1/rubrics/*', (route) => route.fulfill({ json: rubric }));
-  await page.route(`**/v1/themes/${THEME_ID}`, (route) => route.fulfill({ json: themeDetail }));
-  await page.route('**/v1/exams/fuvest/themes*', (route) => {
+  await page.route(`**/v1/prompts/${PROMPT_SLUG}*`, (route) => route.fulfill({ json: promptDetail }));
+  await page.route('**/v1/exams/fuvest/prompts*', (route) => {
     const search = new URL(route.request().url()).searchParams.get('q')?.toLowerCase();
-    return route.fulfill({ json: search ? themes.filter((theme) => theme.title.toLowerCase().includes(search)) : themes });
+    return route.fulfill({ json: search ? prompts.filter((prompt) => prompt.title.toLowerCase().includes(search)) : prompts });
   });
 }
 

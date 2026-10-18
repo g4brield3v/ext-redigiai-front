@@ -5,10 +5,10 @@ import { Chip, ErrorState, Field, Skeleton, StepBar } from '../../components/pri
 import { ApiError } from '../../lib/api';
 import type { Schemas } from '../../lib/api';
 import type { EssaySummary } from '../../api/provisional-types';
-import { useEssays, useExams, useRubric, useThemes } from '../../lib/queries';
+import { useEssays, useExams, usePrompts, useRubric } from '../../lib/queries';
 import { useAuthState } from '../auth/AuthContext';
 import { statusChip } from '../painel/DashboardPage';
-import styles from './ThemesPage.module.css';
+import styles from './PromptsPage.module.css';
 
 const SEARCH_DELAY_MS = 300;
 
@@ -53,35 +53,34 @@ function ExamButton({
   );
 }
 
-/** O cartão mostra a situação da redação mais recente que o aluno logado enviou para o tema. */
-function ThemeCard({ theme, essay }: { theme: Schemas['ThemeSummaryDto']; essay?: EssaySummary }) {
+/** O cartão mostra a situação da redação mais recente que o aluno logado enviou para a proposta. */
+function PromptCard({ prompt, essay }: { prompt: Schemas['PromptSummaryDto']; essay?: EssaySummary }) {
   const chip = essay && statusChip[essay.status];
   return (
-    <Link to={`/temas/${theme.id}`} className={essay ? `${styles.theme} ${styles.themeSent}` : styles.theme}>
+    <Link to={`/propostas/${encodeURIComponent(prompt.slug)}`} className={essay ? `${styles.theme} ${styles.themeSent}` : styles.theme}>
       <div className={styles.themeTop}>
-        <span className={`muted ${styles.themeExam}`}>{theme.examName}</span>
+        <span className={`muted ${styles.themeExam}`}>{prompt.examName}</span>
         {chip && (
           <Chip tone={chip.tone}>
             {essay.status === 'completed' && essay.score !== null ? `Corrigida · ${essay.score}/${essay.maxScore}` : chip.label}
           </Chip>
         )}
       </div>
-      <h3 className={`serif ${styles.themeTitle}`}>{theme.title}</h3>
+      <h3 className={`serif ${styles.themeTitle}`}>{prompt.title}</h3>
+      {prompt.summary && <span className={`muted ${styles.themeTexts}`}>{prompt.summary}</span>}
       <div className={styles.themeTypes}>
-        {theme.essayTypes.map((type) => (
-          <Chip key={type.id}>{type.name}</Chip>
-        ))}
+        <Chip>{prompt.essayType.name}</Chip>
       </div>
       <span className={`muted ${styles.themeTexts}`}>
-        Coletânea com {theme.textCount} {theme.textCount === 1 ? 'texto' : 'textos'}
+        Coletânea com {prompt.textCount} {prompt.textCount === 1 ? 'texto' : 'textos'}
       </span>
     </Link>
   );
 }
 
-function ThemeGridSkeleton() {
+function PromptGridSkeleton() {
   return (
-    <div className={styles.grid} aria-busy="true" aria-label="Carregando os temas">
+    <div className={styles.grid} aria-busy="true" aria-label="Carregando as propostas">
       {[0, 1, 2].map((card) => (
         <div key={card} className={styles.theme}>
           <Skeleton width={60} height={14} />
@@ -94,7 +93,8 @@ function ThemeGridSkeleton() {
   );
 }
 
-export function ThemesPage() {
+/** 2 · Vestibular e proposta. */
+export function PromptsPage() {
   const exams = useExams();
   const [chosenSlug, setChosenSlug] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -103,14 +103,14 @@ export function ThemesPage() {
   const selected =
     exams.data?.find((exam) => exam.slug === chosenSlug && exam.status === 'active') ??
     exams.data?.find((exam) => exam.status === 'active');
-  const themes = useThemes(selected?.slug, debouncedSearch);
+  const prompts = usePrompts(selected?.slug, debouncedSearch);
   const auth = useAuthState();
   const essays = useEssays(auth.isSignedIn);
-  // A lista vem da mais recente para a mais antiga: vale a primeira de cada tema.
-  const latestByTheme = new Map<string, EssaySummary>();
+  // A lista vem da mais recente para a mais antiga: vale a primeira de cada proposta, em qualquer versão dela.
+  const latestByPrompt = new Map<string, EssaySummary>();
   for (const essay of essays.data?.items ?? []) {
-    if (!latestByTheme.has(essay.themeId)) {
-      latestByTheme.set(essay.themeId, essay);
+    if (!latestByPrompt.has(essay.promptSlug)) {
+      latestByPrompt.set(essay.promptSlug, essay);
     }
   }
 
@@ -120,9 +120,9 @@ export function ThemesPage() {
       <main className={`container ${styles.page}`}>
         <div className={styles.intro}>
           <span className="eyebrow">Nova redação</span>
-          <h1 className="serif h1">Escolha o vestibular e o tema</h1>
+          <h1 className="serif h1">Escolha o vestibular e a proposta</h1>
           <p className={`muted ${styles.lead}`}>
-            Cada tema traz o enunciado e a coletânea de textos. Depois você escolhe o tipo de redação e envia.
+            Cada proposta traz a coletânea e o comando, como na prova. Você escolhe a proposta antes de escrever.
           </p>
         </div>
 
@@ -158,35 +158,35 @@ export function ThemesPage() {
           <section className={styles.block} aria-labelledby="tema">
             <div className={styles.themesHeader}>
               <h2 id="tema" className="h3">
-                2. Tema da {selected.name}
+                2. Propostas da {selected.name}
               </h2>
               <Field
                 className={styles.search}
-                label="Buscar tema"
+                label="Buscar proposta"
                 hideLabel
                 type="search"
-                placeholder="Buscar tema"
+                placeholder="Buscar proposta"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
             </div>
 
             <div aria-live="polite">
-              {themes.error ? (
+              {prompts.error ? (
                 <ErrorState
-                  message={messageOf(themes.error)}
-                  onRetry={themes.error instanceof ApiError && !themes.error.retryable ? undefined : () => void themes.refetch()}
+                  message={messageOf(prompts.error)}
+                  onRetry={prompts.error instanceof ApiError && !prompts.error.retryable ? undefined : () => void prompts.refetch()}
                 />
-              ) : !themes.data ? (
-                <ThemeGridSkeleton />
-              ) : themes.data.length === 0 ? (
+              ) : !prompts.data ? (
+                <PromptGridSkeleton />
+              ) : prompts.data.length === 0 ? (
                 <p className={`muted ${styles.empty}`}>
-                  {debouncedSearch ? 'Nenhum tema encontrado para essa busca.' : 'Ainda não há temas disponíveis.'}
+                  {debouncedSearch ? 'Nenhuma proposta encontrada para essa busca.' : 'Ainda não há propostas disponíveis.'}
                 </p>
               ) : (
                 <div className={styles.grid}>
-                  {themes.data.map((theme) => (
-                    <ThemeCard key={theme.id} theme={theme} essay={latestByTheme.get(theme.id)} />
+                  {prompts.data.map((prompt) => (
+                    <PromptCard key={prompt.id} prompt={prompt} essay={latestByPrompt.get(prompt.slug)} />
                   ))}
                 </div>
               )}
