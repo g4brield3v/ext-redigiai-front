@@ -672,10 +672,32 @@ export interface components {
             /** Format: int32 */
             maxScore: null | number;
             failureCode: null | string;
+            failure: null | components["schemas"]["EssayFailureDto"];
             /** Format: int32 */
             sheetLines: number;
             lines: components["schemas"]["TranscriptionLineDto"][];
             illegibleWords: components["schemas"]["IllegibleWordDto"][];
+            timeline: components["schemas"]["EssayEventDto"][];
+        };
+        EssayEventDetailsDto: {
+            /** Format: int32 */
+            illegibleCount: null | number;
+            failureCode: null | string;
+        };
+        EssayEventDto: {
+            /** Format: date-time */
+            at: string;
+            type: components["schemas"]["EssayEventType"];
+            details: null | components["schemas"]["EssayEventDetailsDto"];
+        };
+        /** @enum {unknown} */
+        EssayEventType: "submitted" | "transcribed" | "review_completed" | "grading_started" | "completed" | "failed" | "cancelled" | "credit_refunded";
+        EssayFailureDto: {
+            code: string;
+            /** Format: date-time */
+            occurredAt: string;
+            creditRefunded: boolean;
+            details: null | components["schemas"]["EssayEventDetailsDto"];
         };
         EssayListDto: {
             items: components["schemas"]["EssaySummaryDto"][];
@@ -709,6 +731,7 @@ export interface components {
             /** Format: int32 */
             maxScore: null | number;
             failureCode: null | string;
+            failure: null | components["schemas"]["EssayFailureDto"];
         };
         EssayTypeDto: {
             slug: string;

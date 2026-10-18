@@ -50,6 +50,7 @@ function essay(id: string, status: EssaySummary['status'], extra: Partial<EssayS
     score: null,
     maxScore: null,
     failureCode: null,
+    failure: null,
     ...extra,
   };
 }
@@ -76,7 +77,7 @@ const progress: Progress = {
   focus: { criterionPosition: 3, criterionName: 'Coesão, coerência e progressão', guidance: 'Abra cada parágrafo com uma ideia nova.', essayId: 'essay-done' },
 };
 
-const reviewDetail: EssayDetail = { ...awaitingReview, sheetLines: 30, lines: exampleLines, illegibleWords: exampleIllegibleWords };
+const reviewDetail: EssayDetail = { ...awaitingReview, sheetLines: 30, lines: exampleLines, illegibleWords: exampleIllegibleWords, timeline: [] };
 
 const pendingPayment: Payment = {
   id: 'pay-1',
