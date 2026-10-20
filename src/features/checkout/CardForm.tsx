@@ -34,8 +34,9 @@ export function CardForm({ amountCents, onSubmit }: { amountCents: number; onSub
             if (!cancelled) setState('ready');
           },
           onSubmit: (data) => submit.current(toCardInput(data)),
-          onError: () => {
-            // Erros de digitação o próprio formulário mostra; aqui só importa se ele não carregou.
+          onError: (error) => {
+            // Erros de digitação o próprio formulário mostra ao aluno; em desenvolvimento, o detalhe vai para o console.
+            if (import.meta.env.DEV) console.error('Mercado Pago: erro no formulário de cartão', error);
           },
         });
         if (cancelled) {
