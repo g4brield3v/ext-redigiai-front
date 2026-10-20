@@ -82,7 +82,7 @@ Fontes hospedadas no próprio site com `@fontsource/newsreader`, `@fontsource/sc
 - TanStack Query para dados do servidor (cache, polling, revalidação).
 - Cliente HTTP **gerado do `openapi.json` do backend** (orval ou openapi-typescript + openapi-fetch). Proibido escrever tipos da API à mão.
 - Clerk React SDK (`@clerk/clerk-react`) para login; o token vai em `Authorization: Bearer`.
-- SDK JS do Mercado Pago para tokenizar o cartão; Pix mostra QR code e copia-e-cola vindos da API.
+- Checkout transparente: o aluno não sai da plataforma. O SDK JS do Mercado Pago (`sdk.mercadopago.com/js/v2`, carregado por script, sem pacote npm) monta o Card Payment Brick na nossa página e devolve só o token do cartão; chave pública em `VITE_MERCADOPAGO_PUBLIC_KEY`. Pix mostra QR code e copia-e-cola vindos da API. O Caddyfile libera na CSP só os domínios do Mercado Pago.
 - CSS: CSS Modules ou Tailwind configurado com os tokens acima (escolher um e manter). Sem bibliotecas de componentes visuais prontas (MUI, Chakra etc.), para não ficar com cara genérica.
 - Testes: Vitest + Testing Library; Playwright para ponta a ponta.
 - Sentry para erros.
@@ -118,7 +118,7 @@ Seções, nesta ordem:
 2. **Como funciona:** 4 passos (vestibular, tema, tipo, envio), cada um com ilustração da escolha. Unicamp e Enem aparecem como "em breve".
 3. **A correção:** três pontos (nível de 1 a `maxLevel` da grade por critério; orientação direta com linhas; erros agrupados pela regra) e um cartão de critério de exemplo.
 4. **Como a nota é calculada** (`id="nota"`): tabela critério × nível × peso × pontos, nota da grade, "Quando a nota é zero" e "Se a grade mudar". Os dados vêm de `GET /v1/rubrics/{versionId}`.
-5. **Preços:** três cartões (Teste grátis R$ 0, Plano semanal R$ 39,90/mês em destaque, Correção avulsa R$ 16).
+5. **Preços:** três cartões (Teste grátis R$ 0, Plano mensal R$ 39,90/mês em destaque, Correção avulsa R$ 16).
 6. **Perguntas frequentes:** acordeão (`<details>`).
 7. **CTA final:** "Escolha um tema e escreva a sua próxima redação." + "Ver os temas".
 8. **Rodapé:** "Correções feitas por IA com base nos critérios públicos da Fuvest. Não é afiliado à Fuvest." + Termos, Privacidade, Contato + identificação da empresa.
@@ -241,17 +241,17 @@ Dados de `GET /v1/essays/{id}/correction`.
 
 Menu lateral com âncoras: Dados, Correções e compras, Avisos por e-mail, Privacidade.
 - **Dados:** Nome (editável), E-mail (só leitura, "Você entra com Google."), Vestibular que você vai prestar; "Salvar alterações".
-- **Correções e compras:** saldo e "Comprar correções"; assinatura ("Plano semanal · ativo", regra de vencimento no dia 1º, próxima cobrança, "Gerenciar assinatura"); histórico de compras com data, descrição, valor e "Recibo"; "Desistir da compra" nas compras com menos de 7 dias.
+- **Correções e compras:** saldo e "Comprar correções"; assinatura ("Plano mensal · ativo", 12 correções válidas até a cobrança seguinte, próxima cobrança, "Gerenciar assinatura"); histórico de compras com data, descrição, valor e situação; "Desistir da compra" nas compras com menos de 7 dias, num modal com motivo opcional que mostra o valor que a API calculou.
 - **Avisos por e-mail:** interruptores para Correção pronta, Palavras ilegíveis pendentes ("Um lembrete 12 horas depois do aviso, se você ainda não tiver preenchido.") e Novos temas (desligado por padrão).
 - **Privacidade:** "Baixar meus dados" ("Solicitar arquivo"); "Excluir minha conta", com o texto sobre anonimização, perda de créditos e exclusão por inatividade, e uma confirmação digitando "EXCLUIR".
 - "Sair".
 
 ### Checkout (`/comprar`), sem design ainda
 
-- Duas opções: Plano semanal (R$ 39,90/mês, cartão) e Correção avulsa (R$ 16, quantidade de 1 a 10, Pix ou cartão).
+- Duas opções: Plano mensal (R$ 39,90/mês, 12 correções por mês, cartão) e Correção avulsa (R$ 16, quantidade de 1 a 10, Pix ou cartão).
 - Usuário de 16 ou 17 anos: caixa obrigatória "Meu responsável autorizou esta compra."
 - Texto antes de pagar: "Você pode desistir em até 7 dias e receber o valor das correções não usadas. Correções já entregues não são reembolsadas."
-- Pix: QR code, copia-e-cola com botão "Copiar", validade de 30 min e polling a cada 3 s até aprovar. Cartão: formulário do SDK do Mercado Pago (o número do cartão nunca passa pelo nosso código).
+- Pix: QR code, copia-e-cola com botão "Copiar", validade de 30 min e polling a cada 3 s até aprovar. Cartão: Card Payment Brick na própria página, uma parcela (o número do cartão nunca passa pelo nosso código); na avulsa, consulta a compra até aprovar ou recusar; no plano, consulta `GET /v1/me` até a assinatura ficar ativa e, depois de 60 s, sugere conferir em Meu perfil. `CHECKOUT_IN_PROGRESS` pede para tentar de novo em instantes.
 - Aprovado → "Pagamento aprovado" e volta para onde o aluno estava (ex.: o modal de envio).
 
 ## 6. Estados obrigatórios em toda tela com dados

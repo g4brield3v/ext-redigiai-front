@@ -282,14 +282,14 @@ function Pricing() {
           <article className={`${styles.plan} ${styles.featured}`}>
             <span className={styles.ribbon}>Para quem treina toda semana</span>
             <div className={styles.planHeader}>
-              <h3 className={styles.h3}>Plano semanal</h3>
+              <h3 className={styles.h3}>Plano mensal</h3>
               <span>Escreva, corrija e reescreva com frequência.</span>
             </div>
             <span>
               <span className={`serif ${styles.price}`}>R$ 39,90</span>
               <span className={styles.featuredSoft}> /mês</span>
             </span>
-            <span className={`${styles.small} ${styles.featuredSoft}`}>3 correções por semana · cartão de crédito</span>
+            <span className={`${styles.small} ${styles.featuredSoft}`}>12 correções por mês · cartão de crédito</span>
             <ul className={styles.ticks}>
               <li>
                 <Check size={16} color="#FFFFFF" />
@@ -301,7 +301,7 @@ function Pricing() {
               </li>
               <li>
                 <Check size={16} color="#FFFFFF" />
-                Correções não usadas acumulam até o fim do mês
+                12 correções a cada mês, válidas até a renovação
               </li>
               <li>
                 <Check size={16} color="#FFFFFF" />
@@ -309,7 +309,7 @@ function Pricing() {
               </li>
             </ul>
             <Button to="/propostas" size="lg" variant="inverse" className={styles.planAction}>
-              Assinar o plano semanal
+              Assinar o plano mensal
             </Button>
           </article>
 

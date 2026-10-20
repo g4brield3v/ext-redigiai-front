@@ -1,7 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Account, EssayDetail, EssaySummary, Payment, Progress } from '../api/provisional-types';
+import type { BrickCardData } from '../lib/mercadopago';
 import { apiError, json, mockApi, renderApp } from '../test/helpers';
 import type { Auth } from './auth/AuthContext';
 import { CheckoutPage } from './checkout/CheckoutPage';
@@ -87,8 +88,41 @@ const pendingPayment: Payment = {
   quantity: 1,
   status: 'pending',
   createdAt: '2026-09-28T15:00:00Z',
-  receiptUrl: null,
+  approvedAt: null,
   refundable: true,
+  pix: null,
+};
+
+type Brick = { amount: number; submit: (data: BrickCardData) => Promise<void> };
+
+/** O SDK do Mercado Pago no lugar do de verdade: guarda cada formulário montado para o teste "enviar" o cartão. */
+function stubMercadoPago() {
+  vi.stubEnv('VITE_MERCADOPAGO_PUBLIC_KEY', 'TEST-public-key');
+  const bricks: Brick[] = [];
+  class FakeMercadoPago {
+    bricks() {
+      return {
+        create: async (
+          _kind: string,
+          _container: string,
+          settings: { initialization: { amount: number }; callbacks: { onReady: () => void; onSubmit: Brick['submit'] } },
+        ) => {
+          bricks.push({ amount: settings.initialization.amount, submit: settings.callbacks.onSubmit });
+          settings.callbacks.onReady();
+          return { unmount: () => {} };
+        },
+      };
+    }
+  }
+  window.MercadoPago = FakeMercadoPago as unknown as Window['MercadoPago'];
+  return bricks;
+}
+
+const cardData: BrickCardData = {
+  token: 'tok-123',
+  payment_method_id: 'master',
+  issuer_id: 24,
+  payer: { identification: { type: 'CPF', number: '12345678909' } },
 };
 
 describe('Minhas correções', () => {
@@ -334,20 +368,79 @@ describe('Confirmação do envio', () => {
 });
 
 describe('Checkout', () => {
-  it('só mostra o pagamento como aprovado quando o backend confirma', async () => {
-    mockApi({ 'GET /v1/me': json(account), 'GET /v1/payments/pay-1': json(pendingPayment) });
-    renderApp(<CheckoutPage />, { route: '/comprar?pagamento=pay-1', path: '/comprar', auth: signedIn() });
+  afterEach(() => {
+    delete window.MercadoPago;
+    vi.unstubAllEnvs();
+  });
 
-    expect(await screen.findByText('Confirmando o pagamento')).toBeInTheDocument();
+  it('Pix: mostra o QR code da API e só confirma quando o backend aprova', async () => {
+    const pix = { ...pendingPayment, method: 'pix' as const, pix: { qrCodeBase64: 'iVBORw0KGgo=', copyPaste: '000201pix', expiresAt: '2026-09-28T15:30:00Z' } };
+    mockApi({ 'GET /v1/me': json(account), 'POST /v1/checkout/single': json(pix, 201), 'GET /v1/payments/pay-1': json(pix) });
+    renderApp(<CheckoutPage />, { route: '/comprar', path: '/comprar', auth: signedIn() });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Gerar Pix' }));
+
+    expect(await screen.findByLabelText('Pix copia e cola')).toHaveValue('000201pix');
     expect(screen.queryByText('Pagamento aprovado')).not.toBeInTheDocument();
   });
 
-  it('parâmetro forjado na URL não vira confirmação', async () => {
-    mockApi({ 'GET /v1/me': json(account) });
-    renderApp(<CheckoutPage />, { route: '/comprar?pagamento=aprovado', path: '/comprar', auth: signedIn() });
+  it('cartão: o formulário do Mercado Pago fica na página e só o token vai para a API', async () => {
+    const bricks = stubMercadoPago();
+    const requests = mockApi({
+      'GET /v1/me': json(account),
+      'POST /v1/checkout/single': json(pendingPayment, 201),
+      'GET /v1/payments/pay-1': json({ ...pendingPayment, status: 'approved' }),
+    });
+    renderApp(<CheckoutPage />, { route: '/comprar', path: '/comprar', auth: signedIn() });
 
-    expect(await screen.findByRole('alert')).toBeInTheDocument();
-    expect(screen.queryByText('Pagamento aprovado')).not.toBeInTheDocument();
+    await userEvent.click(await screen.findByRole('radio', { name: 'Cartão de crédito' }));
+    await waitFor(() => expect(bricks).toHaveLength(1));
+    expect(bricks[0]?.amount).toBe(16);
+    await bricks[0]?.submit(cardData);
+
+    expect(await screen.findByText('Pagamento aprovado')).toBeInTheDocument();
+    const post = requests.find((r) => r.method === 'POST');
+    expect(post?.body).toEqual({
+      quantity: 1,
+      method: 'card',
+      guardianAuthorized: false,
+      card: { token: 'tok-123', paymentMethodId: 'master', issuerId: '24', identificationType: 'CPF', identificationNumber: '12345678909' },
+    });
+  });
+
+  it('plano: assina com o cartão na página e mostra ativo quando o backend confirma', async () => {
+    const bricks = stubMercadoPago();
+    let subscribed = false;
+    const requests = mockApi({
+      'GET /v1/me': () =>
+        json(subscribed ? { ...account, subscription: { status: 'active', nextBillingAt: '2026-11-19T15:00:00Z', cardLast4: '4242' } } : account),
+      'POST /v1/checkout/plan': () => {
+        subscribed = true;
+        return json({ subscriptionId: 'sub-1', status: 'pending' });
+      },
+    });
+    renderApp(<CheckoutPage />, { route: '/comprar', path: '/comprar', auth: signedIn() });
+
+    await userEvent.click(await screen.findByRole('radio', { name: /Plano mensal/ }));
+    await waitFor(() => expect(bricks).toHaveLength(1));
+    expect(bricks[0]?.amount).toBe(39.9);
+    await bricks[0]?.submit(cardData);
+
+    expect(await screen.findByText('Seu plano mensal está ativo')).toBeInTheDocument();
+    const post = requests.find((r) => r.method === 'POST');
+    expect(post?.url.pathname).toBe('/v1/checkout/plan');
+    expect(post?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
+    expect((post?.body as { card: { token: string } }).card.token).toBe('tok-123');
+  });
+
+  it('sem a chave pública do Mercado Pago, o cartão aparece como indisponível', async () => {
+    vi.stubEnv('VITE_MERCADOPAGO_PUBLIC_KEY', '');
+    mockApi({ 'GET /v1/me': json(account) });
+    renderApp(<CheckoutPage />, { route: '/comprar', path: '/comprar', auth: signedIn() });
+
+    await userEvent.click(await screen.findByRole('radio', { name: 'Cartão de crédito' }));
+
+    expect(await screen.findByText(/O pagamento com cartão está indisponível agora/)).toBeInTheDocument();
   });
 
   it('repetir a tentativa usa a mesma chave de idempotência; mudar a compra gera outra', async () => {
@@ -388,11 +481,21 @@ describe('Meu perfil', () => {
   const handlers = {
     'GET /v1/me': json(account),
     'GET /v1/exams': json([{ slug: 'fuvest', name: 'Fuvest', status: 'active', sheetLines: 30, currentRubricVersionId: null }]),
-    'GET /v1/payments': json([{ ...pendingPayment, status: 'approved' }]),
+    'GET /v1/payments': json({ items: [{ ...pendingPayment, status: 'approved' }] }),
   };
 
   it('mostra os dados, o histórico e deixa desistir da compra dentro do prazo', async () => {
-    const requests = mockApi({ ...handlers, 'POST /v1/payments/pay-1/refund-request': new Response(null, { status: 202 }) });
+    const requests = mockApi({
+      ...handlers,
+      'POST /v1/payments/pay-1/refund-request': json({
+        id: 'refund-1',
+        paymentId: 'pay-1',
+        status: 'requested',
+        amountCents: 1600,
+        creditsRemoved: 1,
+        createdAt: '2026-09-29T15:00:00Z',
+      }),
+    });
     renderApp(<ProfilePage />, { route: '/perfil', path: '/perfil', auth: signedIn() });
 
     expect(await screen.findByLabelText('Nome')).toHaveValue('Ana Souza');
@@ -400,7 +503,13 @@ describe('Meu perfil', () => {
     expect(screen.getByRole('checkbox', { name: /Novos temas/ })).not.toBeChecked();
 
     await userEvent.click(await screen.findByRole('button', { name: 'Desistir da compra' }));
-    await waitFor(() => expect(requests.some((r) => r.url.pathname === '/v1/payments/pay-1/refund-request')).toBe(true));
+    const dialog = screen.getByRole('dialog', { name: 'Desistir da compra' });
+    await userEvent.type(within(dialog).getByLabelText(/Por que você está desistindo/), 'Mudei de ideia.');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Desistir da compra' }));
+
+    expect(await within(dialog).findByText(/Vamos devolver R\$\s?16,00/)).toBeInTheDocument();
+    const refund = requests.find((r) => r.url.pathname === '/v1/payments/pay-1/refund-request');
+    expect(refund?.body).toEqual({ reason: 'Mudei de ideia.' });
   });
 
   it('só exclui a conta com a confirmação digitada, e sair encerra a sessão', async () => {
