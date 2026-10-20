@@ -24,10 +24,6 @@ import { NotFoundPage } from './NotFoundPage';
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
 
-// Alunos de teste sem login: só no servidor de desenvolvimento, e só com VITE_DEV_AUTH=true.
-const devAuth = import.meta.env.DEV && import.meta.env.VITE_DEV_AUTH === 'true';
-const DevAuthProvider = devAuth ? lazy(() => import('../features/auth/DevAuthProvider')) : null;
-
 // O SDK do Clerk só é carregado quando a chave está configurada.
 const ClerkAuthProvider = lazy(() => import('../features/auth/ClerkAuthProvider'));
 const SsoCallbackPage = lazy(() => import('../features/auth/ClerkCallbacks').then((m) => ({ default: m.SsoCallbackPage })));
@@ -74,15 +70,7 @@ function ScrollManager() {
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
-  if (DevAuthProvider) {
-    return (
-      <Suspense fallback={null}>
-        <DevAuthProvider>{children}</DevAuthProvider>
-      </Suspense>
-    );
-  }
-
-  // Sem a chave do Clerk, as telas públicas funcionam e o login fica indisponível.
+  // Sem a chave do Clerk, só a página inicial funciona e o login fica indisponível.
   return clerkKey ? (
     <Suspense fallback={null}>
       <ClerkAuthProvider publishableKey={clerkKey}>{children}</ClerkAuthProvider>
@@ -128,25 +116,27 @@ export function AppRoutes() {
     <Suspense fallback={null}>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/propostas" element={<PromptsPage />} />
-        <Route path="/propostas/:slug" element={<ProposalPage />} />
-        <Route path="/propostas/:slug/enviar" element={<SubmitPage />} />
+        {/* Sem login, só a página inicial e o login: todo o resto pede o login na hora e volta depois. */}
+        <Route path="/propostas" element={logged(<PromptsPage />)} />
+        <Route path="/propostas/:slug" element={logged(<ProposalPage />)} />
+        <Route path="/propostas/:slug/enviar" element={logged(<SubmitPage />)} />
         {/* Endereço antigo da lista, que ainda pode estar em favoritos e e-mails. */}
         <Route path="/temas" element={<Navigate to="/propostas" replace />} />
-        <Route path="/enviar/foto" element={<CameraPage />} />
-        <Route path="/exemplo" element={<ExampleCorrectionPage />} />
-        {ExampleZeroCorrectionPage && <Route path="/exemplo/nota-zero" element={<ExampleZeroCorrectionPage />} />}
+        <Route path="/enviar/foto" element={logged(<CameraPage />)} />
+        <Route path="/exemplo" element={logged(<ExampleCorrectionPage />)} />
+        {ExampleZeroCorrectionPage && <Route path="/exemplo/nota-zero" element={logged(<ExampleZeroCorrectionPage />)} />}
         <Route path="/entrar" element={<LoginPage />} />
         <Route path="/entrar/concluir" element={<CompleteSignupPage />} />
-        {clerkKey && !devAuth && <Route path="/entrar/sso" element={<SsoCallbackPage />} />}
-        {clerkKey && !devAuth && <Route path="/entrar/verificar" element={<VerifyEmailLinkPage />} />}
+        {clerkKey && <Route path="/entrar/sso" element={<SsoCallbackPage />} />}
+        {clerkKey && <Route path="/entrar/verificar" element={<VerifyEmailLinkPage />} />}
         <Route path="/painel" element={logged(<DashboardPage />)} />
         <Route path="/redacoes/:id/revisao" element={logged(<ReviewPage />)} />
         <Route path="/redacoes/:id" element={logged(<CorrectionPage />)} />
         <Route path="/perfil" element={logged(<ProfilePage />)} />
         <Route path="/comprar" element={logged(<CheckoutPage />)} />
+        {/* A administração não pede login: para quem não é administrador, logado ou não, ela não existe (não encontrado). */}
         <Route path="/admin/*" element={<AdminArea />} />
-        {ComponentsPage && <Route path="/_componentes" element={<ComponentsPage />} />}
+        {ComponentsPage && <Route path="/_componentes" element={logged(<ComponentsPage />)} />}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>

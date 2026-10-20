@@ -92,13 +92,13 @@ Fontes hospedadas no próprio site com `@fontsource/newsreader`, `@fontsource/sc
 | Rota | Tela (arquivo de design) | Acesso |
 |---|---|---|
 | `/` | 1 · Início (`01-inicio.html`) | Público |
-| `/propostas` (antes `/temas`) | 2 · Vestibular e proposta (`02-temas.html`) | Público |
-| `/propostas/:slug` | 2b · Proposta e coletânea (`02b-proposta-coletanea.html`) | Público |
-| `/propostas/:slug/enviar` | 3 · Envio (`03-tipo-envio.html`), modal 3b (`03b-modal-confirmar-envio.html`) | Público até enviar |
-| `/admin/propostas` | 11 · Admin: propostas (`11-admin-propostas.html`) | Só administrador (ver `07-propostas-de-redacao.md`, A5) |
+| `/propostas` (antes `/temas`) | 2 · Vestibular e proposta (`02-temas.html`) | Logado (desde 20/10/2026: sem login, só a página inicial e o login) |
+| `/propostas/:slug` | 2b · Proposta e coletânea (`02b-proposta-coletanea.html`) | Logado |
+| `/propostas/:slug/enviar` | 3 · Envio (`03-tipo-envio.html`), modal 3b (`03b-modal-confirmar-envio.html`) | Logado |
+| `/admin/propostas` | 11 · Admin: propostas (`11-admin-propostas.html`) | Só administrador; para os demais, logados ou não, "não encontrado" (ver `07-propostas-de-redacao.md`, A5) |
 | `/admin/propostas/:id` | 11b · Admin: editar proposta (`11b-admin-editar-proposta.html`) | Só administrador |
 | `/entrar` | 4 · Login (`04-login.html`) | Público |
-| `/enviar/foto` | 5 · Câmera no celular (`05-camera-celular.html`) | Público |
+| `/enviar/foto` | 5 · Câmera no celular (`05-camera-celular.html`) | Logado |
 | `/painel` | 8 · Minhas correções (`08-painel.html`) | Logado |
 | `/redacoes/:id/revisao` | 6 · Palavras ilegíveis (`06-revisao-ilegiveis.html`), modal 6b (`06b-modal-confirmar-palavras.html`) | Logado |
 | `/redacoes/:id` | 9 · Correção (`09-correcao.html`) | Logado |

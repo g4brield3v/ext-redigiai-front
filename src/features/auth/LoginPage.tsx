@@ -169,29 +169,6 @@ export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmai
 }
 
 /** Modo de desenvolvimento: entra direto como um dos alunos de teste. */
-function DevLogin({ next }: { next: string }) {
-  const auth = useAuthState();
-
-  return (
-    <div className={styles.form}>
-      <p className={`muted ${styles.note}`}>Ambiente de teste: escolha com qual aluno entrar.</p>
-      {auth.devUsers?.map((user) => (
-        <Button
-          key={user.key}
-          variant="ghost"
-          block
-          onClick={() => {
-            savePendingSignup({ next });
-            auth.signInAs?.(user.key);
-          }}
-        >
-          {user.label}
-        </Button>
-      ))}
-    </div>
-  );
-}
-
 export function LoginPage() {
   const auth = useAuthState();
   const [params] = useSearchParams();
@@ -202,11 +179,10 @@ export function LoginPage() {
   }
 
   return (
-    <LoginShell closeTo={next}>
+    // Fechar o login volta à página inicial: o destino é área interna e pediria o login de novo.
+    <LoginShell closeTo="/">
       <DraftNotice />
-      {auth.mode === 'dev' ? (
-        <DevLogin next={next} />
-      ) : auth.mode === 'clerk' ? (
+      {auth.mode === 'clerk' ? (
         <Suspense fallback={null}>
           <ClerkLoginForm next={next} />
         </Suspense>

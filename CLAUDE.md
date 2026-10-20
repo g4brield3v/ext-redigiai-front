@@ -38,8 +38,8 @@ Dockerfile
 
 ```bash
 npm ci && npm run dev        # http://localhost:5173 (precisa da API em VITE_API_URL)
-# Sem login, só na sua máquina: VITE_DEV_AUTH=true em .env.development.local (e DevAuth__Enabled=true na API).
-# Uma barra no topo troca entre os alunos de teste (ana | bruno | nova | admin | visitante). O build recusa essa variável.
+# Não existe acesso sem login, nem na sua máquina: VITE_CLERK_PUBLISHABLE_KEY (Clerk de desenvolvimento) no
+# .env.development.local. Sem login, só a página inicial e o login; o resto leva ao login e volta depois.
 npm run sync:api             # copia o openapi.json do repositório do back-end (pasta ao lado)
 npm run gen:api              # regenera src/api/schema.d.ts a partir do openapi.json
 npm test && npm run typecheck && npm run lint

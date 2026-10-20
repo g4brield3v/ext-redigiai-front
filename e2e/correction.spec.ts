@@ -5,6 +5,9 @@ import { horizontalOverflow, interceptCatalog } from './catalog';
 // Tela da correção (docs/06-tela-correcao.md) sobre a correção de exemplo, que é pública.
 // Em telas largas os apontamentos ficam no painel ao lado; nas estreitas, abrem numa folha inferior.
 
+// Tela interna: desde 20/10/2026 exige login; volta com a sessão de teste do Clerk (etapa 5d).
+test.skip(true, 'A correção de exemplo exige login desde 20/10/2026.');
+
 test.beforeEach(async ({ page }) => {
   await interceptCatalog(page);
   await page.goto('/exemplo');
