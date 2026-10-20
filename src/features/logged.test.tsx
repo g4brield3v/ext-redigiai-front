@@ -32,6 +32,7 @@ const account: Account = {
   targetExamSlug: 'fuvest',
   loginProvider: 'google',
   needsGuardianAuthorization: false,
+  planResumesAt: null,
 };
 
 function essay(id: string, status: EssaySummary['status'], extra: Partial<EssaySummary> = {}): EssaySummary {
@@ -474,6 +475,7 @@ describe('Checkout', () => {
       ...account,
       credits: { total: 7, buckets: [{ source: 'plan' as const, remaining: 7, expiresAt: '2026-11-09T15:00:00Z' }] },
       subscription: { status: 'cancelled' as const, nextBillingAt: '2026-11-09T15:00:00Z', cardLast4: '4242' },
+      planResumesAt: '2026-11-09T15:00:00Z',
     };
     mockApi({
       'GET /v1/me': () =>

@@ -989,6 +989,8 @@ export interface components {
             credits: components["schemas"]["CreditBalanceDto"];
             subscription: null | components["schemas"]["SubscriptionDto"];
             needsGuardianAuthorization: boolean;
+            /** Format: date-time */
+            planResumesAt: null | string;
         };
         PromptAdminDto: {
             /** Format: uuid */

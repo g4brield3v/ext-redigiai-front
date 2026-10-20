@@ -204,13 +204,9 @@ export function CheckoutPage() {
 
   const needsGuardian = account.data?.needsGuardianAuthorization ?? false;
   const hasPlan = account.data?.subscription?.status === 'active' || account.data?.subscription?.status === 'paused';
-  // Correções do plano ainda valendo (plano cancelado no meio do ciclo): assinar de novo não cobra agora. A data que vale
-  // é a que o backend devolve na assinatura; esta só avisa antes.
-  const planCycleEnd = (account.data?.credits.buckets ?? [])
-    .filter((bucket) => bucket.source === 'plan' && bucket.expiresAt)
-    .map((bucket) => bucket.expiresAt!)
-    .sort()
-    .at(-1);
+  // Plano cancelado no meio do ciclo pago: assinar de novo não cobra agora. A data vem do backend (regra 23), a mesma
+  // que a assinatura vai usar.
+  const planCycleEnd = account.data?.planResumesAt;
   // Uma chave por intenção de compra: repetir o clique (ou a tentativa) não cria um segundo pagamento.
   // Ela muda quando muda o que está sendo comprado, e a cada cartão enviado na avulsa (outro token, outra tentativa).
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
@@ -351,8 +347,8 @@ export function CheckoutPage() {
                 <>
                   {planCycleEnd && (
                     <p className={styles.check} role="note">
-                      Você ainda tem correções do plano até {formatDay(planCycleEnd)}. Ao assinar de novo, nada é cobrado agora: o
-                      plano volta a renovar nessa data, e as correções que você tem continuam valendo.
+                      Seu ciclo pago vai até {formatDay(planCycleEnd)}. Ao assinar de novo, nada é cobrado agora: o plano volta a
+                      renovar nessa data, e as correções do plano que você tem continuam valendo.
                     </p>
                   )}
                   <p className="muted">
