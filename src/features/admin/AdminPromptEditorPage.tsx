@@ -7,7 +7,6 @@ import { ApiError, errorMessage } from '../../lib/api';
 import type { Schemas } from '../../lib/api';
 import { useExams } from '../../lib/queries';
 import styles from './Admin.module.css';
-import { SecondFactorNotice } from './AdminArea';
 import { AdminField, BlockCard } from './BlockCard';
 import { PromptPreview } from './PromptPreview';
 import { archivePrompt, createVersion, deletePrompt, publishPrompt, savePrompt, useAdminPrompt, validatePrompt } from './adminApi';
@@ -531,9 +530,6 @@ export function AdminPromptEditorPage() {
   const { id } = useParams();
   const prompt = useAdminPrompt(id);
 
-  if (prompt.error instanceof ApiError && prompt.error.code === 'ADMIN_2FA_REQUIRED') {
-    return <SecondFactorNotice error={prompt.error} />;
-  }
   if (prompt.error) {
     return (
       <main className={`${styles.inner} ${styles.center}`}>

@@ -7,7 +7,6 @@ import { ApiError, errorMessage } from '../../lib/api';
 import type { Schemas } from '../../lib/api';
 import { formatSentAt } from '../../lib/format';
 import styles from './Admin.module.css';
-import { SecondFactorNotice } from './AdminArea';
 import { createPrompt, createVersion, useAdminPrompts } from './adminApi';
 import type { PromptStatus } from './adminApi';
 
@@ -90,10 +89,6 @@ export function AdminPromptsPage() {
 
   const failure = create.error ?? importFile.error ?? newVersion.error;
   const items = prompts.data?.items ?? [];
-
-  if (prompts.error instanceof ApiError && prompts.error.code === 'ADMIN_2FA_REQUIRED') {
-    return <SecondFactorNotice error={prompts.error} />;
-  }
 
   return (
     <main className={`${styles.inner} ${styles.listPage}`}>

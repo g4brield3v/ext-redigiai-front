@@ -13,7 +13,7 @@ const USERS: (DevUserOption & { initial: string })[] = [
   { key: 'ana', label: 'Ana Souza · adulta, com correções', initial: 'A' },
   { key: 'bruno', label: 'Bruno Lima · 16 anos', initial: 'B' },
   { key: 'nova', label: 'Conta nova · ainda sem cadastro', initial: 'C' },
-  // Só existe na API quando Admin__Emails está preenchido: abre a área /admin.
+  // Vem com a flag de administrador ligada pela API de desenvolvimento: abre a área /admin.
   { key: 'admin', label: 'Administração · cadastra as propostas', initial: 'G' },
 ];
 

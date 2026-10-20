@@ -149,7 +149,6 @@ Página só de leitura, separada do envio: o aluno lê a proposta, escreve à m�
 Regras, API e campos em `docs/07-propostas-de-redacao.md`, seção A5. Referências: `11-admin-propostas` e `11b-admin-editar-proposta`. O código fica em `src/features/admin` e é carregado à parte: quem não é administrador não o baixa.
 
 - `/admin/*` só existe para quem tem `role: admin` em `GET /v1/me`. Para aluno logado e para quem não entrou, é a página de "não encontrado", sem nenhuma chamada a `/v1/admin`. O link "Admin" aparece ao lado do avatar só para administradores.
-- Sessão sem o segundo fator, quando a API o exige (`ADMIN_2FA_REQUIRED`): a tela pede a ativação da verificação em duas etapas.
 - **Lista:** abas por situação com as contagens que vêm da API, busca com atraso de 300 ms, tabela (proposta, versão, status, atualizada, ação), "Importar JSON" e "Nova proposta".
 - **Editor:** barra fixa (voltar, status e versão, "Salvo às hh:mm", "Exportar JSON", "Validar", "Publicar" com confirmação); pendências clicáveis, que levam ao campo; título e dados gerais; um cartão por bloco, com posição editável, alça para arrastar, ↑ ↓, duplicar e remover; cartão fixo de Instruções, com o tipo de redação (gênero como na prova e categoria de correção), linhas, título obrigatório e itens; "Abordagens esperadas do tema"; prévia à direita com os mesmos componentes da página do aluno, em "Computador" e "Celular".
 - Mudar a ordem renumera os blocos de 10 em 10. O editor manda sempre a proposta inteira (`PUT`), com `expectedUpdatedAt`.

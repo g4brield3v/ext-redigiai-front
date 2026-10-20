@@ -25,7 +25,7 @@ const account: Account = {
   name: 'Ana Souza',
   termsAcceptanceRequired: false,
   aiNoticeAccepted: true,
-  role: 'student',
+  isAdmin: false,
   emailPreferences: { correctionReady: true, illegibleReminder: true, newThemes: false },
   credits: { total: 3, buckets: [{ source: 'single', remaining: 3, expiresAt: null }] },
   subscription: null,
