@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { LogoMark } from '../../components/Logo';
-import { ApiError } from '../../lib/api';
 import { useAccount } from '../../lib/queries';
 import { NotFoundPage } from '../../routes/NotFoundPage';
 import { useAuthState } from '../auth/AuthContext';
@@ -38,26 +37,7 @@ export function AdminShell({ email, children }: { email?: string; children: Reac
 }
 
 /**
- * Sessão de administrador sem a verificação em duas etapas: a API responde `ADMIN_2FA_REQUIRED` e a tela pede a
- * ativação. Qualquer outro erro segue para quem chamou.
- */
-export function SecondFactorNotice({ error }: { error: unknown }) {
-  if (!(error instanceof ApiError) || error.code !== 'ADMIN_2FA_REQUIRED') {
-    return null;
-  }
-  return (
-    <main className={`${styles.inner} ${styles.center}`}>
-      <h1 className="serif h1">Ative a verificação em duas etapas</h1>
-      <p className="muted" role="alert">
-        {error.message} Ative-a na sua conta, saia e entre de novo para abrir a administração.
-      </p>
-      <Link to="/perfil">Ir para o meu perfil</Link>
-    </main>
-  );
-}
-
-/**
- * `/admin/*`: só existe para quem tem o papel de administrador, que vem do backend em `/v1/me`. Para os demais,
+ * `/admin/*`: só existe para quem tem a flag de administrador, que vem do backend em `/v1/me` (`isAdmin`). Para os demais,
  * inclusive quem não está logado, é a página de "não encontrado": nada indica que a área existe.
  */
 export default function AdminArea() {
@@ -67,7 +47,7 @@ export default function AdminArea() {
   if (!auth.isLoaded || (auth.isSignedIn && account.isPending)) {
     return null;
   }
-  if (!auth.isSignedIn || account.data?.role !== 'admin') {
+  if (!auth.isSignedIn || !account.data?.isAdmin) {
     return <NotFoundPage />;
   }
 

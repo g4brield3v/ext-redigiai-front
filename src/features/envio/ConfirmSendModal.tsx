@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Modal, Notice, SheetThumb, Skeleton } from '../../components/primitives';
-import { api, errorMessage, unwrap } from '../../lib/api';
+import { ApiError, api, errorMessage, request, unwrap } from '../../lib/api';
 import { corrections } from '../../lib/format';
 import { useAccount } from '../../lib/queries';
+import { TermsNotice } from '../auth/LoginPage';
 import { clearDraft } from './draft';
 import styles from './SubmitPage.module.css';
 
@@ -27,8 +28,12 @@ export function ConfirmSendModal({ essays, parentEssayId, onClose }: Props) {
   const [aiNoticeChecked, setAiNoticeChecked] = useState(false);
 
   const send = useMutation({
-    mutationFn: () =>
-      unwrap(
+    mutationFn: async () => {
+      // Termos novos ainda não aceitos: continuar aceita (o aviso está na tela), antes do envio.
+      if (needsTerms) {
+        await request('POST', '/v1/me/terms');
+      }
+      return unwrap(
         api.POST('/v1/essays/batch', {
           params: { header: { 'Idempotency-Key': idempotencyKey } },
           body: {
@@ -41,7 +46,14 @@ export function ConfirmSendModal({ essays, parentEssayId, onClose }: Props) {
             aiNoticeAccepted: needsAiNotice ? true : null,
           },
         }),
-      ),
+      );
+    },
+    onError: (error) => {
+      // O perfil estava desatualizado: recarrega para mostrar o aviso dos termos.
+      if (error instanceof ApiError && error.code === 'TERMS_ACCEPTANCE_REQUIRED') {
+        void queryClient.invalidateQueries({ queryKey: ['me'] });
+      }
+    },
     onSuccess: async () => {
       await clearDraft();
       await queryClient.invalidateQueries();
@@ -52,6 +64,7 @@ export function ConfirmSendModal({ essays, parentEssayId, onClose }: Props) {
   const cost = essays.length;
   const balance = account.data?.credits.total;
   const needsAiNotice = account.data ? !account.data.aiNoticeAccepted : false;
+  const needsTerms = account.data?.termsAcceptanceRequired ?? false;
   const insufficient = balance !== undefined && balance < cost;
   const canConfirm = balance !== undefined && !insufficient && (!needsAiNotice || aiNoticeChecked) && !send.isPending;
 
@@ -89,6 +102,8 @@ export function ConfirmSendModal({ essays, parentEssayId, onClose }: Props) {
           </span>
         </label>
       )}
+
+      {needsTerms && <TermsNotice />}
 
       {insufficient && (
         <p className={styles.modalError} role="alert">

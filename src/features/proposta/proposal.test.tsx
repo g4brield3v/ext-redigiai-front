@@ -189,7 +189,7 @@ describe('Envio', () => {
     const requests = mockApi({
       ...catalogHandlers,
       'GET /v1/me': json({
-        id: 'u1', email: 'ana@example.com', name: 'Ana', role: 'student', termsAcceptanceRequired: false, aiNoticeAccepted: true,
+        id: 'u1', email: 'ana@example.com', name: 'Ana', isAdmin: false, termsAcceptanceRequired: false, aiNoticeAccepted: true,
         emailPreferences: { correctionReady: true, illegibleReminder: true, newThemes: false },
         credits: { total: 2, buckets: [{ source: 'single', remaining: 2, expiresAt: null }] },
       }),

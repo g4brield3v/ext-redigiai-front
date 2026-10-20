@@ -26,7 +26,7 @@ const account = (role: 'admin' | 'student') => ({
   id: 'u1',
   email: 'admin@redigiai.test',
   name: 'Gabriel',
-  role,
+  isAdmin: role === 'admin',
   termsAcceptanceRequired: false,
   aiNoticeAccepted: true,
   emailPreferences: { correctionReady: true, illegibleReminder: true, newThemes: false },
@@ -254,13 +254,6 @@ describe('Acesso à administração', () => {
     expect(requests).toHaveLength(0);
   });
 
-  it('administrador sem o segundo fator é avisado para ativar a verificação em duas etapas', async () => {
-    mockApi({ ...adminHandlers, 'GET /v1/admin/prompts': apiError('ADMIN_2FA_REQUIRED', 'Ative a verificação em duas etapas para acessar a administração.', 403) });
-    renderApp(<AdminArea />, listRoute);
-
-    expect(await screen.findByRole('heading', { name: 'Ative a verificação em duas etapas' })).toBeInTheDocument();
-    expect(screen.getByRole('alert')).toHaveTextContent('Ative a verificação em duas etapas para acessar a administração.');
-  });
 });
 
 describe('Lista de propostas', () => {

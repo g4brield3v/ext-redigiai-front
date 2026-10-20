@@ -65,7 +65,7 @@ export function Nav({ variant = 'app', current }: NavProps) {
         <div className={styles.actions}>
           {auth.isSignedIn ? (
             <>
-              {account.data?.role === 'admin' && (
+              {account.data?.isAdmin && (
                 <Link className={styles.signIn} to="/admin/propostas">
                   Admin
                 </Link>
