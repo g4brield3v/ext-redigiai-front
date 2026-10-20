@@ -467,6 +467,32 @@ describe('Checkout', () => {
     expect(await screen.findByText(/O pagamento com cartão está indisponível agora/)).toBeInTheDocument();
   });
 
+  it('plano cancelado com correções valendo: avisa que nada é cobrado agora e mostra a data da primeira cobrança', async () => {
+    const bricks = stubMercadoPago();
+    let subscribed = false;
+    const cancelled = {
+      ...account,
+      credits: { total: 7, buckets: [{ source: 'plan' as const, remaining: 7, expiresAt: '2026-11-09T15:00:00Z' }] },
+      subscription: { status: 'cancelled' as const, nextBillingAt: '2026-11-09T15:00:00Z', cardLast4: '4242' },
+    };
+    mockApi({
+      'GET /v1/me': () =>
+        json(subscribed ? { ...cancelled, subscription: { status: 'active', nextBillingAt: '2026-11-09T15:00:00Z', cardLast4: '4242' } } : cancelled),
+      'POST /v1/checkout/plan': () => {
+        subscribed = true;
+        return json({ subscriptionId: 'sub-2', status: 'pending', firstChargeAt: '2026-11-09T15:00:00Z' });
+      },
+    });
+    renderApp(<CheckoutPage />, { route: '/comprar', path: '/comprar', auth: signedIn() });
+
+    await userEvent.click(await screen.findByRole('radio', { name: /Plano mensal/ }));
+    expect(screen.getByRole('note')).toHaveTextContent('Ao assinar de novo, nada é cobrado agora');
+    await waitFor(() => expect(bricks).toHaveLength(1));
+    await bricks[0]?.submit(cardData);
+
+    expect(await screen.findByText(/Seu plano volta a renovar em 09\/11/)).toBeInTheDocument();
+  });
+
   it('sem a chave pública do Mercado Pago, o cartão aparece como indisponível', async () => {
     vi.stubEnv('VITE_MERCADOPAGO_PUBLIC_KEY', '');
     mockApi({ 'GET /v1/me': json(account) });

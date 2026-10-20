@@ -974,6 +974,8 @@ export interface components {
             /** Format: uuid */
             subscriptionId: string;
             status: components["schemas"]["SubscriptionStatus"];
+            /** Format: date-time */
+            firstChargeAt?: null | string;
         };
         ProfileDto: {
             /** Format: uuid */
