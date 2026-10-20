@@ -11,6 +11,7 @@ export function CardForm({ amountCents, onSubmit }: { amountCents: number; onSub
   // O SDK acha o contêiner pelo id: só letras, números e hífen.
   const containerId = `cartao-${useId().replace(/[^A-Za-z0-9-]/g, '')}`;
   const submit = useRef(onSubmit);
+  const queue = useRef<Promise<void>>(Promise.resolve());
   const [state, setState] = useState<'loading' | 'ready' | 'unavailable'>(mercadoPagoPublicKey() ? 'loading' : 'unavailable');
 
   useEffect(() => {
@@ -23,28 +24,35 @@ export function CardForm({ amountCents, onSubmit }: { amountCents: number; onSub
     }
     let cancelled = false;
     let controller: { unmount: () => void } | null = null;
-    createCardBrick(containerId, amountCents, {
-      onReady: () => {
-        if (!cancelled) setState('ready');
-      },
-      onSubmit: (data) => submit.current(toCardInput(data)),
-      onError: () => {
-        // Erros de digitação o próprio formulário mostra; aqui só importa se ele não carregou.
-      },
-    })
-      .then((created) => {
+    // Uma montagem por vez no contêiner: a seguinte (o modo estrito do React monta duas vezes) espera a anterior
+    // terminar e sair dele; desmontar uma no meio da criação da outra apaga o que o SDK está montando.
+    const creation = queue.current.then(async () => {
+      if (cancelled) return;
+      try {
+        const created = await createCardBrick(containerId, amountCents, {
+          onReady: () => {
+            if (!cancelled) setState('ready');
+          },
+          onSubmit: (data) => submit.current(toCardInput(data)),
+          onError: () => {
+            // Erros de digitação o próprio formulário mostra; aqui só importa se ele não carregou.
+          },
+        });
         if (cancelled) {
           created.unmount();
         } else {
           controller = created;
         }
-      })
-      .catch(() => {
+      } catch (error) {
+        // Só em desenvolvimento: o motivo de o formulário não montar (não há dado de cartão aqui).
+        if (import.meta.env.DEV) console.error('Mercado Pago: o formulário de cartão não montou', error);
         if (!cancelled) setState('unavailable');
-      });
+      }
+    });
+    queue.current = creation;
     return () => {
       cancelled = true;
-      controller?.unmount();
+      queue.current = creation.then(() => controller?.unmount());
     };
   }, [containerId, amountCents]);
 
