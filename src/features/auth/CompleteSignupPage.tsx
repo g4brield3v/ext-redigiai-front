@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { ErrorState, Field, Skeleton } from '../../components/primitives';
 import { ApiError, api, unwrap } from '../../lib/api';
@@ -20,6 +20,7 @@ export function CompleteSignupPage() {
   const signOut = useSignOut();
   const queryClient = useQueryClient();
   const [pending] = useState(readPendingSignup);
+  const [params] = useSearchParams();
   const [birth, setBirth] = useState('');
   const [birthError, setBirthError] = useState<string | null>(null);
   const autoSubmitted = useRef(false);
@@ -62,7 +63,8 @@ export function CompleteSignupPage() {
   }
 
   if (done) {
-    return <Navigate to={safeNext(pending.next)} replace />;
+    // Para onde voltar: o que o login guardou ou, vindo de uma rota logada, o ?next= dela.
+    return <Navigate to={safeNext(pending.next ?? params.get('next'))} replace />;
   }
 
   function submit(event: FormEvent) {

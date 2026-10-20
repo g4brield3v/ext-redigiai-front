@@ -17,7 +17,9 @@ import { ProfilePage } from '../features/perfil/ProfilePage';
 import { ReviewPage } from '../features/revisao/ReviewPage';
 import { ProposalPage } from '../features/proposta/ProposalPage';
 import { PromptsPage } from '../features/propostas/PromptsPage';
+import { TermsUpdate } from '../features/auth/TermsUpdate';
 import { ApiError } from '../lib/api';
+import { useAccount } from '../lib/queries';
 import { NotFoundPage } from './NotFoundPage';
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
@@ -90,16 +92,27 @@ function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Rota logada: sem sessão, vai para o login e volta para cá depois. */
-function RequireAuth({ children }: { children: ReactNode }) {
+/**
+ * Rota logada: sem sessão, vai para o login e volta para cá depois. Com sessão mas sem cadastro na plataforma (o
+ * cadastro ficou pela metade), vai concluir o cadastro. Com Termos novos ainda não aceitos, pede o aceite antes.
+ */
+export function RequireAuth({ children }: { children: ReactNode }) {
   const auth = useAuthState();
   const location = useLocation();
+  const account = useAccount(auth.isLoaded && auth.isSignedIn);
+  const here = encodeURIComponent(location.pathname + location.search);
 
   if (!auth.isLoaded) {
     return <Nav />;
   }
   if (!auth.isSignedIn) {
-    return <Navigate to={`/entrar?next=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+    return <Navigate to={`/entrar?next=${here}`} replace />;
+  }
+  if (account.error instanceof ApiError && account.error.code === 'PROFILE_NOT_FOUND') {
+    return <Navigate to={`/entrar/concluir?next=${here}`} replace />;
+  }
+  if (account.data?.termsAcceptanceRequired) {
+    return <TermsUpdate />;
   }
   return <>{children}</>;
 }

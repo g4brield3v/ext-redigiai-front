@@ -8,6 +8,7 @@ import { LoginPage } from './auth/LoginPage';
 import { clearPendingSignup, savePendingSignup } from './auth/signup';
 import { HomePage } from './home/HomePage';
 import { PromptsPage } from './propostas/PromptsPage';
+import { RequireAuth } from '../routes/App';
 
 const profile = {
   id: '0198f0c0-0000-7000-8000-0000000000aa',
@@ -211,5 +212,38 @@ describe('Primeiro acesso', () => {
     renderApp(<CompleteSignupPage />, { route: '/entrar/concluir', path: '/entrar/concluir' });
 
     expect(screen.getByTestId('location')).toHaveTextContent('/entrar');
+  });
+
+  it('cadastro já feito: volta para o ?next= da rota logada', async () => {
+    mockApi({ 'GET /v1/me': json({ id: 'u1', email: 'ana@example.com' }) });
+    renderApp(<CompleteSignupPage />, { route: '/entrar/concluir?next=%2Fpainel', path: '/entrar/concluir', auth: signedIn() });
+
+    expect(await screen.findByTestId('location')).toHaveTextContent('/painel');
+  });
+});
+
+describe('Rota logada', () => {
+  const profile = { id: 'u1', email: 'ana@example.com', name: 'Ana', isAdmin: false, termsAcceptanceRequired: false };
+
+  it('com sessão e sem cadastro, vai concluir o cadastro e guarda para onde voltar', async () => {
+    mockApi({ 'GET /v1/me': apiError('PROFILE_NOT_FOUND', 'Conclua o cadastro.', 404) });
+    renderApp(<RequireAuth><p>painel</p></RequireAuth>, { route: '/painel', path: '/painel', auth: signedIn() });
+
+    expect(await screen.findByTestId('location')).toHaveTextContent('/entrar/concluir?next=%2Fpainel');
+  });
+
+  it('termos novos: pede o aceite antes da tela e a mostra depois de aceitar', async () => {
+    const requests = mockApi({
+      'GET /v1/me': json({ ...profile, termsAcceptanceRequired: true }),
+      'POST /v1/me/terms': json(profile),
+    });
+    renderApp(<RequireAuth><p>painel</p></RequireAuth>, { route: '/painel', path: '/painel', auth: signedIn() });
+
+    expect(await screen.findByRole('heading', { name: 'Termos de uso e Política de privacidade' })).toBeInTheDocument();
+    expect(screen.queryByText('painel')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+
+    expect(await screen.findByText('painel')).toBeInTheDocument();
+    expect(requests.some((r) => r.method === 'POST' && r.url.pathname === '/v1/me/terms')).toBe(true);
   });
 });
