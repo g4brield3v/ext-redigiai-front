@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
 import { CheckIcon, ErrorState, Skeleton } from '../../components/primitives';
-import { errorMessage, request } from '../../lib/api';
+import { ApiError, errorMessage, request } from '../../lib/api';
 import type { Schemas } from '../../lib/api';
 import { formatDay, formatMoney } from '../../lib/format';
 import type { CardInput } from '../../lib/mercadopago';
@@ -107,21 +107,26 @@ function PixPayment({ payment, onApproved, onRetry }: { payment: Payment; onAppr
 }
 
 /** Plano: a assinatura aparece ativa em GET /v1/me quando o backend confirma no Mercado Pago. */
-function PlanConfirmation({ since, onApproved }: { since: number; onApproved: () => void }) {
+function PlanConfirmation({ since, onApproved, onRetry }: { since: number; onApproved: () => void; onRetry: () => void }) {
   const queryClient = useQueryClient();
   const account = useAccount();
   const [late, setLate] = useState(false);
   const status = account.data?.subscription?.status;
 
   useEffect(() => {
-    if (status === 'active') return;
+    // Consulta só durante a espera: ativa, cancelada ou depois de 60 s, para.
+    if (status === 'active' || status === 'cancelled' || late) return;
     const poll = setInterval(() => void queryClient.invalidateQueries({ queryKey: ['me'] }), 2000);
     const timeout = setTimeout(() => setLate(true), Math.max(0, since + PLAN_WAIT_MS - Date.now()));
     return () => {
       clearInterval(poll);
       clearTimeout(timeout);
     };
-  }, [queryClient, since, status]);
+  }, [queryClient, since, status, late]);
+
+  if (status === 'cancelled') {
+    return <ErrorState message="Não conseguimos ativar o plano com este cartão. Tente outro cartão." onRetry={onRetry} />;
+  }
 
   if (status === 'active') {
     const next = account.data?.subscription?.nextBillingAt;
@@ -215,6 +220,13 @@ export function CheckoutPage() {
             idempotencyKey,
             body: { quantity, method: 'card', guardianAuthorized, card: input },
           }),
+    onError: (error) => {
+      // Cartão recusado na avulsa: a compra daquela chave ficou recusada; o próximo cartão é outra compra. (No plano, a
+      // mesma chave aceita o cartão novo.) Erros de rede mantêm a chave: a compra pode ter chegado ao Mercado Pago.
+      if (product === 'single' && error instanceof ApiError && error.code === 'PAYMENT_FAILED') {
+        setIdempotencyKey(crypto.randomUUID());
+      }
+    },
     onSuccess: (response) => {
       if ('subscriptionId' in response) {
         void queryClient.invalidateQueries({ queryKey: ['me'] });
@@ -255,7 +267,7 @@ export function CheckoutPage() {
         ) : stage.kind === 'card' ? (
           <CardPaymentStatus paymentId={stage.paymentId} onApproved={() => void finish()} onRetry={restart} />
         ) : stage.kind === 'plan' ? (
-          <PlanConfirmation since={stage.since} onApproved={() => void finish()} />
+          <PlanConfirmation since={stage.since} onApproved={() => void finish()} onRetry={restart} />
         ) : !account.data ? (
           account.error ? (
             <ErrorState message={errorMessage(account.error)} onRetry={() => void account.refetch()} />

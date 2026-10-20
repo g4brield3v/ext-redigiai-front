@@ -67,10 +67,13 @@ function loadScript(): Promise<void> {
   return loading;
 }
 
-/** A chave pública do Mercado Pago (não é segredo). Sem ela, o cartão fica indisponível. */
+// Formato da chave pública (APP_USR- ou TEST- e um UUID). O Access Token, privado, tem outro formato e é recusado.
+const PUBLIC_KEY = /^(APP_USR|TEST)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+/** A chave pública do Mercado Pago (não é segredo). Sem ela, ou fora do formato, o cartão fica indisponível. */
 export function mercadoPagoPublicKey(): string | null {
   const key = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY as string | undefined;
-  return key ? key : null;
+  return key && PUBLIC_KEY.test(key) ? key : null;
 }
 
 /** Monta o formulário de cartão no elemento `containerId`. Uma parcela só: o valor é o da compra. */

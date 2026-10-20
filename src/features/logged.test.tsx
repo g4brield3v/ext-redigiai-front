@@ -97,7 +97,7 @@ type Brick = { amount: number; submit: (data: BrickCardData) => Promise<void> };
 
 /** O SDK do Mercado Pago no lugar do de verdade: guarda cada formulário montado para o teste "enviar" o cartão. */
 function stubMercadoPago() {
-  vi.stubEnv('VITE_MERCADOPAGO_PUBLIC_KEY', 'TEST-public-key');
+  vi.stubEnv('VITE_MERCADOPAGO_PUBLIC_KEY', 'TEST-1c2d3e4f-0000-4000-8000-123456789abc');
   const bricks: Brick[] = [];
   class FakeMercadoPago {
     bricks() {
@@ -431,6 +431,40 @@ describe('Checkout', () => {
     expect(post?.url.pathname).toBe('/v1/checkout/plan');
     expect(post?.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
     expect((post?.body as { card: { token: string } }).card.token).toBe('tok-123');
+  });
+
+  it('cartão recusado na avulsa: o próximo cartão vai com outra chave', async () => {
+    const bricks = stubMercadoPago();
+    let attempts = 0;
+    const requests = mockApi({
+      'GET /v1/me': json(account),
+      'POST /v1/checkout/single': () =>
+        ++attempts === 1
+          ? apiError('PAYMENT_FAILED', 'O pagamento não foi aprovado. Tente outro meio de pagamento.', 402, true)
+          : json(pendingPayment, 201),
+      'GET /v1/payments/pay-1': json({ ...pendingPayment, status: 'approved' }),
+    });
+    renderApp(<CheckoutPage />, { route: '/comprar', path: '/comprar', auth: signedIn() });
+
+    await userEvent.click(await screen.findByRole('radio', { name: 'Cartão de crédito' }));
+    await waitFor(() => expect(bricks).toHaveLength(1));
+    await expect(bricks[0]?.submit(cardData)).rejects.toThrow();
+    expect(await screen.findByText('O pagamento não foi aprovado. Tente outro meio de pagamento.')).toBeInTheDocument();
+    await bricks[0]?.submit({ ...cardData, token: 'tok-456' });
+
+    expect(await screen.findByText('Pagamento aprovado')).toBeInTheDocument();
+    const [first, second] = requests.filter((r) => r.method === 'POST').map((r) => r.headers.get('Idempotency-Key'));
+    expect(second).not.toBe(first);
+  });
+
+  it('chave fora do formato de chave pública (como um Access Token) não liga o cartão', async () => {
+    vi.stubEnv('VITE_MERCADOPAGO_PUBLIC_KEY', 'APP_USR-1234567890123456-101912-abcdef0123456789abcdef0123456789-123456789');
+    mockApi({ 'GET /v1/me': json(account) });
+    renderApp(<CheckoutPage />, { route: '/comprar', path: '/comprar', auth: signedIn() });
+
+    await userEvent.click(await screen.findByRole('radio', { name: 'Cartão de crédito' }));
+
+    expect(await screen.findByText(/O pagamento com cartão está indisponível agora/)).toBeInTheDocument();
   });
 
   it('sem a chave pública do Mercado Pago, o cartão aparece como indisponível', async () => {
