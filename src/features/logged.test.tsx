@@ -366,6 +366,22 @@ describe('Confirmação do envio', () => {
     await userEvent.click(notice);
     expect(confirm).toBeEnabled();
   });
+
+  it('termos novos: mostra o aviso de aceite e aceita antes de enviar', async () => {
+    const requests = mockApi({
+      'GET /v1/me': json({ ...account, termsAcceptanceRequired: true }),
+      'POST /v1/me/terms': json(account),
+      'POST /v1/essays/batch': json({ essayIds: ['new-1'] }, 202),
+    });
+    renderApp(<ConfirmSendModal essays={pending} onClose={() => {}} />, { route: '/propostas/tema', path: '/propostas/:slug', auth: signedIn() });
+
+    expect(await screen.findByText(/Ao continuar, você aceita os/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar envio' }));
+
+    await waitFor(() => expect(requests.some((r) => r.url.pathname === '/v1/essays/batch')).toBe(true));
+    const order = requests.filter((r) => r.method === 'POST').map((r) => r.url.pathname);
+    expect(order).toEqual(['/v1/me/terms', '/v1/essays/batch']);
+  });
 });
 
 describe('Checkout', () => {

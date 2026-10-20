@@ -108,6 +108,10 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   if (!auth.isSignedIn) {
     return <Navigate to={`/entrar?next=${here}`} replace />;
   }
+  if (account.isPending) {
+    // Espera o perfil: cadastro e termos são conferidos antes de abrir a tela.
+    return <Nav />;
+  }
   if (account.error instanceof ApiError && account.error.code === 'PROFILE_NOT_FOUND') {
     return <Navigate to={`/entrar/concluir?next=${here}`} replace />;
   }
