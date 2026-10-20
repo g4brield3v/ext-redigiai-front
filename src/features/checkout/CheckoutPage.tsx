@@ -23,7 +23,7 @@ const PLAN_WAIT_MS = 60_000;
 
 type Product = 'plan' | 'single';
 type Method = 'pix' | 'card';
-type Stage = { kind: 'form' } | { kind: 'pix'; payment: Payment } | { kind: 'card'; paymentId: string } | { kind: 'plan'; since: number };
+type Stage = { kind: 'form' } | { kind: 'pix'; payment: Payment } | { kind: 'card'; paymentId: string } | { kind: 'plan'; since: number; firstChargeAt: string | null };
 
 const REJECTED = 'O pagamento não foi aprovado. Tente outro meio de pagamento.';
 
@@ -107,7 +107,18 @@ function PixPayment({ payment, onApproved, onRetry }: { payment: Payment; onAppr
 }
 
 /** Plano: a assinatura aparece ativa em GET /v1/me quando o backend confirma no Mercado Pago. */
-function PlanConfirmation({ since, onApproved, onRetry }: { since: number; onApproved: () => void; onRetry: () => void }) {
+function PlanConfirmation({
+  since,
+  firstChargeAt,
+  onApproved,
+  onRetry,
+}: {
+  since: number;
+  /** Assinou de novo com o ciclo pago valendo: a primeira cobrança é no fim dele. */
+  firstChargeAt: string | null;
+  onApproved: () => void;
+  onRetry: () => void;
+}) {
   const queryClient = useQueryClient();
   const account = useAccount();
   const [late, setLate] = useState(false);
@@ -137,8 +148,9 @@ function PlanConfirmation({ since, onApproved, onRetry }: { since: number; onApp
           Seu plano mensal está ativo
         </span>
         <span className="muted">
-          As 12 correções entram no seu saldo assim que a primeira cobrança for aprovada
-          {next ? `, e valem até ${formatDay(next)}` : ''}.
+          {firstChargeAt
+            ? `Seu plano volta a renovar em ${formatDay(firstChargeAt)}; as correções que você tem continuam valendo. A primeira cobrança de R$ 39,90 é nessa data.`
+            : `As 12 correções entram no seu saldo assim que a primeira cobrança for aprovada${next ? `, e valem até ${formatDay(next)}` : ''}.`}
         </span>
         <Button className={styles.start} onClick={onApproved}>
           Continuar
@@ -192,6 +204,9 @@ export function CheckoutPage() {
 
   const needsGuardian = account.data?.needsGuardianAuthorization ?? false;
   const hasPlan = account.data?.subscription?.status === 'active' || account.data?.subscription?.status === 'paused';
+  // Plano cancelado no meio do ciclo pago: assinar de novo não cobra agora. A data vem do backend (regra 23), a mesma
+  // que a assinatura vai usar.
+  const planCycleEnd = account.data?.planResumesAt;
   // Uma chave por intenção de compra: repetir o clique (ou a tentativa) não cria um segundo pagamento.
   // Ela muda quando muda o que está sendo comprado, e a cada cartão enviado na avulsa (outro token, outra tentativa).
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
@@ -230,7 +245,7 @@ export function CheckoutPage() {
     onSuccess: (response) => {
       if ('subscriptionId' in response) {
         void queryClient.invalidateQueries({ queryKey: ['me'] });
-        setStage({ kind: 'plan', since: Date.now() });
+        setStage({ kind: 'plan', since: Date.now(), firstChargeAt: response.firstChargeAt ?? null });
       } else {
         // O token do cartão só vale uma vez: a próxima tentativa é outra compra.
         setIdempotencyKey(crypto.randomUUID());
@@ -267,7 +282,7 @@ export function CheckoutPage() {
         ) : stage.kind === 'card' ? (
           <CardPaymentStatus paymentId={stage.paymentId} onApproved={() => void finish()} onRetry={restart} />
         ) : stage.kind === 'plan' ? (
-          <PlanConfirmation since={stage.since} onApproved={() => void finish()} onRetry={restart} />
+          <PlanConfirmation since={stage.since} firstChargeAt={stage.firstChargeAt} onApproved={() => void finish()} onRetry={restart} />
         ) : !account.data ? (
           account.error ? (
             <ErrorState message={errorMessage(account.error)} onRetry={() => void account.refetch()} />
@@ -329,11 +344,19 @@ export function CheckoutPage() {
                   </fieldset>
                 </>
               ) : (
-                <p className="muted">
-                  12 correções a cada cobrança aprovada, válidas até a cobrança seguinte. Na renovação, o saldo do plano volta
-                  a 12; as correções que sobrarem não passam para o mês seguinte. A cobrança é mensal, no cartão de crédito,
-                  com renovação automática.
-                </p>
+                <>
+                  {planCycleEnd && (
+                    <p className={styles.check} role="note">
+                      Seu ciclo pago vai até {formatDay(planCycleEnd)}. Ao assinar de novo, nada é cobrado agora: o plano volta a
+                      renovar nessa data, e as correções do plano que você tem continuam valendo.
+                    </p>
+                  )}
+                  <p className="muted">
+                    12 correções a cada cobrança aprovada, válidas até a cobrança seguinte. Na renovação, o saldo do plano volta
+                    a 12; as correções que sobrarem não passam para o mês seguinte. A cobrança é mensal, no cartão de crédito,
+                    com renovação automática.
+                  </p>
+                </>
               )}
 
               <div className={styles.total}>

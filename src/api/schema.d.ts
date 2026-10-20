@@ -974,6 +974,8 @@ export interface components {
             /** Format: uuid */
             subscriptionId: string;
             status: components["schemas"]["SubscriptionStatus"];
+            /** Format: date-time */
+            firstChargeAt?: null | string;
         };
         ProfileDto: {
             /** Format: uuid */
@@ -987,6 +989,8 @@ export interface components {
             credits: components["schemas"]["CreditBalanceDto"];
             subscription: null | components["schemas"]["SubscriptionDto"];
             needsGuardianAuthorization: boolean;
+            /** Format: date-time */
+            planResumesAt: null | string;
         };
         PromptAdminDto: {
             /** Format: uuid */
