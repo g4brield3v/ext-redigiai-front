@@ -475,6 +475,144 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/webhooks/mercadopago": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Recebe uma notificação (cabeçalhos `x-signature` e `x-request-id`; consulta `data.id` e
+         *     `type`). Grava e responde 200 em seguida; o pagamento é consultado na API do Mercado Pago depois, na fila.
+         */
+        post: operations["receiveMercadoPagoWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/checkout/single": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Compra correções avulsas (R$ 16 cada, de 1 a 10) por Pix ou cartão. Exige `Idempotency-Key`; repetir a
+         *     chave devolve a mesma compra. O Pix volta com o QR code, válido por 30 minutos. Os créditos entram quando o
+         *     pagamento é confirmado: consulte `GET /v1/payments/{id}`.
+         */
+        post: operations["checkoutSingle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/checkout/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assina o plano mensal (R$ 39,90 no cartão, 12 correções por cobrança) com o cartão tokenizado na nossa página
+         *     pelo Card Payment Brick, sem sair da plataforma. Exige `Idempotency-Key`; repetir a chave devolve a mesma
+         *     assinatura. Devolve `pending`: a assinatura aparece ativa em `GET /v1/me` quando a consulta ao Mercado
+         *     Pago confirma. Cartão recusado: 402 `PAYMENT_FAILED`, e a nova tentativa traz outro token.
+         */
+        post: operations["checkoutPlan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/subscription/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancela a renovação do plano mensal. As correções já concedidas valem até o fim do ciclo pago. Sem plano ativo
+         *     ou pausado, 404.
+         */
+        post: operations["cancelSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payments/{id}/refund-request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Desiste da compra (direito de arrependimento, até 7 dias da aprovação): as correções não usadas saem do saldo e o
+         *     valor delas é devolvido pelo Mercado Pago. No plano, a assinatura é cancelada. Pedir de novo devolve o mesmo
+         *     pedido. Fora do prazo, `REFUND_WINDOW_EXPIRED`.
+         */
+        post: operations["requestRefund"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** As compras do aluno, da mais recente para a mais antiga. */
+        get: operations["listPayments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Uma compra do aluno, com a situação atual. A tela do Pix consulta a cada 3 segundos. */
+        get: operations["getPayment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -499,6 +637,24 @@ export interface components {
             id: null | string;
             /** Format: int32 */
             position: null | number;
+        };
+        CardPaymentRequest: {
+            token: null | string;
+            paymentMethodId: null | string;
+            issuerId: null | string;
+            identificationType: null | string;
+            identificationNumber: null | string;
+        };
+        CheckoutPlanRequest: {
+            guardianAuthorized: null | boolean;
+            card: null | components["schemas"]["CardPaymentRequest"];
+        };
+        CheckoutSingleRequest: {
+            /** Format: int32 */
+            quantity: null | number;
+            method: null | components["schemas"]["PaymentMethod"];
+            guardianAuthorized: null | boolean;
+            card: null | components["schemas"]["CardPaymentRequest"];
         };
         CorrectionAnnotationDto: {
             /** Format: int32 */
@@ -625,7 +781,7 @@ export interface components {
             expiresAt: null | string;
         };
         /** @enum {unknown} */
-        CreditSource: "trial" | "plan_week" | "single" | "refund";
+        CreditSource: "trial" | "plan" | "single" | "refund";
         EmailPreferencesDto: {
             correctionReady: boolean;
             illegibleReminder: boolean;
@@ -779,8 +935,45 @@ export interface components {
         };
         /** @enum {unknown} */
         MarkKind: "good" | "issue";
+        PaymentDto: {
+            /** Format: uuid */
+            id: string;
+            kind: components["schemas"]["PaymentKind"];
+            method: components["schemas"]["PaymentMethod"];
+            /** Format: int64 */
+            amountCents: number;
+            /** Format: int32 */
+            quantity: number;
+            status: components["schemas"]["PaymentStatus"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            approvedAt: null | string;
+            refundable: boolean;
+            pix: null | components["schemas"]["PixDto"];
+        };
+        /** @enum {unknown} */
+        PaymentKind: "single" | "plan";
+        PaymentListDto: {
+            items: components["schemas"]["PaymentDto"][];
+        };
+        /** @enum {unknown} */
+        PaymentMethod: "pix" | "card";
+        /** @enum {unknown} */
+        PaymentStatus: "pending" | "approved" | "rejected" | "cancelled" | "refunded" | "charged_back";
         PhotoUrlDto: {
             url: string;
+        };
+        PixDto: {
+            qrCodeBase64: string;
+            copyPaste: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        PlanCheckoutDto: {
+            /** Format: uuid */
+            subscriptionId: string;
+            status: components["schemas"]["SubscriptionStatus"];
         };
         ProfileDto: {
             /** Format: uuid */
@@ -792,6 +985,8 @@ export interface components {
             aiNoticeAccepted: boolean;
             emailPreferences: components["schemas"]["EmailPreferencesDto"];
             credits: components["schemas"]["CreditBalanceDto"];
+            subscription: null | components["schemas"]["SubscriptionDto"];
+            needsGuardianAuthorization: boolean;
         };
         PromptAdminDto: {
             /** Format: uuid */
@@ -984,6 +1179,24 @@ export interface components {
             valid: boolean;
             issues: components["schemas"]["PromptIssueDto"][];
         };
+        RefundRequestBody: {
+            reason: null | string;
+        };
+        RefundRequestDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            paymentId: string;
+            status: components["schemas"]["RefundStatus"];
+            /** Format: int64 */
+            amountCents: number;
+            /** Format: int32 */
+            creditsRemoved: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @enum {unknown} */
+        RefundStatus: "requested" | "paid";
         RegisterRequest: {
             /** Format: date */
             birthDate: null | string;
@@ -1027,6 +1240,14 @@ export interface components {
             /** Format: int32 */
             position: number;
         };
+        SubscriptionDto: {
+            status: components["schemas"]["SubscriptionStatus"];
+            /** Format: date-time */
+            nextBillingAt: null | string;
+            cardLast4: null | string;
+        };
+        /** @enum {unknown} */
+        SubscriptionStatus: "pending" | "active" | "paused" | "cancelled";
         TranscriptionLineDto: {
             /** Format: int32 */
             number: number;
@@ -2538,6 +2759,388 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    receiveMercadoPagoWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["ErrorResponse"];
+                    "text/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    checkoutSingle: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutSingleRequest"];
+                "text/json": components["schemas"]["CheckoutSingleRequest"];
+                "application/*+json": components["schemas"]["CheckoutSingleRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    checkoutPlan: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutPlanRequest"];
+                "text/json": components["schemas"]["CheckoutPlanRequest"];
+                "application/*+json": components["schemas"]["CheckoutPlanRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanCheckoutDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Payment Required */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    cancelSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    requestRefund: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": null | components["schemas"]["RefundRequestBody"];
+                "text/json": null | components["schemas"]["RefundRequestBody"];
+                "application/*+json": null | components["schemas"]["RefundRequestBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundRequestDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listPayments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentListDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

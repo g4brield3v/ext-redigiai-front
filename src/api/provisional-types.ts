@@ -27,41 +27,12 @@ export type Progress = {
   focus: { criterionPosition: number; criterionName: string; guidance: string; essayId: string } | null;
 };
 
-export type Subscription = {
-  status: 'active' | 'paused' | 'cancelled';
-  nextBillingAt: string | null;
-  cardLast4: string | null;
-};
-
-/** `GET /v1/me` com a assinatura e o vestibular de interesse, que o backend ainda não devolve. */
+/** `GET /v1/me` com o vestibular de interesse e o modo de login, que o backend ainda não devolve. */
 export type Account = Schemas['ProfileDto'] & {
-  subscription: Subscription | null;
   targetExamSlug: string | null;
   loginProvider: 'google' | 'email';
-  /** 16 ou 17 anos: a compra exige a declaração de autorização do responsável. */
-  needsGuardianAuthorization: boolean;
 };
 
-export type Payment = {
-  id: string;
-  kind: 'plan' | 'single';
-  method: 'pix' | 'card';
-  amountCents: number;
-  quantity: number;
-  status: 'pending' | 'approved' | 'rejected' | 'refunded';
-  createdAt: string;
-  receiptUrl: string | null;
-  /** Dentro dos 7 dias do direito de arrependimento. */
-  refundable: boolean;
-};
-
-export type PixCheckout = {
-  paymentId: string;
-  qrCode: string;
-  copyPaste: string;
-  expiresAt: string;
-};
-
-export type CheckoutResponse =
-  | ({ method: 'pix' } & PixCheckout)
-  | { method: 'card'; paymentId: string; checkoutUrl: string };
+// Já publicados pelo backend.
+export type Payment = Schemas['PaymentDto'];
+export type RefundRequest = Schemas['RefundRequestDto'];

@@ -1,34 +1,31 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { CheckoutResponse, Payment, PixCheckout } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
 import { CheckIcon, ErrorState, Skeleton } from '../../components/primitives';
-import { errorMessage, request } from '../../lib/api';
-import { formatMoney } from '../../lib/format';
+import { ApiError, errorMessage, request } from '../../lib/api';
+import type { Schemas } from '../../lib/api';
+import { formatDay, formatMoney } from '../../lib/format';
+import type { CardInput } from '../../lib/mercadopago';
 import { useAccount } from '../../lib/queries';
+import { CardForm } from './CardForm';
 import styles from './CheckoutPage.module.css';
+
+type Payment = Schemas['PaymentDto'];
+type PlanCheckout = Schemas['PlanCheckoutDto'];
 
 // Preços exibidos na tela; o valor cobrado é sempre o que o backend calcula.
 const PLAN_CENTS = 3990;
 const SINGLE_CENTS = 1600;
+// Quanto esperar a confirmação do plano antes de sugerir conferir depois.
+const PLAN_WAIT_MS = 60_000;
 
 type Product = 'plan' | 'single';
 type Method = 'pix' | 'card';
+type Stage = { kind: 'form' } | { kind: 'pix'; payment: Payment } | { kind: 'card'; paymentId: string } | { kind: 'plan'; since: number };
 
-/** O checkout do cartão é do Mercado Pago; qualquer outro destino é recusado. */
-function isCheckoutUrl(url: string) {
-  try {
-    const target = new URL(url, window.location.origin);
-    return (
-      target.origin === window.location.origin ||
-      (target.protocol === 'https:' && /(^|\.)mercadopago\.com(\.br)?$/.test(target.hostname))
-    );
-  } catch {
-    return false;
-  }
-}
+const REJECTED = 'O pagamento não foi aprovado. Tente outro meio de pagamento.';
 
 /**
  * Situação do pagamento, sempre perguntada ao backend (que consulta o Mercado Pago): a tela nunca
@@ -42,8 +39,17 @@ function usePaymentStatus(paymentId: string) {
   });
 }
 
-/** Volta do checkout do cartão: mostra o resultado que o backend confirmar. */
-function ReturnedPayment({ paymentId, onApproved }: { paymentId: string; onApproved: () => void }) {
+function Confirming() {
+  return (
+    <section className={styles.card} aria-live="polite" aria-busy="true">
+      <h2 className="h3">Confirmando o pagamento</h2>
+      <span className="muted">Isso leva alguns segundos. A página avisa assim que o pagamento for aprovado.</span>
+    </section>
+  );
+}
+
+/** Cartão da compra avulsa: espera a confirmação do backend. */
+function CardPaymentStatus({ paymentId, onApproved, onRetry }: { paymentId: string; onApproved: () => void; onRetry: () => void }) {
   const payment = usePaymentStatus(paymentId);
 
   if (payment.error) {
@@ -53,34 +59,33 @@ function ReturnedPayment({ paymentId, onApproved }: { paymentId: string; onAppro
     return <Approved onContinue={onApproved} />;
   }
   if (payment.data && payment.data.status !== 'pending') {
-    return <ErrorState message="O pagamento não foi aprovado. Tente outro meio de pagamento." />;
+    return <ErrorState message={REJECTED} onRetry={onRetry} />;
   }
-  return (
-    <section className={styles.card} aria-live="polite" aria-busy="true">
-      <h2 className="h3">Confirmando o pagamento</h2>
-      <span className="muted">Isso leva alguns segundos. A página avisa assim que o pagamento for aprovado.</span>
-    </section>
-  );
+  return <Confirming />;
 }
 
 /** Pix: QR code e copia-e-cola vindos da API. */
-function PixPayment({ pix, onApproved }: { pix: PixCheckout; onApproved: () => void }) {
+function PixPayment({ payment, onApproved, onRetry }: { payment: Payment; onApproved: () => void; onRetry: () => void }) {
   const [copied, setCopied] = useState(false);
-  const payment = usePaymentStatus(pix.paymentId);
+  const status = usePaymentStatus(payment.id);
+  const pix = payment.pix;
 
-  if (payment.data?.status === 'approved') {
+  if (status.data?.status === 'approved') {
     return <Approved onContinue={onApproved} />;
   }
-  if (payment.data?.status === 'rejected') {
-    return <ErrorState message="O pagamento não foi aprovado. Tente outro meio de pagamento." />;
+  if (!pix || (status.data && status.data.status !== 'pending')) {
+    return <ErrorState message={REJECTED} onRetry={onRetry} />;
   }
+
+  // Só a imagem que a API mandou, em base64; nada além disso entra no src.
+  const qrCode = /^[A-Za-z0-9+/=]+$/.test(pix.qrCodeBase64) ? `data:image/png;base64,${pix.qrCodeBase64}` : null;
 
   return (
     <section className={styles.card} aria-live="polite">
       <h2 className="h3">Pague com Pix</h2>
       <div className={styles.pix}>
         <div className={styles.qr} role="img" aria-label="QR code do Pix">
-          {pix.qrCode.startsWith('data:') ? <img src={pix.qrCode} alt="" /> : <span className="muted">QR code</span>}
+          {qrCode ? <img src={qrCode} alt="" /> : <span className="muted">QR code</span>}
         </div>
         <div className={styles.pixInfo}>
           <label htmlFor="pix-code" className={styles.label}>
@@ -101,6 +106,60 @@ function PixPayment({ pix, onApproved }: { pix: PixCheckout; onApproved: () => v
   );
 }
 
+/** Plano: a assinatura aparece ativa em GET /v1/me quando o backend confirma no Mercado Pago. */
+function PlanConfirmation({ since, onApproved, onRetry }: { since: number; onApproved: () => void; onRetry: () => void }) {
+  const queryClient = useQueryClient();
+  const account = useAccount();
+  const [late, setLate] = useState(false);
+  const status = account.data?.subscription?.status;
+
+  useEffect(() => {
+    // Consulta só durante a espera: ativa, cancelada ou depois de 60 s, para.
+    if (status === 'active' || status === 'cancelled' || late) return;
+    const poll = setInterval(() => void queryClient.invalidateQueries({ queryKey: ['me'] }), 2000);
+    const timeout = setTimeout(() => setLate(true), Math.max(0, since + PLAN_WAIT_MS - Date.now()));
+    return () => {
+      clearInterval(poll);
+      clearTimeout(timeout);
+    };
+  }, [queryClient, since, status, late]);
+
+  if (status === 'cancelled') {
+    return <ErrorState message="Não conseguimos ativar o plano com este cartão. Tente outro cartão." onRetry={onRetry} />;
+  }
+
+  if (status === 'active') {
+    const next = account.data?.subscription?.nextBillingAt;
+    return (
+      <section className={`${styles.card} ${styles.approved}`} role="status">
+        <span className={styles.approvedTitle}>
+          <CheckIcon size={18} color="#17603B" />
+          Seu plano mensal está ativo
+        </span>
+        <span className="muted">
+          As 12 correções entram no seu saldo assim que a primeira cobrança for aprovada
+          {next ? `, e valem até ${formatDay(next)}` : ''}.
+        </span>
+        <Button className={styles.start} onClick={onApproved}>
+          Continuar
+        </Button>
+      </section>
+    );
+  }
+  if (late) {
+    return (
+      <section className={styles.card} role="status">
+        <h2 className="h3">Ainda não recebemos a confirmação</h2>
+        <span className="muted">O Mercado Pago pode levar alguns minutos. Confira a assinatura em Meu perfil daqui a pouco.</span>
+        <Button className={styles.start} to="/perfil">
+          Ir para o perfil
+        </Button>
+      </section>
+    );
+  }
+  return <Confirming />;
+}
+
 function Approved({ onContinue }: { onContinue: () => void }) {
   return (
     <section className={`${styles.card} ${styles.approved}`} role="status">
@@ -116,7 +175,10 @@ function Approved({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-/** Checkout: plano semanal no cartão ou correção avulsa por Pix ou cartão. Tela sem design; segue o design system. */
+/**
+ * Checkout transparente: plano mensal no cartão ou correção avulsa por Pix ou cartão, sem sair da plataforma. O cartão
+ * é digitado no formulário do Mercado Pago dentro da página. Tela sem design; segue o design system.
+ */
 export function CheckoutPage() {
   const account = useAccount();
   const navigate = useNavigate();
@@ -126,36 +188,53 @@ export function CheckoutPage() {
   const [quantity, setQuantity] = useState(1);
   const [method, setMethod] = useState<Method>('pix');
   const [guardianAuthorized, setGuardianAuthorized] = useState(false);
+  const [stage, setStage] = useState<Stage>({ kind: 'form' });
 
   const needsGuardian = account.data?.needsGuardianAuthorization ?? false;
-  const hasPlan = account.data?.subscription?.status === 'active';
-  const returnedPaymentId = params.get('pagamento');
+  const hasPlan = account.data?.subscription?.status === 'active' || account.data?.subscription?.status === 'paused';
   // Uma chave por intenção de compra: repetir o clique (ou a tentativa) não cria um segundo pagamento.
-  // Ela só muda quando muda o que está sendo comprado.
+  // Ela muda quando muda o que está sendo comprado, e a cada cartão enviado na avulsa (outro token, outra tentativa).
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
-  const [redirectError, setRedirectError] = useState(false);
 
   function change<T>(setter: (value: T) => void, value: T) {
     setter(value);
     setIdempotencyKey(crypto.randomUUID());
   }
 
-  const checkout = useMutation({
+  function restart() {
+    setIdempotencyKey(crypto.randomUUID());
+    setStage({ kind: 'form' });
+  }
+
+  const pix = useMutation({
     mutationFn: () =>
+      request<Payment>('POST', '/v1/checkout/single', { idempotencyKey, body: { quantity, method: 'pix', guardianAuthorized } }),
+    onSuccess: (payment) => setStage({ kind: 'pix', payment }),
+  });
+
+  const card = useMutation({
+    mutationFn: (input: CardInput): Promise<Payment | PlanCheckout> =>
       product === 'plan'
-        ? request<CheckoutResponse>('POST', '/v1/checkout/plan', { idempotencyKey, body: { guardianAuthorized } })
-        : request<CheckoutResponse>('POST', '/v1/checkout/single', {
+        ? request<PlanCheckout>('POST', '/v1/checkout/plan', { idempotencyKey, body: { guardianAuthorized, card: input } })
+        : request<Payment>('POST', '/v1/checkout/single', {
             idempotencyKey,
-            body: { quantity, method, guardianAuthorized },
+            body: { quantity, method: 'card', guardianAuthorized, card: input },
           }),
+    onError: (error) => {
+      // Cartão recusado na avulsa: a compra daquela chave ficou recusada; o próximo cartão é outra compra. (No plano, a
+      // mesma chave aceita o cartão novo.) Erros de rede mantêm a chave: a compra pode ter chegado ao Mercado Pago.
+      if (product === 'single' && error instanceof ApiError && error.code === 'PAYMENT_FAILED') {
+        setIdempotencyKey(crypto.randomUUID());
+      }
+    },
     onSuccess: (response) => {
-      // Cartão: o pagamento acontece na página do Mercado Pago; o número do cartão nunca passa por aqui.
-      if (response.method === 'card') {
-        if (isCheckoutUrl(response.checkoutUrl)) {
-          window.location.assign(response.checkoutUrl);
-        } else {
-          setRedirectError(true);
-        }
+      if ('subscriptionId' in response) {
+        void queryClient.invalidateQueries({ queryKey: ['me'] });
+        setStage({ kind: 'plan', since: Date.now() });
+      } else {
+        // O token do cartão só vale uma vez: a próxima tentativa é outra compra.
+        setIdempotencyKey(crypto.randomUUID());
+        setStage({ kind: 'card', paymentId: response.id });
       }
     },
   });
@@ -170,7 +249,9 @@ export function CheckoutPage() {
   }
 
   const total = product === 'plan' ? PLAN_CENTS : SINGLE_CENTS * quantity;
-  const pix = checkout.data?.method === 'pix' ? checkout.data : null;
+  const usesCard = product === 'plan' || method === 'card';
+  const blocked = needsGuardian && !guardianAuthorized;
+  const error = pix.error ?? card.error;
 
   return (
     <>
@@ -181,10 +262,12 @@ export function CheckoutPage() {
           <h1 className="serif h1">Escolha como quer corrigir</h1>
         </div>
 
-        {returnedPaymentId ? (
-          <ReturnedPayment paymentId={returnedPaymentId} onApproved={() => void finish()} />
-        ) : pix ? (
-          <PixPayment pix={pix} onApproved={() => void finish()} />
+        {stage.kind === 'pix' ? (
+          <PixPayment payment={stage.payment} onApproved={() => void finish()} onRetry={restart} />
+        ) : stage.kind === 'card' ? (
+          <CardPaymentStatus paymentId={stage.paymentId} onApproved={() => void finish()} onRetry={restart} />
+        ) : stage.kind === 'plan' ? (
+          <PlanConfirmation since={stage.since} onApproved={() => void finish()} onRetry={restart} />
         ) : !account.data ? (
           account.error ? (
             <ErrorState message={errorMessage(account.error)} onRetry={() => void account.refetch()} />
@@ -192,13 +275,8 @@ export function CheckoutPage() {
             <Skeleton height={360} radius={18} />
           )
         ) : (
-          <form
-            className={styles.layout}
-            onSubmit={(event) => {
-              event.preventDefault();
-              checkout.mutate();
-            }}
-          >
+          // Sem <form> em volta: o formulário de cartão do Mercado Pago tem o dele.
+          <div className={styles.layout}>
             <fieldset className={styles.options}>
               <legend className="visually-hidden">O que você quer comprar</legend>
               <label className={product === 'single' ? styles.optionOn : undefined}>
@@ -217,8 +295,8 @@ export function CheckoutPage() {
                   onChange={() => change(setProduct, 'plan')}
                 />
                 <span>
-                  <span className={styles.strong}>Plano semanal{hasPlan ? ' · você já assina' : ''}</span>
-                  <span className="muted">R$ 39,90/mês · 3 correções por semana · cartão de crédito</span>
+                  <span className={styles.strong}>Plano mensal{hasPlan ? ' · você já assina' : ''}</span>
+                  <span className="muted">R$ 39,90/mês · 12 correções por mês · cartão de crédito</span>
                 </span>
               </label>
             </fieldset>
@@ -252,8 +330,9 @@ export function CheckoutPage() {
                 </>
               ) : (
                 <p className="muted">
-                  3 correções toda segunda-feira. As não usadas acumulam e vencem no dia 1º de cada mês. A cobrança é
-                  mensal, no cartão de crédito, com renovação automática.
+                  12 correções a cada cobrança aprovada, válidas até a cobrança seguinte. Na renovação, o saldo do plano volta
+                  a 12; as correções que sobrarem não passam para o mês seguinte. A cobrança é mensal, no cartão de crédito,
+                  com renovação automática.
                 </p>
               )}
 
@@ -277,14 +356,20 @@ export function CheckoutPage() {
                 são reembolsadas.
               </p>
 
-              {checkout.error && <ErrorState message={errorMessage(checkout.error)} />}
-              {redirectError && <ErrorState message="Algo deu errado do nosso lado. Tente novamente em instantes." />}
+              {error && <ErrorState message={errorMessage(error)} />}
 
-              <Button type="submit" block disabled={checkout.isPending || (needsGuardian && !guardianAuthorized)}>
-                {product === 'plan' ? 'Assinar o plano semanal' : method === 'pix' ? 'Gerar Pix' : 'Pagar com cartão'}
-              </Button>
+              {!usesCard ? (
+                <Button block disabled={pix.isPending || blocked} onClick={() => pix.mutate()}>
+                  Gerar Pix
+                </Button>
+              ) : blocked ? (
+                <span className="muted">Marque a autorização do responsável para preencher o cartão.</span>
+              ) : (
+                // Recriado quando muda o valor: o formulário do Mercado Pago mostra o total da compra.
+                <CardForm key={`${product}-${total}`} amountCents={total} onSubmit={(input) => card.mutateAsync(input).then(() => undefined)} />
+              )}
             </section>
-          </form>
+          </div>
         )}
       </main>
     </>

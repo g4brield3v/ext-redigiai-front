@@ -2,11 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { Account, Payment } from '../../api/provisional-types';
+import type { Account, Payment, RefundRequest } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
 import { ErrorState, Field, Modal, Skeleton } from '../../components/primitives';
 import { errorMessage, request } from '../../lib/api';
+import type { Schemas } from '../../lib/api';
 import { formatDay, formatFullDate, formatMoney } from '../../lib/format';
 import { useAccount, useExams, usePayments } from '../../lib/queries';
 import { useSignOut } from '../auth/useSignOut';
@@ -30,9 +31,18 @@ const notices: { key: keyof Account['emailPreferences']; title: string; detail: 
 ];
 
 function describe(payment: Payment) {
-  const what = payment.kind === 'plan' ? 'Plano semanal' : payment.quantity > 1 ? `${payment.quantity} correções avulsas` : 'Correção avulsa';
+  const what = payment.kind === 'plan' ? 'Plano mensal' : payment.quantity > 1 ? `${payment.quantity} correções avulsas` : 'Correção avulsa';
   return `${what} · ${payment.method === 'pix' ? 'Pix' : 'cartão'}`;
 }
+
+// A situação de cada compra, como o backend a informa. A aprovada não leva rótulo.
+const paymentStatus: Partial<Record<Payment['status'], string>> = {
+  pending: 'Aguardando pagamento',
+  rejected: 'Não aprovado',
+  cancelled: 'Cancelado',
+  refunded: 'Reembolsado',
+  charged_back: 'Contestado',
+};
 
 function useUpdateAccount() {
   const queryClient = useQueryClient();
@@ -99,17 +109,19 @@ function DataSection({ account }: { account: Account }) {
 function SubscriptionModal({ account, onClose }: { account: Account; onClose: () => void }) {
   const queryClient = useQueryClient();
   const cancel = useMutation({
-    mutationFn: () => request<Account>('POST', '/v1/subscription/cancel'),
-    onSuccess: (updated) => {
-      queryClient.setQueryData(['me'], updated);
+    mutationFn: () => request<Schemas['SubscriptionDto']>('POST', '/v1/subscription/cancel'),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['me'] });
       onClose();
     },
   });
+  const next = account.subscription?.nextBillingAt;
 
   return (
-    <Modal title="Plano semanal" closeButton onClose={onClose}>
+    <Modal title="Plano mensal" closeButton onClose={onClose}>
       <p className={styles.modalText}>
-        Ao cancelar a renovação, não há novas cobranças. As correções já concedidas continuam valendo até o dia 1º.
+        Ao cancelar a renovação, não há novas cobranças. As correções já concedidas continuam valendo
+        {next ? ` até ${formatDay(next)}` : ' até o fim do ciclo pago'}.
         {account.subscription?.cardLast4 && ` O plano é cobrado no cartão com final ${account.subscription.cardLast4}.`}
       </p>
       {cancel.error && <ErrorState message={errorMessage(cancel.error)} />}
@@ -125,14 +137,61 @@ function SubscriptionModal({ account, onClose }: { account: Account; onClose: ()
   );
 }
 
+/** Direito de arrependimento: o backend calcula o valor e tira do saldo as correções não usadas. */
+function RefundModal({ payment, onClose }: { payment: Payment; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const [reason, setReason] = useState('');
+  const refund = useMutation({
+    mutationFn: () =>
+      request<RefundRequest>('POST', `/v1/payments/${encodeURIComponent(payment.id)}/refund-request`, {
+        body: { reason: reason.trim() || null },
+      }),
+    onSuccess: () => queryClient.invalidateQueries(),
+  });
+
+  return (
+    <Modal title="Desistir da compra" closeButton onClose={onClose}>
+      {refund.data ? (
+        <p className={styles.modalText} role="status">
+          Pedido recebido. Vamos devolver {formatMoney(refund.data.amountCents)} pelo Mercado Pago, no mesmo meio de pagamento
+          da compra.
+        </p>
+      ) : (
+        <>
+          <p className={styles.modalText}>
+            As correções desta compra que você ainda não usou saem do seu saldo, e o valor delas volta para você. Correções já
+            entregues ou em andamento não são reembolsadas.
+            {payment.kind === 'plan' && ' O plano mensal é cancelado.'}
+          </p>
+          <div className={styles.select}>
+            <label htmlFor="motivo">Por que você está desistindo? (opcional)</label>
+            <textarea id="motivo" rows={3} maxLength={500} value={reason} onChange={(event) => setReason(event.target.value)} />
+          </div>
+          {refund.error && <ErrorState message={errorMessage(refund.error)} />}
+        </>
+      )}
+      <div className={styles.modalActions}>
+        {refund.data ? (
+          <Button onClick={onClose}>Fechar</Button>
+        ) : (
+          <>
+            <Button variant="ghost" onClick={onClose}>
+              Manter a compra
+            </Button>
+            <Button variant="danger" disabled={refund.isPending} onClick={() => refund.mutate()}>
+              Desistir da compra
+            </Button>
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
 function PurchasesSection({ account }: { account: Account }) {
   const payments = usePayments();
-  const queryClient = useQueryClient();
   const [managing, setManaging] = useState(false);
-  const refund = useMutation({
-    mutationFn: (paymentId: string) => request<void>('POST', `/v1/payments/${encodeURIComponent(paymentId)}/refund-request`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payments'] }),
-  });
+  const [refunding, setRefunding] = useState<Payment | null>(null);
   const { subscription } = account;
 
   return (
@@ -151,9 +210,11 @@ function PurchasesSection({ account }: { account: Account }) {
       {subscription && subscription.status !== 'cancelled' && (
         <div className={styles.plan}>
           <span>
-            <span className={styles.strong}>Plano semanal · {subscription.status === 'active' ? 'ativo' : 'pausado'}</span>
+            <span className={styles.strong}>
+              Plano mensal · {subscription.status === 'active' ? 'ativo' : subscription.status === 'paused' ? 'pausado' : 'aguardando confirmação'}
+            </span>
             <span className="muted">
-              3 correções por semana. As não usadas vencem no dia 1º de cada mês.
+              12 correções por mês, válidas até a cobrança seguinte; as que sobrarem não passam para o mês seguinte.
               {subscription.nextBillingAt && ` Próxima cobrança em ${formatDay(subscription.nextBillingAt)}.`}
             </span>
           </span>
@@ -172,32 +233,24 @@ function PurchasesSection({ account }: { account: Account }) {
           {payments.data.map((payment) => (
             <li key={payment.id}>
               <span className={styles.date}>{formatFullDate(payment.createdAt)}</span>
-              <span className={styles.what}>{describe(payment)}</span>
+              <span className={styles.what}>
+                {describe(payment)}
+                {paymentStatus[payment.status] && <span className="muted"> · {paymentStatus[payment.status]}</span>}
+              </span>
               <span className={`muted ${styles.amount}`}>{formatMoney(payment.amountCents)}</span>
               <span className={styles.links}>
                 {payment.refundable && payment.status === 'approved' && (
-                  <button type="button" className={styles.linkButton} disabled={refund.isPending} onClick={() => refund.mutate(payment.id)}>
+                  <button type="button" className={styles.linkButton} onClick={() => setRefunding(payment)}>
                     Desistir da compra
                   </button>
-                )}
-                {payment.receiptUrl && (
-                  <a href={payment.receiptUrl} rel="noopener noreferrer">
-                    Recibo
-                  </a>
                 )}
               </span>
             </li>
           ))}
         </ul>
       )}
-      {refund.error && <ErrorState message={errorMessage(refund.error)} />}
-      {refund.isSuccess && (
-        <p className="muted" role="status">
-          Pedido recebido. O valor das correções não usadas será devolvido.
-        </p>
-      )}
-
       {managing && <SubscriptionModal account={account} onClose={() => setManaging(false)} />}
+      {refunding && <RefundModal payment={refunding} onClose={() => setRefunding(null)} />}
     </section>
   );
 }

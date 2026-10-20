@@ -82,8 +82,12 @@ export function useProgress() {
   return useQuery({ queryKey: ['progress'], queryFn: () => request<Progress>('GET', '/v1/me/progress') });
 }
 
+/** Histórico de compras, mais recente primeiro. */
 export function usePayments() {
-  return useQuery({ queryKey: ['payments'], queryFn: () => request<Payment[]>('GET', '/v1/payments') });
+  return useQuery({
+    queryKey: ['payments'],
+    queryFn: async (): Promise<Payment[]> => (await unwrap(api.GET('/v1/payments'))).items,
+  });
 }
 
 /**
