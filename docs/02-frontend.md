@@ -179,7 +179,7 @@ Referência: `03-tipo-envio`. A página **não pergunta o tipo**.
 ### 4 · Login (`/entrar`)
 
 - Cartão central "Entre para enviar sua redação"; se houver rascunho, mostra o título e "A foto está guardada. O envio continua depois de entrar."
-- "Continuar com Google"; separador "ou"; "Seu e-mail" + "Receber link de acesso" (link mágico do Clerk, "Sem senha. O link vale por 15 minutos.").
+- "Continuar com Google"; separador "ou"; "Seu e-mail" + "Receber código de acesso" (código de 6 dígitos do Clerk, "Sem senha. O código vale por 10 minutos."). Depois do envio: "Enviamos um código de acesso para {e-mail}.", campo "Código de acesso", "Entrar", "Reenviar código" e "Usar outro e-mail". Conta nova usa o mesmo código para o cadastro.
 - **Data de nascimento** (dd/mm/aaaa) no primeiro acesso, com a nota "A plataforma é para quem tem 16 anos ou mais." Menor de 16 → mensagem do erro `AGE_BELOW_MINIMUM` e nada é criado.
 - Texto de aceite: "Ao continuar, você aceita os Termos de uso e a Política de privacidade, inclusive o envio do texto a um serviço de IA para correção."
 - Usar componentes "headless" do Clerk ou a API dele com o nosso visual, não o widget padrão.

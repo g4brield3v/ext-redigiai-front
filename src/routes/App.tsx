@@ -30,9 +30,6 @@ const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefine
 // O SDK do Clerk só é carregado quando a chave está configurada.
 const ClerkAuthProvider = lazy(() => import('../features/auth/ClerkAuthProvider'));
 const SsoCallbackPage = lazy(() => import('../features/auth/ClerkCallbacks').then((m) => ({ default: m.SsoCallbackPage })));
-const VerifyEmailLinkPage = lazy(() =>
-  import('../features/auth/ClerkCallbacks').then((m) => ({ default: m.VerifyEmailLinkPage })),
-);
 // A correção de exemplo traz os próprios dados e só é carregada por quem abre /exemplo.
 const ExampleCorrectionPage = lazy(() => import('../features/correcao/ExampleCorrectionPage'));
 // A variante de nota zero do exemplo serve para revisar a tela: só existe em desenvolvimento.
@@ -147,7 +144,6 @@ export function AppRoutes() {
         <Route path="/entrar" element={<LoginPage />} />
         <Route path="/entrar/concluir" element={<CompleteSignupPage />} />
         {clerkKey && <Route path="/entrar/sso" element={<SsoCallbackPage />} />}
-        {clerkKey && <Route path="/entrar/verificar" element={<VerifyEmailLinkPage />} />}
         <Route path="/painel" element={logged(<DashboardPage />)} />
         <Route path="/redacoes/:id/revisao" element={logged(<ReviewPage />)} />
         <Route path="/redacoes/:id" element={logged(<CorrectionPage />)} />

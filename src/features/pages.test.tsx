@@ -127,7 +127,7 @@ describe('Login', () => {
   it('sem login configurado, avisa e mantém o texto de aceite', () => {
     renderApp(<LoginPage />, { route: '/entrar' });
 
-    expect(screen.getByRole('heading', { name: 'Entre para enviar sua redação' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Acesse sua conta' })).toBeInTheDocument();
     expect(screen.getByRole('alert')).toHaveTextContent('O login não está configurado neste ambiente.');
     expect(screen.getByText(/inclusive o envio do texto a um serviço de IA para correção/)).toBeInTheDocument();
   });

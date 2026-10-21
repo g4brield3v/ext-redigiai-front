@@ -25,7 +25,15 @@ function GoogleIcon() {
 }
 
 /** O diálogo de login sobre a página, como na tela aprovada. */
-export function LoginShell({ closeTo, children }: { closeTo: string; children: ReactNode }) {
+export function LoginShell({
+  closeTo,
+  title = 'Entre para enviar sua redação',
+  children,
+}: {
+  closeTo: string;
+  title?: string;
+  children: ReactNode;
+}) {
   const navigate = useNavigate();
 
   return (
@@ -37,7 +45,7 @@ export function LoginShell({ closeTo, children }: { closeTo: string; children: R
           <div />
         </div>
       </div>
-      <Modal title="Entre para enviar sua redação" width={448} closeButton onClose={() => navigate(closeTo)}>
+      <Modal title={title} width={448} closeButton onClose={() => navigate(closeTo)}>
         {children}
       </Modal>
     </>
@@ -54,21 +62,39 @@ export function TermsNotice() {
   );
 }
 
+/** Entrar (conta existente) ou criar conta (conta nova, com a data de nascimento). */
+export type LoginMode = 'signIn' | 'signUp';
+
 export type LoginFieldsProps = {
   next: string;
   ready: boolean;
   busy?: boolean;
   error?: string | null;
-  /** E-mail para o qual o link foi enviado; troca o formulário pelo aviso. */
+  /** E-mail para o qual o código foi enviado; troca o formulário pelo campo do código. */
   sentTo?: string | null;
   onUseAnotherEmail?: () => void;
+  onResend?: () => void;
+  onCode?: (code: string) => void;
   onGoogle: () => void;
-  onEmail: (email: string) => void;
+  onEmail: (email: string, mode: LoginMode) => void;
 };
 
 /** Os campos do login. Quem entra de fato (Clerk ou sessão simulada) é decidido por quem usa. */
-export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmail, onGoogle, onEmail }: LoginFieldsProps) {
+export function LoginFields({
+  next,
+  ready,
+  busy,
+  error,
+  sentTo,
+  onUseAnotherEmail,
+  onResend,
+  onCode,
+  onGoogle,
+  onEmail,
+}: LoginFieldsProps) {
+  const [mode, setMode] = useState<LoginMode>('signIn');
   const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
   const [birth, setBirth] = useState('');
   const [birthError, setBirthError] = useState<string | null>(null);
 
@@ -87,24 +113,76 @@ export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmai
   function submit(event: FormEvent) {
     event.preventDefault();
     if (ready && !busy && email.trim() && rememberBirthDate()) {
-      onEmail(email.trim());
+      onEmail(email.trim(), mode);
+    }
+  }
+
+  function submitCode(event: FormEvent) {
+    event.preventDefault();
+    if (ready && !busy && code.length === 6) {
+      onCode?.(code);
     }
   }
 
   if (sentTo) {
     return (
-      <div className={styles.sent} role="status">
-        <strong>Enviamos o link de acesso para {sentTo}.</strong>
-        <span className="muted">Abra o e-mail e toque no link para entrar. Sem senha. O link vale por 15 minutos.</span>
-        <button type="button" className={styles.linkButton} onClick={onUseAnotherEmail}>
+      <form className={styles.form} onSubmit={submitCode} noValidate>
+        <div className={styles.sent} role="status">
+          <strong>Enviamos um código de acesso para {sentTo}.</strong>
+          <span className="muted">Digite o código de 6 dígitos do e-mail. Sem senha. O código vale por 10 minutos.</span>
+        </div>
+        <Field
+          label="Código de acesso"
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          placeholder="000000"
+          maxLength={6}
+          autoFocus
+          value={code}
+          onChange={(event) => setCode(event.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+        />
+        <Button type="submit" block disabled={!ready || busy || code.length !== 6}>
+          Entrar
+        </Button>
+        {error && (
+          <p className={styles.error} role="alert">
+            {error}
+          </p>
+        )}
+        <button type="button" className={styles.linkButton} disabled={busy} onClick={onResend}>
+          Reenviar código
+        </button>
+        <button
+          type="button"
+          className={styles.linkButton}
+          onClick={() => {
+            setCode('');
+            onUseAnotherEmail?.();
+          }}
+        >
           Usar outro e-mail
         </button>
-      </div>
+      </form>
     );
+  }
+
+  function choose(next: LoginMode) {
+    setMode(next);
+    setBirth('');
+    setBirthError(null);
   }
 
   return (
     <>
+      <div className={styles.tabs} role="tablist" aria-label="Acesso">
+        <button type="button" role="tab" aria-selected={mode === 'signIn'} onClick={() => choose('signIn')}>
+          Entrar
+        </button>
+        <button type="button" role="tab" aria-selected={mode === 'signUp'} onClick={() => choose('signUp')}>
+          Criar conta
+        </button>
+      </div>
       <Button variant="ghost" block disabled={!ready} onClick={() => rememberBirthDate() && onGoogle()}>
         <GoogleIcon />
         Continuar com Google
@@ -123,21 +201,23 @@ export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmai
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
-        <Field
-          label="Data de nascimento"
-          type="text"
-          inputMode="numeric"
-          autoComplete="bday"
-          placeholder="dd/mm/aaaa"
-          value={birth}
-          onChange={(event) => setBirth(maskBirthDate(event.target.value))}
-          hint="A plataforma é para quem tem 16 anos ou mais."
-          error={birthError}
-        />
+        {mode === 'signUp' && (
+          <Field
+            label="Data de nascimento"
+            type="text"
+            inputMode="numeric"
+            autoComplete="bday"
+            placeholder="dd/mm/aaaa"
+            value={birth}
+            onChange={(event) => setBirth(maskBirthDate(event.target.value))}
+            hint="A plataforma é para quem tem 16 anos ou mais."
+            error={birthError}
+          />
+        )}
         <Button type="submit" block disabled={!ready || busy}>
-          Receber link de acesso
+          Receber código de acesso
         </Button>
-        <p className={`muted ${styles.note}`}>Sem senha. O link vale por 15 minutos.</p>
+        <p className={`muted ${styles.note}`}>Sem senha. O código vale por 10 minutos.</p>
         {error && (
           <p className={styles.error} role="alert">
             {error}
@@ -160,7 +240,7 @@ export function LoginPage() {
 
   return (
     // Fechar o login volta à página inicial: o destino é área interna e pediria o login de novo.
-    <LoginShell closeTo="/">
+    <LoginShell closeTo="/" title="Acesse sua conta">
       {auth.mode === 'clerk' ? (
         <Suspense fallback={null}>
           <ClerkLoginForm next={next} />
