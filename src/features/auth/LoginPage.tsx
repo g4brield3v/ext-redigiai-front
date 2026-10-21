@@ -59,16 +59,30 @@ export type LoginFieldsProps = {
   ready: boolean;
   busy?: boolean;
   error?: string | null;
-  /** E-mail para o qual o link foi enviado; troca o formulário pelo aviso. */
+  /** E-mail para o qual o código foi enviado; troca o formulário pelo campo do código. */
   sentTo?: string | null;
   onUseAnotherEmail?: () => void;
+  onResend?: () => void;
+  onCode?: (code: string) => void;
   onGoogle: () => void;
   onEmail: (email: string) => void;
 };
 
 /** Os campos do login. Quem entra de fato (Clerk ou sessão simulada) é decidido por quem usa. */
-export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmail, onGoogle, onEmail }: LoginFieldsProps) {
+export function LoginFields({
+  next,
+  ready,
+  busy,
+  error,
+  sentTo,
+  onUseAnotherEmail,
+  onResend,
+  onCode,
+  onGoogle,
+  onEmail,
+}: LoginFieldsProps) {
   const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
   const [birth, setBirth] = useState('');
   const [birthError, setBirthError] = useState<string | null>(null);
 
@@ -91,15 +105,53 @@ export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmai
     }
   }
 
+  function submitCode(event: FormEvent) {
+    event.preventDefault();
+    if (ready && !busy && code.length === 6) {
+      onCode?.(code);
+    }
+  }
+
   if (sentTo) {
     return (
-      <div className={styles.sent} role="status">
-        <strong>Enviamos o link de acesso para {sentTo}.</strong>
-        <span className="muted">Abra o e-mail e toque no link para entrar. Sem senha. O link vale por 15 minutos.</span>
-        <button type="button" className={styles.linkButton} onClick={onUseAnotherEmail}>
+      <form className={styles.form} onSubmit={submitCode} noValidate>
+        <div className={styles.sent} role="status">
+          <strong>Enviamos um código de acesso para {sentTo}.</strong>
+          <span className="muted">Digite o código de 6 dígitos do e-mail. Sem senha. O código vale por 10 minutos.</span>
+        </div>
+        <Field
+          label="Código de acesso"
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          placeholder="000000"
+          maxLength={6}
+          autoFocus
+          value={code}
+          onChange={(event) => setCode(event.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+        />
+        <Button type="submit" block disabled={!ready || busy || code.length !== 6}>
+          Entrar
+        </Button>
+        {error && (
+          <p className={styles.error} role="alert">
+            {error}
+          </p>
+        )}
+        <button type="button" className={styles.linkButton} disabled={busy} onClick={onResend}>
+          Reenviar código
+        </button>
+        <button
+          type="button"
+          className={styles.linkButton}
+          onClick={() => {
+            setCode('');
+            onUseAnotherEmail?.();
+          }}
+        >
           Usar outro e-mail
         </button>
-      </div>
+      </form>
     );
   }
 
@@ -135,9 +187,9 @@ export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmai
           error={birthError}
         />
         <Button type="submit" block disabled={!ready || busy}>
-          Receber link de acesso
+          Receber código de acesso
         </Button>
-        <p className={`muted ${styles.note}`}>Sem senha. O link vale por 15 minutos.</p>
+        <p className={`muted ${styles.note}`}>Sem senha. O código vale por 10 minutos.</p>
         {error && (
           <p className={styles.error} role="alert">
             {error}
