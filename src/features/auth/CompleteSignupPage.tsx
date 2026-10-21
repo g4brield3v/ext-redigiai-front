@@ -109,6 +109,9 @@ export function CompleteSignupPage() {
         <Button type="submit" block disabled={register.isPending}>
           Continuar
         </Button>
+        <Button variant="ghost" block onClick={() => void signOut()}>
+          Sair
+        </Button>
         <TermsNotice />
       </form>
     );
