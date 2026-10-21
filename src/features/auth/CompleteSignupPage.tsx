@@ -109,6 +109,9 @@ export function CompleteSignupPage() {
         <Button type="submit" block disabled={register.isPending}>
           Continuar
         </Button>
+        <Button variant="ghost" block onClick={() => void signOut()}>
+          Sair
+        </Button>
         <TermsNotice />
       </form>
     );
@@ -118,6 +121,14 @@ export function CompleteSignupPage() {
         message={profile.error instanceof ApiError ? profile.error.message : 'Algo deu errado do nosso lado. Tente novamente em instantes.'}
         onRetry={() => void profile.refetch()}
       />
+    );
+    content = (
+      <div className={styles.center}>
+        {content}
+        <Button variant="ghost" block onClick={() => void signOut()}>
+          Sair
+        </Button>
+      </div>
     );
   } else {
     content = (
