@@ -1046,6 +1046,9 @@ export interface components {
             items?: null | string[];
             text?: null | string;
             cardItems?: null | components["schemas"]["PromptCardItemDto"][];
+            width?: null | string;
+            hideLabel?: null | boolean;
+            notes?: null | string[];
             imageUrl?: null | string;
         };
         PromptBlockDto: {
@@ -1068,6 +1071,9 @@ export interface components {
             items?: null | string[];
             text?: null | string;
             cardItems?: null | components["schemas"]["PromptCardItemPublicDto"][];
+            width?: null | string;
+            hideLabel?: null | boolean;
+            notes?: null | string[];
         };
         PromptBlockPublicDto: {
             /** Format: int32 */

@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import { errorMessage } from '../../lib/api';
 import styles from './Admin.module.css';
 import { uploadImage, useEssayTypes } from './adminApi';
-import { CARD_FORMAT_LABEL, FORMAT_LABEL, KIND_LABEL, MAX_COLUMNS, blockTitle, updateCardItem } from './editorState';
-import type { CardItemFormat, CollectionFormat, EditorBlock, EditorPrompt } from './editorState';
+import { CARD_FORMAT_LABEL, FORMAT_LABEL, KIND_LABEL, MAX_COLUMNS, WIDTH_LABEL, blockTitle, updateCardItem } from './editorState';
+import type { CardItemFormat, CollectionFormat, CollectionWidth, EditorBlock, EditorPrompt } from './editorState';
 
 type FieldProps = {
   label: string;
@@ -192,6 +192,45 @@ function ImageFields({ block, readOnly, onChange }: Pick<CardProps, 'block' | 'r
   );
 }
 
+/** Como o texto aparece na página: largura, rótulo à mostra ou não e notas de rodapé. */
+function LayoutFields({ block, readOnly, onChange }: Pick<CardProps, 'block' | 'readOnly' | 'onChange'>) {
+  const widthId = `largura-${block.key}`;
+  return (
+    <>
+      <div className={styles.columns2}>
+        <div className={styles.field}>
+          <span className={styles.fieldLabel} id={widthId}>
+            Largura
+          </span>
+          <div className={styles.segmented} role="radiogroup" aria-labelledby={widthId}>
+            {(Object.keys(WIDTH_LABEL) as CollectionWidth[]).map((option) => (
+              <button
+                key={option}
+                type="button"
+                role="radio"
+                aria-checked={block.width === option}
+                data-field={option === block.width ? 'width' : undefined}
+                disabled={readOnly}
+                onClick={() => onChange({ width: option })}
+              >
+                {WIDTH_LABEL[option]}
+              </button>
+            ))}
+          </div>
+          <span className={styles.hint}>Dois textos seguidos com metade ficam lado a lado; no celular, um embaixo do outro.</span>
+        </div>
+        <label className={styles.check}>
+          <input type="checkbox" data-field="hideLabel" checked={block.hideLabel} disabled={readOnly} onChange={(event) => onChange({ hideLabel: event.target.checked })} />
+          Esconder o rótulo na página (a correção continua recebendo)
+        </label>
+      </div>
+      <AdminField label="Notas de rodapé (opcional, uma por linha)" name="notes" hint="Glossário ou tradução, como “* Sapere aude: ousa saber.”. Aparecem entre o texto e a fonte.">
+        {(props) => <textarea {...props} className={styles.textarea} value={block.notes} disabled={readOnly} onChange={(event) => onChange({ notes: event.target.value })} />}
+      </AdminField>
+    </>
+  );
+}
+
 function CollectionFields({ block, readOnly, onChange }: Pick<CardProps, 'block' | 'readOnly' | 'onChange'>) {
   const format = (
     <div className={styles.field}>
@@ -221,6 +260,7 @@ function CollectionFields({ block, readOnly, onChange }: Pick<CardProps, 'block'
       <>
         {format}
         <ImageFields block={block} readOnly={readOnly} onChange={onChange} />
+        <LayoutFields block={block} readOnly={readOnly} onChange={onChange} />
       </>
     );
   }
@@ -279,6 +319,7 @@ function CollectionFields({ block, readOnly, onChange }: Pick<CardProps, 'block'
         <MarkdownArea label="Texto" name="body" value={block.body} disabled={readOnly} onChange={(body) => onChange({ body })} />
       )}
       {source}
+      <LayoutFields block={block} readOnly={readOnly} onChange={onChange} />
     </>
   );
 }

@@ -6,6 +6,8 @@ import type { Schemas } from '../../lib/api';
 export type BlockKind = 'collection_item' | 'card' | 'command' | 'instructions' | 'heading' | 'paragraph' | 'divider';
 export type CollectionFormat = 'prose' | 'verse' | 'image';
 export type CardItemFormat = 'text' | 'image';
+/** Largura do texto da coletânea: dois de metade seguidos ficam lado a lado. */
+export type CollectionWidth = 'full' | 'half';
 
 /** Um dos 3 itens do card: texto ou imagem, com a legenda opcional. */
 export type EditorCardItem = {
@@ -35,6 +37,12 @@ export type EditorBlock = {
   imageUrl: string | null;
   alt: string;
   aiDescription: string;
+  /** Texto da coletânea: inteira ou metade da largura. */
+  width: CollectionWidth;
+  /** Texto da coletânea: o rótulo não aparece na página (a correção continua recebendo). */
+  hideLabel: boolean;
+  /** Texto da coletânea: notas de rodapé, uma por linha. */
+  notes: string;
   /** Instruções e card: título. Título de seção: o texto dele. */
   title: string;
   /** Instruções: um item por linha. */
@@ -74,6 +82,8 @@ export const FORMAT_LABEL: Record<CollectionFormat, string> = { prose: 'Texto', 
 
 export const CARD_FORMAT_LABEL: Record<CardItemFormat, string> = { text: 'Texto', image: 'Imagem' };
 
+export const WIDTH_LABEL: Record<CollectionWidth, string> = { full: 'Inteira', half: 'Metade' };
+
 export const MAX_COLUMNS = 4;
 
 /** Um card tem exatamente 3 itens. */
@@ -105,6 +115,9 @@ function emptyBlock(kind: BlockKind, position: number): EditorBlock {
     imageUrl: null,
     alt: '',
     aiDescription: '',
+    width: 'full',
+    hideLabel: false,
+    notes: '',
     title: kind === 'instructions' ? 'Instruções' : '',
     items: '',
     cardItems: kind === 'card' ? Array.from({ length: CARD_ITEMS }, emptyCardItem) : [],
@@ -158,6 +171,9 @@ export function fromApi(prompt: Schemas['PromptAdminDto']): EditorPrompt {
         imageUrl: data.imageUrl ?? null,
         alt: data.alt ?? '',
         aiDescription: data.aiDescription ?? '',
+        width: data.width === 'half' ? 'half' : 'full',
+        hideLabel: data.hideLabel === true,
+        notes: (data.notes ?? []).join('\n'),
         title: (block.kind === 'heading' ? data.text : data.title) ?? (block.kind === 'instructions' ? 'Instruções' : ''),
         items: (data.items ?? []).join('\n'),
         // O backend só guarda card com 3 itens; se faltar algum, o editor completa para mostrar os 3 campos.
@@ -192,7 +208,16 @@ function cardItemData(item: EditorCardItem): Schemas['PromptCardItemDto'] {
 function blockData(block: EditorBlock): Schemas['PromptBlockDataDto'] {
   switch (block.kind) {
     case 'collection_item': {
-      const common = { label: block.label, format: block.format, source: block.source };
+      // Largura, rótulo escondido e notas só vão quando fogem do padrão: o JSON exportado fica igual ao de antes.
+      const notes = lines(block.notes);
+      const common = {
+        label: block.label,
+        format: block.format,
+        source: block.source,
+        ...(block.width === 'half' ? { width: 'half' } : {}),
+        ...(block.hideLabel ? { hideLabel: true } : {}),
+        ...(notes.length ? { notes } : {}),
+      };
       if (block.format === 'verse') {
         // Verso vazio no meio separa estrofes; os do fim da coluna são sobra de digitação.
         return { ...common, columns: block.columns.map((column) => column.replace(/\s+$/, '').split('\n')) };
