@@ -28,19 +28,8 @@ export function setTokenSource(source: TokenSource) {
   tokenSource = source;
 }
 
-let devUser: string | null = null;
-
-/** Só no ambiente de desenvolvimento: o aluno de teste que entra no lugar do login (cabeçalho `X-Dev-User`). */
-export function setDevUser(key: string | null) {
-  devUser = key;
-}
-
-/** Identifica quem chama: o token da sessão ou, em desenvolvimento, o aluno de teste. */
+/** Identifica quem chama: o token da sessão do Clerk. Não existe acesso sem login, nem em desenvolvimento. */
 async function authorize(headers: Headers) {
-  if (devUser) {
-    headers.set('X-Dev-User', devUser);
-    return;
-  }
   const token = await tokenSource();
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);

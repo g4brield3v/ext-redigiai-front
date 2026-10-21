@@ -45,6 +45,27 @@ export const exampleScore = 27;
 
 export const exampleMaxScore = 40;
 
+/**
+ * A grade publicada da Fuvest (versão carregada pela API em 20/10/2026), fixa aqui porque a página inicial é pública e
+ * o catálogo da API exige login. Se a grade mudar, atualizar junto com a carga da API.
+ */
+export const homeRubric = {
+  maxLevel: 4,
+  maxScore: 40,
+  criteria: [
+    { position: 1, name: 'Compreensão e desenvolvimento do tema, uso da coletânea e autoria', weight: 3, maxPoints: 12 },
+    { position: 2, name: 'Compreensão e atendimento da proposta quanto à modalidade textual (tipo/gênero)', weight: 2, maxPoints: 8 },
+    { position: 3, name: 'Recursos linguísticos (coesão e coerência) e progressão textual', weight: 3, maxPoints: 12 },
+    { position: 4, name: 'Correção gramatical, convenção da escrita e adequação vocabular', weight: 2, maxPoints: 8 },
+  ],
+  zeroRules: [
+    { code: 'theme_not_addressed', description: 'Não abordagem (compreensão e desenvolvimento) do tema proposto.' },
+    { code: 'modality_not_met', description: 'Não atendimento à modalidade textual da proposta escolhida.' },
+    { code: 'collection_copy', description: 'Cópia integral ou parcial da coletânea.' },
+    { code: 'candidate_identification', description: 'Nome, assinatura ou qualquer marca que identifique o candidato.' },
+  ],
+};
+
 export const faq = [
   {
     question: 'A correção substitui um professor?',

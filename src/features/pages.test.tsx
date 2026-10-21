@@ -40,24 +40,18 @@ describe('Início', () => {
     await screen.findByRole('table', { name: 'Cálculo da nota do exemplo' });
   });
 
-  it('monta a tabela da nota com os critérios e pesos da grade publicada', async () => {
-    mockApi(catalogHandlers);
+  it('monta a tabela da nota com os critérios e pesos da grade publicada, sem chamar a API', async () => {
+    const requests = mockApi({});
     renderApp(<HomePage />);
 
     const table = await screen.findByRole('table', { name: 'Cálculo da nota do exemplo' });
     const rows = within(table).getAllByRole('row');
     expect(rows).toHaveLength(6);
-    expect(rows[1]).toHaveTextContent('1 · Tema, coletânea e autoria3× 39 / 12');
-    expect(rows[3]).toHaveTextContent('3 · Coesão, coerência e progressão2× 36 / 12');
+    expect(rows[1]).toHaveTextContent('1 · Compreensão e desenvolvimento do tema, uso da coletânea e autoria3× 39 / 12');
+    expect(rows[3]).toHaveTextContent('3 · Recursos linguísticos (coesão e coerência) e progressão textual2× 36 / 12');
     expect(rows[5]).toHaveTextContent('Nota da grade27 / 40');
-  });
-
-  it('mostra a mensagem da API quando a grade não carrega', async () => {
-    mockApi({ 'GET /v1/exams': apiError('INTERNAL_ERROR', 'Algo deu errado do nosso lado. Tente novamente em instantes.', 500) });
-    renderApp(<HomePage />);
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('Algo deu errado do nosso lado. Tente novamente em instantes.');
-    expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeInTheDocument();
+    // A página é pública e o catálogo exige login: nada é pedido à API.
+    expect(requests).toHaveLength(0);
   });
 });
 

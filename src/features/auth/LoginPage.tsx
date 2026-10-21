@@ -1,11 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
-import { Field, Modal, SheetThumb } from '../../components/primitives';
-import { loadDraft } from '../envio/draft';
+import { Field, Modal } from '../../components/primitives';
 import { useAuthState } from './AuthContext';
 import styles from './LoginPage.module.css';
 import { maskBirthDate, parseBirthDate, safeNext, savePendingSignup } from './signup';
@@ -53,24 +51,6 @@ export function TermsNotice() {
       <Link to="/privacidade">Política de privacidade</Link>, inclusive o envio do texto a um serviço de IA para
       correção.
     </p>
-  );
-}
-
-/** Aviso de que a foto escolhida antes do login está guardada. */
-function DraftNotice() {
-  const draft = useQuery({ queryKey: ['draft'], queryFn: loadDraft, staleTime: 0 });
-  if (!draft.data) {
-    return null;
-  }
-
-  return (
-    <div className={styles.draft}>
-      <SheetThumb size="sm" />
-      <span>
-        <span className={styles.draftTitle}>{draft.data.title}</span>
-        <span className="muted">A foto está guardada. O envio continua depois de entrar.</span>
-      </span>
-    </div>
   );
 }
 
@@ -169,29 +149,6 @@ export function LoginFields({ next, ready, busy, error, sentTo, onUseAnotherEmai
 }
 
 /** Modo de desenvolvimento: entra direto como um dos alunos de teste. */
-function DevLogin({ next }: { next: string }) {
-  const auth = useAuthState();
-
-  return (
-    <div className={styles.form}>
-      <p className={`muted ${styles.note}`}>Ambiente de teste: escolha com qual aluno entrar.</p>
-      {auth.devUsers?.map((user) => (
-        <Button
-          key={user.key}
-          variant="ghost"
-          block
-          onClick={() => {
-            savePendingSignup({ next });
-            auth.signInAs?.(user.key);
-          }}
-        >
-          {user.label}
-        </Button>
-      ))}
-    </div>
-  );
-}
-
 export function LoginPage() {
   const auth = useAuthState();
   const [params] = useSearchParams();
@@ -202,11 +159,9 @@ export function LoginPage() {
   }
 
   return (
-    <LoginShell closeTo={next}>
-      <DraftNotice />
-      {auth.mode === 'dev' ? (
-        <DevLogin next={next} />
-      ) : auth.mode === 'clerk' ? (
+    // Fechar o login volta à página inicial: o destino é área interna e pediria o login de novo.
+    <LoginShell closeTo="/">
+      {auth.mode === 'clerk' ? (
         <Suspense fallback={null}>
           <ClerkLoginForm next={next} />
         </Suspense>

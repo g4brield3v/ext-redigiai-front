@@ -26,8 +26,9 @@ test.describe('Início', () => {
     await expect(table.getByRole('row').nth(5)).toContainText('27 / 40');
     expect(await horizontalOverflow(page)).toBe(0);
 
+    // A lista de propostas é área interna: o login abre na hora.
     await page.getByRole('link', { name: 'Ver os temas' }).first().click();
-    await expect(page).toHaveURL(/\/propostas$/);
+    await expect(page).toHaveURL(`/entrar?next=${encodeURIComponent('/propostas')}`);
   });
 
   test('"Como a nota é calculada" rola até a seção', async ({ page }) => {
@@ -48,11 +49,17 @@ test.describe('Início', () => {
     await expect(notes.last()).toBeVisible({ visible: !wide });
   });
 
-  test('a correção de exemplo é pública e não oferece foto nem avaliação', async ({ page }) => {
+  test('a correção de exemplo pede o login', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: 'Abrir uma correção completa →' }).click();
 
-    await expect(page).toHaveURL(/\/exemplo$/);
+    await expect(page).toHaveURL(`/entrar?next=${encodeURIComponent('/exemplo')}`);
+    await expect(page.getByRole('dialog', { name: 'Entre para enviar sua redação' })).toBeVisible();
+  });
+
+  // Tela interna: desde 20/10/2026 exige login; volta com a sessão de teste do Clerk (etapa 5d).
+  test.skip('a correção de exemplo não oferece foto nem avaliação', async ({ page }) => {
+    await page.goto('/exemplo');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fuvest – Dissertação – Algoritmos e o debate público');
     await expect(page.getByText('+4 desde a 1ª versão')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Ver foto original' })).toHaveCount(0);
@@ -64,7 +71,8 @@ test.describe('Início', () => {
   });
 });
 
-test.describe('Propostas', () => {
+// Tela interna: desde 20/10/2026 exige login; volta com a sessão de teste do Clerk (etapa 5d).
+test.describe.skip('Propostas', () => {
   test('lista vestibulares e propostas, e a busca filtra pelo título', async ({ page }) => {
     await page.goto('/propostas');
     const cards = page.locator('main a[href^="/propostas/"]');
@@ -100,7 +108,7 @@ test.describe('Propostas', () => {
   });
 });
 
-test.describe('Proposta e coletânea', () => {
+test.describe.skip('Proposta e coletânea', () => {
   test('mostra a coletânea, o comando e as instruções na ordem da prova, e leva ao envio', async ({ page }) => {
     await page.goto(`/propostas/${PROMPT_SLUG}`);
 
@@ -147,7 +155,7 @@ test.describe('Proposta e coletânea', () => {
   });
 });
 
-test.describe('Envio', () => {
+test.describe.skip('Envio', () => {
   test('o botão libera com a foto, e sem sessão a foto fica guardada e o login abre', async ({ page }) => {
     await page.goto(`/propostas/${PROMPT_SLUG}/enviar`);
     const send = page.getByRole('button', { name: 'Enviar para correção' });
@@ -195,7 +203,19 @@ test.describe('Administração', () => {
 });
 
 test.describe('rotas logadas', () => {
-  for (const path of ['/painel', '/perfil', '/comprar', '/redacoes/abc', '/redacoes/abc/revisao']) {
+  // Sem login, só a página inicial e o login: todo o resto pede o login na hora.
+  for (const path of [
+    '/propostas',
+    `/propostas/${PROMPT_SLUG}`,
+    `/propostas/${PROMPT_SLUG}/enviar`,
+    '/enviar/foto',
+    '/exemplo',
+    '/painel',
+    '/perfil',
+    '/comprar',
+    '/redacoes/abc',
+    '/redacoes/abc/revisao',
+  ]) {
     test(`${path} sem sessão leva ao login`, async ({ page }) => {
       await page.goto(path);
 
@@ -207,8 +227,14 @@ test.describe('rotas logadas', () => {
   test('o destino depois do login nunca aponta para fora do site', async ({ page }) => {
     await page.goto('/entrar?next=//evil.test/roubo');
 
-    // O X do diálogo usa o mesmo destino validado.
+    // Fechar o login volta à página inicial, nunca ao destino pedido.
     await page.getByRole('button', { name: 'Fechar' }).click();
-    await expect(page).toHaveURL('/propostas');
+    await expect(page).toHaveURL('/');
+  });
+
+  test('o endereço antigo da lista também pede o login', async ({ page }) => {
+    await page.goto('/temas');
+
+    await expect(page).toHaveURL(`/entrar?next=${encodeURIComponent('/propostas')}`);
   });
 });

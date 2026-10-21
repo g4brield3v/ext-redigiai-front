@@ -1,21 +1,13 @@
 import { createContext, useContext } from 'react';
 
-export type DevUserOption = { key: string; label: string };
-
 export type Auth = {
-  /**
-   * `off`: ambiente sem a chave do Clerk (telas públicas funcionam, login não).
-   * `dev`: alunos de teste sem login, só no servidor de desenvolvimento.
-   */
-  mode: 'clerk' | 'dev' | 'off';
+  /** `off`: ambiente sem a chave do Clerk (só a página inicial funciona; o login fica indisponível). */
+  mode: 'clerk' | 'off';
   isLoaded: boolean;
   isSignedIn: boolean;
   /** Inicial mostrada no avatar da navegação. */
   initial: string | null;
   signOut: () => Promise<void>;
-  /** Só no modo `dev`: os alunos de teste e como entrar com um deles. */
-  devUsers?: DevUserOption[];
-  signInAs?: (key: string) => void;
 };
 
 export const signedOut: Auth = {
