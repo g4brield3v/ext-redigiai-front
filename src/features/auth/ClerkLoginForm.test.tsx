@@ -42,7 +42,8 @@ function renderForm() {
   );
 }
 
-async function askCode(address = 'aluno@email.com') {
+async function askCode(address = 'aluno@email.com', tab: 'Entrar' | 'Criar conta' = 'Entrar') {
+  await userEvent.click(screen.getByRole('tab', { name: tab }));
   await userEvent.type(screen.getByLabelText('Seu e-mail'), address);
   await userEvent.click(screen.getByRole('button', { name: 'Receber código de acesso' }));
   return screen.findByLabelText('Código de acesso');
@@ -50,7 +51,8 @@ async function askCode(address = 'aluno@email.com') {
 
 describe('Login por código', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // reset, não clear: a resposta simulada de um teste não pode vazar para o seguinte.
+    vi.resetAllMocks();
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -72,12 +74,47 @@ describe('Login por código', () => {
     expect(setActive).toHaveBeenCalledWith({ session: 'sess_1' });
   });
 
-  it('conta nova: o mesmo código faz o cadastro', async () => {
+  it('entrar: só o e-mail, sem data de nascimento', async () => {
+    renderForm();
+
+    expect(screen.getByRole('tab', { name: 'Entrar' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByLabelText('Seu e-mail')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Data de nascimento')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Criar conta' }));
+    expect(screen.getByLabelText('Data de nascimento')).toBeInTheDocument();
+  });
+
+  it('entrar com e-mail sem conta: indica Criar conta', async () => {
     signIn.create.mockRejectedValue(clerkError('form_identifier_not_found'));
+    renderForm();
+
+    await userEvent.type(screen.getByLabelText('Seu e-mail'), 'nova@email.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Receber código de acesso' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não encontramos uma conta com esse e-mail. Para se cadastrar, use Criar conta.',
+    );
+    expect(signUp.create).not.toHaveBeenCalled();
+  });
+
+  it('criar conta com e-mail já cadastrado: indica Entrar', async () => {
+    signUp.create.mockRejectedValue(clerkError('form_identifier_exists'));
+    renderForm();
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Criar conta' }));
+    await userEvent.type(screen.getByLabelText('Seu e-mail'), 'aluno@email.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Receber código de acesso' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Já existe uma conta com esse e-mail. Use Entrar.');
+  });
+
+  it('criar conta: o código faz o cadastro', async () => {
     signUp.attemptEmailAddressVerification.mockResolvedValue({ status: 'complete', createdSessionId: 'sess_2' });
     renderForm();
 
-    const field = await askCode('nova@email.com');
+    const field = await askCode('nova@email.com', 'Criar conta');
+    expect(signIn.create).not.toHaveBeenCalled();
     expect(signUp.create).toHaveBeenCalledWith({ emailAddress: 'nova@email.com' });
     expect(signUp.prepareEmailAddressVerification).toHaveBeenCalledWith({ strategy: 'email_code' });
 

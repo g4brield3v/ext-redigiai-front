@@ -25,7 +25,15 @@ function GoogleIcon() {
 }
 
 /** O diálogo de login sobre a página, como na tela aprovada. */
-export function LoginShell({ closeTo, children }: { closeTo: string; children: ReactNode }) {
+export function LoginShell({
+  closeTo,
+  title = 'Entre para enviar sua redação',
+  children,
+}: {
+  closeTo: string;
+  title?: string;
+  children: ReactNode;
+}) {
   const navigate = useNavigate();
 
   return (
@@ -37,7 +45,7 @@ export function LoginShell({ closeTo, children }: { closeTo: string; children: R
           <div />
         </div>
       </div>
-      <Modal title="Entre para enviar sua redação" width={448} closeButton onClose={() => navigate(closeTo)}>
+      <Modal title={title} width={448} closeButton onClose={() => navigate(closeTo)}>
         {children}
       </Modal>
     </>
@@ -54,6 +62,9 @@ export function TermsNotice() {
   );
 }
 
+/** Entrar (conta existente) ou criar conta (conta nova, com a data de nascimento). */
+export type LoginMode = 'signIn' | 'signUp';
+
 export type LoginFieldsProps = {
   next: string;
   ready: boolean;
@@ -65,7 +76,7 @@ export type LoginFieldsProps = {
   onResend?: () => void;
   onCode?: (code: string) => void;
   onGoogle: () => void;
-  onEmail: (email: string) => void;
+  onEmail: (email: string, mode: LoginMode) => void;
 };
 
 /** Os campos do login. Quem entra de fato (Clerk ou sessão simulada) é decidido por quem usa. */
@@ -81,6 +92,7 @@ export function LoginFields({
   onGoogle,
   onEmail,
 }: LoginFieldsProps) {
+  const [mode, setMode] = useState<LoginMode>('signIn');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [birth, setBirth] = useState('');
@@ -101,7 +113,7 @@ export function LoginFields({
   function submit(event: FormEvent) {
     event.preventDefault();
     if (ready && !busy && email.trim() && rememberBirthDate()) {
-      onEmail(email.trim());
+      onEmail(email.trim(), mode);
     }
   }
 
@@ -155,8 +167,22 @@ export function LoginFields({
     );
   }
 
+  function choose(next: LoginMode) {
+    setMode(next);
+    setBirth('');
+    setBirthError(null);
+  }
+
   return (
     <>
+      <div className={styles.tabs} role="tablist" aria-label="Acesso">
+        <button type="button" role="tab" aria-selected={mode === 'signIn'} onClick={() => choose('signIn')}>
+          Entrar
+        </button>
+        <button type="button" role="tab" aria-selected={mode === 'signUp'} onClick={() => choose('signUp')}>
+          Criar conta
+        </button>
+      </div>
       <Button variant="ghost" block disabled={!ready} onClick={() => rememberBirthDate() && onGoogle()}>
         <GoogleIcon />
         Continuar com Google
@@ -175,17 +201,19 @@ export function LoginFields({
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
-        <Field
-          label="Data de nascimento"
-          type="text"
-          inputMode="numeric"
-          autoComplete="bday"
-          placeholder="dd/mm/aaaa"
-          value={birth}
-          onChange={(event) => setBirth(maskBirthDate(event.target.value))}
-          hint="A plataforma é para quem tem 16 anos ou mais."
-          error={birthError}
-        />
+        {mode === 'signUp' && (
+          <Field
+            label="Data de nascimento"
+            type="text"
+            inputMode="numeric"
+            autoComplete="bday"
+            placeholder="dd/mm/aaaa"
+            value={birth}
+            onChange={(event) => setBirth(maskBirthDate(event.target.value))}
+            hint="A plataforma é para quem tem 16 anos ou mais."
+            error={birthError}
+          />
+        )}
         <Button type="submit" block disabled={!ready || busy}>
           Receber código de acesso
         </Button>
@@ -212,7 +240,7 @@ export function LoginPage() {
 
   return (
     // Fechar o login volta à página inicial: o destino é área interna e pediria o login de novo.
-    <LoginShell closeTo="/">
+    <LoginShell closeTo="/" title="Acesse sua conta">
       {auth.mode === 'clerk' ? (
         <Suspense fallback={null}>
           <ClerkLoginForm next={next} />
