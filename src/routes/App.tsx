@@ -18,7 +18,8 @@ import { ReviewPage } from '../features/revisao/ReviewPage';
 import { ProposalPage } from '../features/proposta/ProposalPage';
 import { PromptsPage } from '../features/propostas/PromptsPage';
 import { TermsUpdate } from '../features/auth/TermsUpdate';
-import { ApiError } from '../lib/api';
+import { ErrorState } from '../components/primitives';
+import { ApiError, errorMessage } from '../lib/api';
 import { useAccount } from '../lib/queries';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -102,6 +103,17 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   }
   if (account.error instanceof ApiError && account.error.code === 'PROFILE_NOT_FOUND') {
     return <Navigate to={`/entrar/concluir?next=${here}`} replace />;
+  }
+  if (account.error) {
+    // Sem o perfil (sessão recusada pela API, falha de rede), a tela interna não abre: mostra o erro e deixa tentar de novo.
+    return (
+      <>
+        <Nav />
+        <main className="container" style={{ paddingBlock: 48 }}>
+          <ErrorState message={errorMessage(account.error)} onRetry={() => void account.refetch()} />
+        </main>
+      </>
+    );
   }
   if (account.data?.termsAcceptanceRequired) {
     return <TermsUpdate />;

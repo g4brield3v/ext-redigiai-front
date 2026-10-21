@@ -47,6 +47,9 @@ export function useAccount(enabled = true) {
     queryFn: () => request<Account>('GET', '/v1/me'),
     enabled,
     retry: false,
+    // Com erro, uma tela que monta não pede de novo: senão, cada nova montagem zera o erro e a tela é montada de
+    // novo, num laço de chamadas (o 429 do login com o token recusado).
+    retryOnMount: false,
   });
 }
 
