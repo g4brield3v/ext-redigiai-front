@@ -1,5 +1,5 @@
 import { AuthenticateWithRedirectCallback, useClerk } from '@clerk/clerk-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../components/Button';
 import { Skeleton } from '../../components/primitives';
 import { LoginShell } from './LoginPage';
@@ -33,14 +33,20 @@ export function SsoCallbackPage() {
 export function VerifyEmailLinkPage() {
   const { handleEmailLinkVerification, loaded } = useClerk();
   const [failed, setFailed] = useState(false);
+  // O link vale uma vez: no StrictMode o efeito roda duas vezes, e a segunda verificação encontrava o link já usado.
+  const started = useRef(false);
 
   useEffect(() => {
-    if (!loaded) {
+    if (!loaded || started.current) {
       return;
     }
-    handleEmailLinkVerification({ redirectUrlComplete: COMPLETE_PATH, redirectUrl: COMPLETE_PATH }).catch(() =>
-      setFailed(true),
-    );
+    started.current = true;
+    handleEmailLinkVerification({ redirectUrlComplete: COMPLETE_PATH, redirectUrl: COMPLETE_PATH }).catch((error: unknown) => {
+      if (import.meta.env.DEV) {
+        console.error('[email link]', error);
+      }
+      setFailed(true);
+    });
   }, [loaded, handleEmailLinkVerification]);
 
   return (
