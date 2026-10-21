@@ -47,10 +47,13 @@ describe('Sem login', () => {
     expect(requests).toHaveLength(0);
   });
 
-  it('a página inicial abre', async () => {
-    mockApi({});
+  it('a página inicial abre, com a conta da nota, sem nenhuma chamada à API', async () => {
+    const requests = mockApi({});
     renderSignedOut('/');
 
     expect(screen.getByTestId('where')).toHaveTextContent(/^\/$/);
+    expect(await screen.findByRole('table', { name: 'Cálculo da nota do exemplo' })).toBeInTheDocument();
+    expect(screen.getByText('Cópia integral ou parcial da coletânea.')).toBeInTheDocument();
+    expect(requests).toHaveLength(0);
   });
 });
