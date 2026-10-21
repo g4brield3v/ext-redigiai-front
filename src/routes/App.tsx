@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Button } from '../components/Button';
 import { Nav } from '../components/Nav';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { useAuthState } from '../features/auth/AuthContext';
@@ -20,6 +21,7 @@ import { PromptsPage } from '../features/propostas/PromptsPage';
 import { TermsUpdate } from '../features/auth/TermsUpdate';
 import { ErrorState } from '../components/primitives';
 import { ApiError, errorMessage } from '../lib/api';
+import { useSignOut } from '../features/auth/useSignOut';
 import { useAccount } from '../lib/queries';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -89,6 +91,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const auth = useAuthState();
   const location = useLocation();
   const account = useAccount(auth.isLoaded && auth.isSignedIn);
+  const signOut = useSignOut();
   const here = encodeURIComponent(location.pathname + location.search);
 
   if (!auth.isLoaded) {
@@ -105,12 +108,16 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     return <Navigate to={`/entrar/concluir?next=${here}`} replace />;
   }
   if (account.error) {
-    // Sem o perfil (sessão recusada pela API, falha de rede), a tela interna não abre: mostra o erro e deixa tentar de novo.
+    // Sem o perfil (sessão recusada pela API, falha de rede), a tela interna não abre: mostra o erro e deixa tentar de
+    // novo ou sair (o Sair do perfil fica inacessível).
     return (
       <>
         <Nav />
         <main className="container" style={{ paddingBlock: 48 }}>
           <ErrorState message={errorMessage(account.error)} onRetry={() => void account.refetch()} />
+          <Button variant="ghost" onClick={() => void signOut()}>
+            Sair
+          </Button>
         </main>
       </>
     );

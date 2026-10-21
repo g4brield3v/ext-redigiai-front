@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthContext } from '../features/auth/AuthContext';
@@ -38,5 +39,26 @@ describe('Perfil com erro', () => {
   ])('%s com %s não repete a chamada sem parar', async (route, code, status) => {
     const calls = await count(route, apiError(code, 'x', status));
     expect(calls).toBeLessThan(5);
+  });
+});
+
+describe('Sessão recusada pela API', () => {
+  it('mostra o erro com a opção de sair', async () => {
+    const signOut = vi.fn(async () => {});
+    mockApi({ 'GET /v1/me': apiError('UNAUTHENTICATED', 'Entre de novo para continuar.', 401) });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AuthContext.Provider value={{ ...signedIn, signOut }}>
+          <MemoryRouter initialEntries={['/perfil']}>
+            <AppRoutes />
+          </MemoryRouter>
+        </AuthContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Entre de novo para continuar.');
+    await userEvent.click(screen.getByRole('button', { name: 'Sair' }));
+    await waitFor(() => expect(signOut).toHaveBeenCalledOnce());
   });
 });

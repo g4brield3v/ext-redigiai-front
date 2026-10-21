@@ -119,6 +119,14 @@ export function CompleteSignupPage() {
         onRetry={() => void profile.refetch()}
       />
     );
+    content = (
+      <div className={styles.center}>
+        {content}
+        <Button variant="ghost" block onClick={() => void signOut()}>
+          Sair
+        </Button>
+      </div>
+    );
   } else {
     content = (
       <div className={styles.center} aria-busy="true" aria-label="Carregando a sua conta">
