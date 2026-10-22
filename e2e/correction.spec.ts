@@ -1,15 +1,14 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { horizontalOverflow, interceptCatalog } from './catalog';
+import { signIn } from './session';
 
-// Tela da correção (docs/06-tela-correcao.md) sobre a correção de exemplo, que é pública.
-// Em telas largas os apontamentos ficam no painel ao lado; nas estreitas, abrem numa folha inferior.
-
-// Tela interna: desde 20/10/2026 exige login; volta com a sessão de teste do Clerk (etapa 5d).
-test.skip(true, 'A correção de exemplo exige login desde 20/10/2026.');
+// Tela da correção (docs/06-tela-correcao.md) sobre a correção de exemplo, que exige login: a sessão é a de teste,
+// injetada por signIn. Em telas largas os apontamentos ficam no painel ao lado; nas estreitas, numa folha inferior.
 
 test.beforeEach(async ({ page }) => {
   await interceptCatalog(page);
+  await signIn(page);
   await page.goto('/exemplo');
 });
 
