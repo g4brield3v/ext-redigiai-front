@@ -71,7 +71,10 @@ function ProgressChart({ points }: { points: Progress['points'] }) {
   const x = (index: number) => (points.length === 1 ? 275 : 80 + (index * 390) / (points.length - 1));
   const ticks = [max, Math.round((max * 2) / 3), Math.round(max / 3)];
   const last = points.length - 1;
-  const label = `Notas das últimas ${points.length} correções: ${points.map((point) => point.score).join(', ')} de ${max}`;
+  const label =
+    points.length === 1
+      ? `Nota da sua correção: ${points[0]!.score} de ${max}`
+      : `Notas das últimas ${points.length} correções: ${points.map((point) => point.score).join(', ')} de ${max}`;
 
   return (
     <svg viewBox="0 0 520 170" width="100%" role="img" aria-label={label} className={styles.chart}>

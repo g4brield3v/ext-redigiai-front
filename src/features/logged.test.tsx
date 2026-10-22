@@ -76,7 +76,7 @@ const progress: Progress = {
     { essayId: 'essay-done', date: '2026-09-28T22:15:00Z', score: 23, maxScore: 40 },
   ],
   lastDelta: 2,
-  focus: { criterionPosition: 3, criterionName: 'Coesão, coerência e progressão', guidance: 'Abra cada parágrafo com uma ideia nova.', essayId: 'essay-done' },
+  focus: { criterionPosition: 3, criterionName: 'Coesão e progressão', guidance: 'Abra cada parágrafo com uma ideia nova.', essayId: 'essay-done' },
 };
 
 const reviewDetail: EssayDetail = { ...awaitingReview, sheetLines: 30, lines: exampleLines, illegibleWords: exampleIllegibleWords, timeline: [] };
@@ -155,7 +155,23 @@ describe('Minhas correções', () => {
     expect(within(rows[4]!).getByRole('link', { name: 'Reenviar' })).toHaveAttribute('href', '/propostas/algoritmos-e-o-debate-publico/enviar');
 
     expect(screen.getByText('+2 pontos na última correção')).toBeInTheDocument();
-    expect(screen.getByText('3 · Coesão, coerência e progressão')).toBeInTheDocument();
+    expect(screen.getByText('3 · Coesão e progressão')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ver na última correção →' })).toHaveAttribute('href', '/redacoes/essay-done#criterio-3');
+    expect(screen.getByRole('img', { name: 'Notas das últimas 2 correções: 21, 23 de 40' })).toBeInTheDocument();
+  });
+
+  it('com uma correção só e sem foco (nota zero), mostra o gráfico sem variação e sem "Seu foco agora"', async () => {
+    mockApi({
+      'GET /v1/me': json(account),
+      'GET /v1/essays': json({ items: essays, nextCursor: null }),
+      'GET /v1/me/progress': json({ points: [{ essayId: 'essay-done', date: '2026-09-28T22:15:00Z', score: 0, maxScore: 40 }], lastDelta: null, focus: null } satisfies Progress),
+    });
+    renderApp(<DashboardPage />, { route: '/painel', path: '/painel', auth: signedIn() });
+
+    expect(await screen.findByRole('heading', { name: 'Sua evolução' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Nota da sua correção: 0 de 40' })).toBeInTheDocument();
+    expect(screen.queryByText(/na última correção/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Seu foco agora' })).not.toBeInTheDocument();
   });
 
   it('sem redações, convida a ver as propostas', async () => {
