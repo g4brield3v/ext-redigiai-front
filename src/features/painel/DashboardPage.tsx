@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
-import type { EssayStatus, EssaySummary, Progress } from '../../api/provisional-types';
+import type { EssayStatus, EssaySummary } from '../../api/provisional-types';
 import { Button } from '../../components/Button';
 import { Nav } from '../../components/Nav';
 import { AlertIcon, Chip, ErrorState, Skeleton } from '../../components/primitives';
 import type { ChipTone } from '../../components/primitives';
 import { errorMessage } from '../../lib/api';
-import { formatDay, formatDeadline, formatSentAt } from '../../lib/format';
+import { formatDeadline, formatSentAt } from '../../lib/format';
 import { useAccount, useEssays, useProgress } from '../../lib/queries';
 import styles from './DashboardPage.module.css';
+import { ProgressChart } from './ProgressChart';
 
 export const statusChip: Record<EssayStatus, { label: string; tone: ChipTone }> = {
   uploaded: { label: 'Lendo sua redação', tone: 'running' },
@@ -60,62 +61,6 @@ function Score({ essay }: { essay: EssaySummary }) {
     </>
   ) : (
     <span className="muted">—</span>
-  );
-}
-
-/** Gráfico de linha das notas; a escala vai de zero à nota máxima da grade. */
-function ProgressChart({ points }: { points: Progress['points'] }) {
-  // A escala é a da grade da correção; sem pontos não há gráfico, e o 1 só evita divisão por zero.
-  const max = points[0]?.maxScore ?? 1;
-  const y = (score: number) => 20 + (max - score) * (150 / max);
-  const x = (index: number) => (points.length === 1 ? 275 : 80 + (index * 390) / (points.length - 1));
-  const ticks = [max, Math.round((max * 2) / 3), Math.round(max / 3)];
-  const last = points.length - 1;
-  const label =
-    points.length === 1
-      ? `Nota da sua correção: ${points[0]!.score} de ${max}`
-      : `Notas das últimas ${points.length} correções: ${points.map((point) => point.score).join(', ')} de ${max}`;
-
-  return (
-    <svg viewBox="0 0 520 170" width="100%" role="img" aria-label={label} className={styles.chart}>
-      {ticks.map((tick, index) => (
-        <g key={tick}>
-          <line x1="40" y1={y(tick)} x2="510" y2={y(tick)} stroke={index === ticks.length - 1 ? '#D3DBEA' : '#EDF1F7'} />
-          <text x="30" y={y(tick) + 4} textAnchor="end" fontSize="12" fill="#56627A">
-            {tick}
-          </text>
-        </g>
-      ))}
-      <polyline
-        points={points.map((point, index) => `${x(index)},${y(point.score)}`).join(' ')}
-        fill="none"
-        stroke="#2346C9"
-        strokeWidth="3"
-        strokeLinejoin="round"
-      />
-      {points.map((point, index) => (
-        <g key={point.essayId}>
-          {index === last ? (
-            <circle cx={x(index)} cy={y(point.score)} r="7" fill="#2346C9" />
-          ) : (
-            <circle cx={x(index)} cy={y(point.score)} r="5" fill="#FFFFFF" stroke="#2346C9" strokeWidth="2.5" />
-          )}
-          <text
-            x={x(index)}
-            y={index === last ? y(point.score) - 15 : y(point.score) + 23}
-            textAnchor="middle"
-            fontSize={index === last ? 15 : 13}
-            fontWeight={index === last ? 700 : 400}
-            fill="#0E1B33"
-          >
-            {point.score}
-          </text>
-          <text x={x(index)} y="152" textAnchor="middle" fontSize="12" fill="#56627A">
-            {formatDay(point.date)}
-          </text>
-        </g>
-      ))}
-    </svg>
   );
 }
 
