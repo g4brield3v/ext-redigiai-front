@@ -633,6 +633,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/me/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A evolução da nota (as 10 correções mais recentes, da mais antiga para a mais recente, com a variação da
+         *     última) e o foco de melhoria: o critério que mais tirou pontos nas 3 últimas correções sem nota zero.
+         */
+        get: operations["getProgress"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1011,6 +1031,30 @@ export interface components {
             needsGuardianAuthorization: boolean;
             /** Format: date-time */
             planResumesAt: null | string;
+        };
+        ProgressDto: {
+            points: components["schemas"]["ProgressPointDto"][];
+            /** Format: int32 */
+            lastDelta: null | number;
+            focus: null | components["schemas"]["ProgressFocusDto"];
+        };
+        ProgressFocusDto: {
+            /** Format: int32 */
+            criterionPosition: number;
+            criterionName: string;
+            guidance: string;
+            /** Format: uuid */
+            essayId: string;
+        };
+        ProgressPointDto: {
+            /** Format: uuid */
+            essayId: string;
+            /** Format: date-time */
+            date: string;
+            /** Format: int32 */
+            score: number;
+            /** Format: int32 */
+            maxScore: number;
         };
         PromptAdminDto: {
             /** Format: uuid */
@@ -3081,6 +3125,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaymentDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getProgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProgressDto"];
                 };
             };
             /** @description Unauthorized */

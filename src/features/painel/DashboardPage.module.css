@@ -83,8 +83,34 @@
   flex-wrap: wrap;
 }
 
+/* O gráfico ocupa a largura do cartão; o desenho é feito na largura medida, então o texto não encolhe. */
+.chartBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.chart {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+}
+
 .chart text {
   font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.chartNote {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.zeroKey {
+  color: #a8371f;
 }
 
 .focus {

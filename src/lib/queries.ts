@@ -82,7 +82,7 @@ export function useCorrection(id: string | undefined) {
 }
 
 export function useProgress() {
-  return useQuery({ queryKey: ['progress'], queryFn: () => request<Progress>('GET', '/v1/me/progress') });
+  return useQuery({ queryKey: ['progress'], queryFn: (): Promise<Progress> => unwrap(api.GET('/v1/me/progress')) });
 }
 
 /** Histórico de compras, mais recente primeiro. */

@@ -21,11 +21,7 @@ export type CorrectionPoint = Schemas['CorrectionPointDto'];
 export type FeedbackRating = Schemas['FeedbackRating'];
 export type Correction = Schemas['CorrectionDto'];
 
-export type Progress = {
-  points: { essayId: string; date: string; score: number; maxScore: number }[];
-  lastDelta: number | null;
-  focus: { criterionPosition: number; criterionName: string; guidance: string; essayId: string } | null;
-};
+export type Progress = Schemas['ProgressDto'];
 
 /** `GET /v1/me` com o vestibular de interesse e o modo de login, que o backend ainda não devolve. */
 export type Account = Schemas['ProfileDto'] & {
