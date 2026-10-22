@@ -21,14 +21,28 @@ function Source({ text }: { text?: string | null }) {
   ) : null;
 }
 
-/** Um texto da coletânea: prosa, verso em colunas ou imagem, com o rótulo e a fonte. */
+/** Notas de rodapé do texto (glossário, tradução), em letra menor, entre o texto e a fonte. */
+function Notes({ notes }: { notes?: string[] | null }) {
+  return notes?.length ? (
+    <ul className={styles.notes}>
+      {notes.map((note, index) => (
+        <li key={index}>
+          <RichText text={note} />
+        </li>
+      ))}
+    </ul>
+  ) : null;
+}
+
+/** Um texto da coletânea: prosa, verso em colunas ou imagem, com o rótulo (quando aparece), as notas e a fonte. */
 function CollectionItem({ data }: { data: Block['data'] }) {
-  const label = data.label ? <strong className={styles.label}>{data.label}:</strong> : null;
+  const label = data.label && !data.hideLabel ? <strong className={styles.label}>{data.label}:</strong> : null;
+  const labeled = label ? styles.labeled : styles.unlabeled;
 
   if (data.format === 'image') {
     return (
       <section className={styles.block}>
-        <div className={styles.labeled}>
+        <div className={labeled}>
           {label}
           {data.imageUrl ? (
             <img className={styles.image} src={data.imageUrl} alt={data.alt ?? ''} />
@@ -36,6 +50,7 @@ function CollectionItem({ data }: { data: Block['data'] }) {
             <div className={`muted ${styles.imageMissing}`}>{data.alt ?? '[Imagem]'}</div>
           )}
         </div>
+        <Notes notes={data.notes} />
         <Source text={data.source} />
       </section>
     );
@@ -44,7 +59,7 @@ function CollectionItem({ data }: { data: Block['data'] }) {
   if (data.format === 'verse') {
     return (
       <section className={styles.block}>
-        <div className={styles.labeled}>
+        <div className={labeled}>
           {label}
           <div className={styles.verse}>
             {(data.columns ?? []).map((column, index) => (
@@ -57,6 +72,7 @@ function CollectionItem({ data }: { data: Block['data'] }) {
             ))}
           </div>
         </div>
+        <Notes notes={data.notes} />
         <Source text={data.source} />
       </section>
     );
@@ -65,11 +81,33 @@ function CollectionItem({ data }: { data: Block['data'] }) {
   return (
     <section className={styles.block}>
       <p className={styles.prose}>
-        {label} <RichText text={data.body ?? ''} />
+        {label && <>{label} </>}
+        <RichText text={data.body ?? ''} />
       </p>
+      <Notes notes={data.notes} />
       <Source text={data.source} />
     </section>
   );
+}
+
+const isHalf = (block: Block | undefined) => block?.kind === 'collection_item' && block.data.width === 'half';
+
+/**
+ * Os blocos em linhas: dois textos da coletânea seguidos com metade da largura ficam lado a lado; os demais (e um
+ * texto de metade sem par) ocupam a linha inteira.
+ */
+function rows(blocks: Block[]): Block[][] {
+  const result: Block[][] = [];
+  for (let index = 0; index < blocks.length; index++) {
+    const block = blocks[index]!;
+    if (isHalf(block) && isHalf(blocks[index + 1])) {
+      result.push([block, blocks[index + 1]!]);
+      index++;
+    } else {
+      result.push([block]);
+    }
+  }
+  return result;
 }
 
 /** Card com 3 itens empilhados, na ordem cadastrada: texto ou imagem, cada um com a legenda opcional embaixo. */
@@ -153,9 +191,17 @@ function PromptBlock({ block, genre }: { block: Block; genre: string }) {
 export function PromptBlocks({ blocks, genre }: { blocks: Block[]; genre: string }) {
   return (
     <div className={styles.blocks}>
-      {blocks.map((block, index) => (
-        <PromptBlock key={`${block.position}-${index}`} block={block} genre={genre} />
-      ))}
+      {rows(blocks).map((row, index) =>
+        row.length === 2 ? (
+          <div key={`${row[0]!.position}-${index}`} className={styles.pair}>
+            {row.map((block, side) => (
+              <PromptBlock key={side} block={block} genre={genre} />
+            ))}
+          </div>
+        ) : (
+          <PromptBlock key={`${row[0]!.position}-${index}`} block={row[0]!} genre={genre} />
+        ),
+      )}
     </div>
   );
 }

@@ -228,6 +228,19 @@ describe('Estado do editor', () => {
     expect(ids.map((block) => block.id)).toEqual(['id-10', 'id-20', 'id-30', 'id-40', 'id-50']);
   });
 
+  it('largura, rótulo escondido e notas vão e voltam da API, e só vão quando fogem do padrão', () => {
+    const read = fromApi({
+      ...draft,
+      blocks: [{ id: 'b9', position: 10, kind: 'collection_item', data: { label: 'Texto 1', format: 'prose', source: 'RedigiAI.', body: 'Texto.', width: 'half', hideLabel: true, notes: ['* Nota um.', '** Nota dois.'] } }],
+    });
+    const block = read.blocks[0]!;
+    expect([block.width, block.hideLabel, block.notes]).toEqual(['half', true, '* Nota um.\n** Nota dois.']);
+    expect(toDocument(read).blocks![0]!.data).toEqual({ label: 'Texto 1', format: 'prose', source: 'RedigiAI.', body: 'Texto.', width: 'half', hideLabel: true, notes: ['* Nota um.', '** Nota dois.'] });
+
+    const plain = toDocument({ ...read, blocks: [{ ...block, width: 'full', hideLabel: false, notes: ' \n ' }] });
+    expect(plain.blocks![0]!.data).toEqual({ label: 'Texto 1', format: 'prose', source: 'RedigiAI.', body: 'Texto.' });
+  });
+
   it('a prévia recebe o que o aluno recebe: sem o id do arquivo nem a descrição para a IA', () => {
     const preview = toPreviewBlocks({ ...prompt, blocks: [{ ...prompt.blocks[0]!, aiDescription: 'Quadro 1: duas cobras.' }] });
 

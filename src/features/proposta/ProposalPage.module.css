@@ -75,6 +75,33 @@
   font-weight: 700;
 }
 
+/* Texto sem rótulo na tela (provas que não numeram os textos): o conteúdo ocupa a linha inteira. */
+.unlabeled {
+  display: block;
+}
+
+/* Dois textos da coletânea lado a lado, cada um com metade da largura. */
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+/* Na metade da largura, o rótulo fica em cima do conteúdo. */
+.pair .labeled {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .prose {
   margin: 0;
   font-size: 17px;
@@ -298,10 +325,16 @@
   }
 }
 
-/* Em pouco espaço (celular) o rótulo fica em cima e as colunas do verso vêm uma depois da outra. */
+/* Em pouco espaço (celular) o rótulo fica em cima, os textos lado a lado vêm um depois do outro e as colunas do
+   verso também. */
 @container (max-width: 520px) {
   .labeled {
     grid-template-columns: 1fr;
+  }
+
+  .pair {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .verse {

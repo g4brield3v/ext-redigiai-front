@@ -83,6 +83,15 @@
   color: var(--muted);
 }
 
+/* Caixa de marcar com o texto ao lado, alinhada aos campos da mesma linha. */
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  font-size: 14px;
+}
+
 .errorText {
   font-size: 13px;
   color: #a3271e;
