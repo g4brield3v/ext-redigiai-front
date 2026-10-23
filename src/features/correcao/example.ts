@@ -34,7 +34,13 @@ export const exampleLines = toLines([
 
 type Spot = [line: number, fragment: string];
 
-/** Monta um apontamento como a API devolve: posições e o trecho recortado das linhas. */
+/** O que um desvio traz para o aluno tentar antes de ver a resposta. */
+type Learning = { why: string; answer: string; askLabel?: string };
+
+/**
+ * Monta um apontamento como a API devolve: posições e o trecho recortado das linhas. No critério 4 a resposta é
+ * a forma correta exata (e `fix` repete a resposta); nos outros, uma forma possível.
+ */
 function annotate(
   lines: TranscriptionLine[],
   id: number,
@@ -44,7 +50,7 @@ function annotate(
   [lineEnd, last]: Spot,
   note: string,
   ruleName: string | null = null,
-  fix: string | null = null,
+  learning: Learning | null = null,
 ): Annotation {
   const text = (line: number) => lines[line - 1]!.text;
   const charStart = text(lineStart).indexOf(first);
@@ -57,7 +63,24 @@ function annotate(
           ...lines.slice(lineStart, lineEnd - 1).map((line) => line.text),
           text(lineEnd).slice(0, charEnd),
         ].join(' ');
-  return { id, kind, criterion, lineStart, lineEnd, charStart, charEnd, quote, note, ruleName, fix };
+  const exact = criterion === 4;
+  return {
+    id,
+    kind,
+    criterion,
+    lineStart,
+    lineEnd,
+    charStart,
+    charEnd,
+    quote,
+    note,
+    ruleName,
+    fix: learning && exact ? learning.answer : null,
+    why: learning?.why ?? null,
+    answer: learning?.answer ?? null,
+    answerKind: learning ? (exact ? 'exact' : 'example') : null,
+    askLabel: learning?.askLabel ?? null,
+  };
 }
 
 function illegible(id: string, lineNumber: number, word: string, contextBefore: string, contextAfter: string): IllegibleWord {
@@ -101,13 +124,37 @@ export const exampleCorrection: Correction = {
   lines: exampleLines,
   annotations: [
     annotate(exampleLines, 1, 'good', 1, [3, 'como mostra o texto 2 da'], [4, 'coletânea'], 'O dado do texto 2 sustenta a sua tese logo na introdução.'),
-    annotate(exampleLines, 2, 'issue', 4, [4, 'Esse dado, revela'], [4, 'Esse dado, revela'], 'Vírgula separando sujeito e verbo.', 'Vírgula entre sujeito e verbo', 'Esse dado revela'),
+    annotate(exampleLines, 2, 'issue', 4, [4, 'Esse dado, revela'], [4, 'Esse dado, revela'], 'Vírgula separando sujeito e verbo.', 'Vírgula entre sujeito e verbo', {
+      why: 'Sujeito e verbo formam um bloco: a vírgula entre eles corta a frase ao meio. Teste: se dá para ler os dois de uma vez, sem pausa, não há vírgula.',
+      answer: 'Esse dado revela',
+    }),
     annotate(exampleLines, 3, 'good', 3, [8, 'Por isso,'], [8, 'Por isso,'], 'Conectivo certo: liga a causa (o algoritmo) à consequência (notícias falsas circulam mais).'),
-    annotate(exampleLines, 4, 'issue', 3, [10, 'Além disso,'], [11, 'que gera mais engajamento.'], 'Este parágrafo repete a ideia das linhas 6 a 8: não traz informação nova.'),
-    annotate(exampleLines, 5, 'issue', 4, [12, 'a gente'], [12, 'a gente'], 'Marca de oralidade no registro formal.', 'Marca de oralidade', 'nós / os usuários'),
-    annotate(exampleLines, 6, 'issue', 4, [13, 'À partir'], [13, 'À partir'], '“A” antes de verbo nunca leva crase.', 'Crase antes de verbo', 'A partir'),
+    annotate(exampleLines, 4, 'issue', 3, [10, 'Além disso,'], [11, 'que gera mais engajamento.'], 'Este parágrafo repete a ideia das linhas 6 a 8: não traz informação nova.', null, {
+      why: 'Cada parágrafo de desenvolvimento precisa fazer o texto avançar: uma causa nova, uma consequência ou um exemplo que ainda não apareceu. Repetir a ideia anterior gasta linhas sem somar argumento.',
+      answer:
+        'Além disso, ao mostrar a cada pessoa só o que ela já pensa, os algoritmos criam bolhas de opinião que dificultam o diálogo antes de uma eleição.',
+      askLabel: 'Escreva a primeira frase de um parágrafo novo',
+    }),
+    annotate(exampleLines, 5, 'issue', 4, [12, 'a gente'], [12, 'a gente'], 'Marca de oralidade no registro formal.', 'Marca de oralidade', {
+      why: 'Na dissertação, o registro é formal. Expressões da fala trocam-se por um sujeito definido, que deixa claro de quem o texto está falando.',
+      answer: 'os usuários',
+    }),
+    annotate(exampleLines, 6, 'issue', 4, [13, 'À partir'], [13, 'À partir'], '“A” antes de verbo nunca leva crase.', 'Crase antes de verbo', {
+      why: 'Crase é a junção da preposição “a” com o artigo “a”. Verbo não aceita artigo, então antes de verbo não há crase. Teste: troque por “começando”; ninguém escreve “à começando”.',
+      answer: 'A partir',
+    }),
     annotate(exampleLines, 7, 'good', 1, [14, 'Em países europeus,'], [16, 'recomendam conteúdo'], 'Repertório próprio, além da coletânea: mostra autoria.'),
-    annotate(exampleLines, 8, 'issue', 2, [18, 'Cabe à sociedade'], [19, 'discutir esse tema com seriedade'], 'Conclusão genérica: não responde à pergunta que você mesmo fez na linha 13.'),
+    annotate(exampleLines, 8, 'issue', 2, [18, 'Cabe à sociedade'], [19, 'discutir esse tema com seriedade'], 'Conclusão genérica: não responde à pergunta que você mesmo fez na linha 13.', null, {
+      why: 'A conclusão de uma dissertação retoma a tese e responde ao problema que o próprio texto levantou. Uma frase que serviria para qualquer tema não fecha o argumento.',
+      answer: 'Cabe ao Estado, com a participação da sociedade, exigir que as plataformas expliquem como escolhem o que cada um vê.',
+      askLabel: 'Escreva a frase que fecha a conclusão',
+    }),
+  ],
+  // Como a API ordena: o critério do problema principal, depois o de mais pontos perdidos, e o critério 4 por último.
+  annotationGroups: [
+    { criterion: 3, potentialGain: 6, markIds: [4] },
+    { criterion: 2, potentialGain: 2, markIds: [8] },
+    { criterion: 4, potentialGain: 2, markIds: [2, 5, 6] },
   ],
   criteria: [
     {
@@ -125,6 +172,16 @@ export const exampleCorrection: Correction = {
         'A tese está clara desde a introdução e o texto 2 é usado como prova, não como resumo. O exemplo europeu das linhas 14 a 16 é seu, mas aparece só de passagem.',
       guidance: 'Transforme o exemplo europeu das linhas 14 a 16 no argumento central de um parágrafo e ligue-o ao dado do texto 2.',
       annotationIds: [1, 7],
+      plainExplanation:
+        'Para o nível 4, o seu repertório precisa virar argumento. Hoje o exemplo europeu das linhas 14 a 16 aparece de passagem, sem dizer o que ele prova.',
+      example: {
+        lineLabel: 'Fim do parágrafo, linha 16',
+        segments: [
+          { text: 'o que mostra que a transparência é possível', kind: 'keep' },
+          { text: '. Se a Europa já exige essa explicação, o Brasil também pode exigir', kind: 'add' },
+          { text: '.', kind: 'keep' },
+        ],
+      },
     },
     {
       position: 2,
@@ -141,6 +198,17 @@ export const exampleCorrection: Correction = {
         'Introdução com tese, desenvolvimento e conclusão estão presentes. Falta o traço que fecha a dissertação: a conclusão não responde à pergunta da linha 13.',
       guidance: 'Reescreva a conclusão (linhas 17 a 20) dizendo quem deve regular os algoritmos e com que critério.',
       annotationIds: [8],
+      plainExplanation:
+        'Para o nível 4, a conclusão precisa responder à pergunta da linha 13: quem deve regular os algoritmos. Hoje ela só diz que o tema é sério.',
+      example: {
+        lineLabel: 'Linhas 18 e 19',
+        segments: [
+          { text: 'Cabe à sociedade ', kind: 'keep' },
+          { text: 'discutir esse tema com seriedade', kind: 'remove' },
+          { text: 'cobrar uma lei que obrigue as plataformas a explicar os seus critérios', kind: 'add' },
+          { text: ',', kind: 'keep' },
+        ],
+      },
     },
     {
       position: 3,
@@ -157,6 +225,16 @@ export const exampleCorrection: Correction = {
       guidance:
         'Troque o parágrafo das linhas 10 a 12 por uma consequência nova, como o efeito das bolhas de opinião sobre o voto, apoiada na coletânea.',
       annotationIds: [3, 4],
+      plainExplanation:
+        'Para o nível 3, cada parágrafo precisa trazer uma ideia nova. O das linhas 10 a 12 repete o das linhas 6 a 8, e o texto para de avançar.',
+      example: {
+        lineLabel: 'Começo do parágrafo, linha 10',
+        segments: [
+          { text: 'Além disso, ', kind: 'keep' },
+          { text: 'os algoritmos também escolhem o que as pessoas', kind: 'remove' },
+          { text: 'as bolhas de opinião afetam o voto: quem só vê um lado não conhece as propostas do outro', kind: 'add' },
+        ],
+      },
     },
     {
       position: 4,
@@ -172,6 +250,9 @@ export const exampleCorrection: Correction = {
       justification: 'Três desvios em 20 linhas, cada um de uma regra diferente.',
       guidance: 'Corrija os três desvios marcados nas linhas 4, 12 e 13.',
       annotationIds: [2, 5, 6],
+      plainExplanation:
+        'Para o nível 4, os desvios precisam ser quase nenhum. Os três deste texto são de regras diferentes: vírgula, registro e crase.',
+      example: null,
     },
   ],
   nextSteps: [
@@ -235,9 +316,15 @@ export const exampleZeroCorrection: Correction = {
   },
   lines: zeroLines,
   annotations: [
-    annotate(zeroLines, 1, 'issue', 1, [2, 'Não há limites'], [2, 'imaginário humano.'], 'A tese trata do imaginário humano, não de algoritmos e do debate público.'),
+    annotate(zeroLines, 1, 'issue', 1, [2, 'Não há limites'], [2, 'imaginário humano.'], 'A tese trata do imaginário humano, não de algoritmos e do debate público.', null, {
+      why: 'O tema é o recorte que a proposta pede. Um texto bem escrito sobre outro assunto não chega a ser avaliado nos critérios.',
+      answer: 'Os algoritmos das redes sociais decidem o que cada pessoa vê e, assim, moldam o debate público.',
+      askLabel: 'Escreva uma tese sobre o tema pedido',
+    }),
     annotate(zeroLines, 2, 'good', 1, [9, 'Em um filme'], [10, 'para proteger o filho'], 'Bom repertório: o exemplo sustenta com clareza a ideia que você defendeu.'),
   ],
+  // Com nota zero nenhum critério é pontuado: não há ordem por importância.
+  annotationGroups: [],
   criteria: [],
   nextSteps: [
     {

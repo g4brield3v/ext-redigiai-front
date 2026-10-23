@@ -657,6 +657,8 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {unknown} */
+        AnswerKind: "exact" | "example" | null;
         BatchEssayItem: {
             /** Format: uuid */
             promptId: string;
@@ -713,7 +715,19 @@ export interface components {
             quote: string;
             note: null | string;
             ruleName: null | string;
+            /** @deprecated */
             fix: null | string;
+            why: null | string;
+            answer: null | string;
+            answerKind: null | components["schemas"]["AnswerKind"];
+            askLabel: null | string;
+        };
+        CorrectionAnnotationGroupDto: {
+            /** Format: int32 */
+            criterion: number;
+            /** Format: int32 */
+            potentialGain: number;
+            markIds: number[];
         };
         CorrectionCriterionDto: {
             /** Format: int32 */
@@ -735,6 +749,8 @@ export interface components {
             justification: string;
             guidance: null | string;
             annotationIds: number[];
+            plainExplanation: null | string;
+            example: null | components["schemas"]["CorrectionExampleDto"];
         };
         CorrectionDto: {
             /** Format: uuid */
@@ -775,6 +791,15 @@ export interface components {
             criteria: components["schemas"]["CorrectionCriterionDto"][];
             nextSteps: components["schemas"]["CorrectionPointDto"][];
             feedback: null | components["schemas"]["CorrectionFeedbackDto"];
+            annotationGroups: components["schemas"]["CorrectionAnnotationGroupDto"][];
+        };
+        CorrectionExampleDto: {
+            lineLabel: string;
+            segments: components["schemas"]["CorrectionExampleSegmentDto"][];
+        };
+        CorrectionExampleSegmentDto: {
+            text: string;
+            kind: components["schemas"]["ExampleSegmentKind"];
         };
         CorrectionFeedbackDto: {
             rating: components["schemas"]["FeedbackRating"];
@@ -947,6 +972,8 @@ export interface components {
             /** Format: uuid */
             currentRubricVersionId: null | string;
         };
+        /** @enum {unknown} */
+        ExampleSegmentKind: "keep" | "remove" | "add";
         /** @enum {unknown} */
         ExamStatus: "active" | "coming_soon";
         /** @enum {unknown} */

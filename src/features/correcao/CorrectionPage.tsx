@@ -16,8 +16,9 @@ import { EssayFlow } from './EssayFlow';
 import { ResultSummary } from './ResultSummary';
 import { RewritePlan } from './RewritePlan';
 import { ZeroResult } from './ZeroResult';
-import { noFilters, startingAnnotation, stepAnnotation, visibleAnnotations } from './annotations';
-import type { Filters } from './annotations';
+import { hasImportanceOrder, noFilters, startingAnnotation, stepAnnotation, steppableAnnotations, visibleAnnotations } from './annotations';
+import type { Filters, Order } from './annotations';
+import { LearningProvider } from './learning';
 import { PinMark, cx } from './parts';
 
 const ratings: { value: FeedbackRating; label: string }[] = [
@@ -210,11 +211,16 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
   const narrow = useNarrowScreen();
   const [selectedId, setSelectedId] = useState(() => startingAnnotation(correction));
   const [filters, setFilters] = useState<Filters>(noFilters);
+  // Sem grupos (correção antiga ou nota zero) só existe a ordem de linha, e o seletor some.
+  const [order, setOrder] = useState<Order>(() => (hasImportanceOrder(correction) ? 'importance' : 'line'));
+  const [goodOpen, setGoodOpen] = useState(false);
   const [sheet, setSheet] = useState<'one' | 'list' | null>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
 
   const visible = visibleAnnotations(correction.annotations, filters);
+  const steppable = steppableAnnotations(correction, order, filters, goodOpen);
   const selected = visible.find((annotation) => annotation.id === selectedId);
+  const nameOf = (position: number) => correction.criteria.find((criterion) => criterion.position === position)?.shortName;
   const rewriteTo = example ? '/propostas' : rewriteLink(correction);
   const rewriteLabel = example ? 'Ver as propostas' : 'Reescrever esta redação';
 
@@ -223,6 +229,10 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
     (id: number, from: 'text' | 'card') => {
       setSelectedId(id);
       if (from === 'text') {
+        // Um pino verde abre os que funcionaram, recolhidos em "Por importância".
+        if (correction.annotations.some((annotation) => annotation.id === id && annotation.kind === 'good')) {
+          setGoodOpen(true);
+        }
         if (narrow) {
           setSheet('one');
         } else {
@@ -233,18 +243,19 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
         requestAnimationFrame(() => scrollTo(document.querySelector(`[data-annotation="${id}"]`), 'center'));
       }
     },
-    [narrow],
+    [narrow, correction.annotations],
   );
 
+  /** Anterior/Próximo e j/k seguem a ordem escolhida, só pelos cartões visíveis (sem os recolhidos). */
   const step = useCallback(
     (delta: 1 | -1) => {
-      const next = stepAnnotation(visibleAnnotations(correction.annotations, filters), selectedId, delta);
+      const next = stepAnnotation(steppableAnnotations(correction, order, filters, goodOpen), selectedId, delta);
       if (next !== null) {
         setSelectedId(next);
         requestAnimationFrame(() => scrollTo(document.querySelector(`[data-annotation="${next}"]`), 'center'));
       }
     },
-    [correction.annotations, filters, selectedId],
+    [correction, order, filters, goodOpen, selectedId],
   );
 
   // Teclas j e k percorrem os apontamentos visíveis, fora de campos de texto.
@@ -264,14 +275,44 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
     return () => window.removeEventListener('keydown', onKey);
   }, [step]);
 
-  function applyFilters(next: Filters) {
-    setFilters(next);
-    // Com o filtro, a seleção passa para o primeiro apontamento que continua visível.
-    const stillVisible = visibleAnnotations(correction.annotations, next);
+  /** Com outro filtro ou outra ordem, a seleção passa para o primeiro cartão se a atual saiu da lista. */
+  function keepSelection(nextOrder: Order, nextFilters: Filters, nextGoodOpen: boolean) {
+    const stillVisible = steppableAnnotations(correction, nextOrder, nextFilters, nextGoodOpen);
     if (!stillVisible.some((annotation) => annotation.id === selectedId)) {
       setSelectedId(stillVisible[0]?.id ?? null);
     }
   }
+
+  function applyFilters(next: Filters) {
+    setFilters(next);
+    keepSelection(order, next, goodOpen);
+  }
+
+  function applyOrder(next: Order) {
+    setOrder(next);
+    keepSelection(next, filters, goodOpen);
+  }
+
+  function applyGoodOpen(next: boolean) {
+    setGoodOpen(next);
+    keepSelection(order, filters, next);
+  }
+
+  const panelProps = {
+    annotations: correction.annotations,
+    criteria: correction.criteria,
+    annotationGroups: correction.annotationGroups,
+    filters,
+    onFilters: applyFilters,
+    order,
+    onOrder: applyOrder,
+    goodOpen,
+    onGoodOpen: applyGoodOpen,
+    selectedId,
+    onSelect: (id: number) => select(id, 'card'),
+    onStep: step,
+    plain: zero,
+  };
 
   function showInText(id: number | null, next: Filters) {
     setFilters(next);
@@ -293,7 +334,7 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
   ];
 
   return (
-    <>
+    <LearningProvider correctionId={correction.id}>
       <div className={cx(styles.wrap, styles.top)}>
         <Link className={styles.back} to={back.to}>
           ← {back.label}
@@ -334,7 +375,9 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
           <p className="muted">
             {zero
               ? 'Os apontamentos mostram onde o texto saiu do tema e o que vale aproveitar na reescrita.'
-              : 'Clique num número para ver o apontamento. Os vermelhos tiraram pontos; os verdes funcionaram e valem manter.'}
+              : hasImportanceOrder(correction)
+                ? 'Os apontamentos vêm na ordem do que mais aumenta a nota: comece pelo primeiro e tente corrigir antes de ver a resposta.'
+                : 'Clique num número para ver o apontamento. Os vermelhos tiraram pontos; os verdes funcionaram e valem manter.'}
           </p>
         </div>
         <div className={styles.textColumns}>
@@ -361,16 +404,7 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
             <EssayFlow lines={correction.lines} annotations={visible} selectedId={selectedId} onSelect={(id) => select(id, 'text')} />
           </div>
           <aside className={styles.panel} aria-label="Apontamentos">
-            <AnnotationPanel
-              annotations={correction.annotations}
-              criteria={correction.criteria}
-              filters={filters}
-              onFilters={applyFilters}
-              selectedId={selectedId}
-              onSelect={(id) => select(id, 'card')}
-              onStep={step}
-              plain={zero}
-            />
+            <AnnotationPanel {...panelProps} />
           </aside>
         </div>
       </section>
@@ -379,7 +413,7 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
         <section id="criterios" className={cx(styles.wrap, styles.section)}>
           <div className={styles.sectionHead}>
             <h2 className={cx('serif', styles.h2)}>Critérios</h2>
-            <p className="muted">Cada critério mostra o seu nível, o que a grade pede para o próximo e o que fazer para chegar lá.</p>
+            <p className="muted">Cada critério mostra o seu nível, o que a grade pede para o próximo, o que isso quer dizer e como ficaria no seu texto.</p>
           </div>
           <div className={styles.criteria}>
             {correction.criteria.map((criterion) => (
@@ -388,9 +422,10 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
                 criterion={criterion}
                 maxLevel={correction.rubric.maxLevel}
                 annotations={correction.annotations}
+                mainIssue={criterion.position === correction.mainIssue.criterion}
                 onShowInText={(position) => {
                   const next = { kind: 'all' as const, criterion: position };
-                  showInText(visibleAnnotations(correction.annotations, next)[0]?.id ?? null, next);
+                  showInText(steppableAnnotations(correction, order, next, goodOpen)[0]?.id ?? null, next);
                 }}
               />
             ))}
@@ -420,10 +455,16 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
 
       {sheet === 'one' && selected && (
         <AnnotationSheet title={`Apontamento ${selected.id}`} onClose={() => setSheet(null)}>
-          <AnnotationCard annotation={selected} selected onSelect={() => select(selected.id, 'card')} />
+          <AnnotationCard
+            annotation={selected}
+            criterionName={nameOf(selected.criterion)}
+            selected
+            open
+            onSelect={() => select(selected.id, 'card')}
+          />
           <AnnotationStepper
-            position={visible.findIndex((annotation) => annotation.id === selected.id) + 1}
-            total={visible.length}
+            position={steppable.findIndex((annotation) => annotation.id === selected.id) + 1}
+            total={steppable.length}
             onStep={step}
           />
           <button type="button" className={styles.sheetAll} onClick={() => setSheet('list')}>
@@ -434,21 +475,12 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
 
       {sheet === 'list' && (
         <AnnotationSheet title={`Apontamentos (${correction.annotations.length})`} onClose={() => setSheet(null)}>
-          <AnnotationPanel
-            annotations={correction.annotations}
-            criteria={correction.criteria}
-            filters={filters}
-            onFilters={applyFilters}
-            selectedId={selectedId}
-            onSelect={(id) => select(id, 'card')}
-            onStep={step}
-            plain={zero}
-          />
+          <AnnotationPanel {...panelProps} />
         </AnnotationSheet>
       )}
 
       {photoOpen && <PhotoModal essayId={correction.essayId} onClose={() => setPhotoOpen(false)} />}
-    </>
+    </LearningProvider>
   );
 }
 

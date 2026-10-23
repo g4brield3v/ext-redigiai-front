@@ -91,3 +91,31 @@ O front não calcula pontos, perdas nem ganhos: só exibe.
 - Unitários dos componentes: `ResultSummary`, `ScoreMap`, `EssayFlow` (parágrafos pelo recuo, junção das linhas e do hífen, trecho atravessando linhas, números fora do nome acessível), `AnnotationPanel` (filtros, Anterior/Próximo circular), `CriterionCard` (com e sem próximo nível, critério 4), `RewritePlan`, `ZeroResult`.
 - Playwright: clicar num pino seleciona o cartão e vice-versa; filtro "Tiraram pontos" + critério 4 mostra só os desvios de escrita; nota zero não mostra critérios; nenhuma linha da redação cortada (comparar `scrollWidth` e `clientWidth` de cada linha).
 - Comparação visual com os PNG em 1440 px e 390 px.
+
+## 9. Versão 3 · aprendizado
+
+Detalhe completo em `docs/09-aprendizado-correcao.md` (parte B). Prevalece sobre as seções acima onde elas divergem. A redação continua em texto corrido (`EssayFlow`); a versão 3 muda só o painel de apontamentos e os cartões dos critérios.
+
+**Tentar antes de ver (`AnnotationCard`)**
+- O cartão é `<article tabIndex={0} data-annotation-card>`, com `aria-current` quando selecionado. Clique, Enter ou Espaço fora do campo selecionam.
+- Fechado, um desvio mostra pino, "↓ Tirou pontos", linhas, a etiqueta "C{n} · {shortName}", o trecho sem risco, a regra, a `note` e "Tente corrigir →".
+- Aberto, mostra também "Por quê" (`why`), o campo (`askLabel ?? "Como você escreveria?"`), "Ver resposta" e "Tente antes de ver. Ninguém corrige a sua tentativa.". Enter no campo faz o mesmo que o botão.
+- Depois de "Ver resposta": "Você escreveu" (só com texto), "Forma correta" (`exact`) ou "Uma forma possível" (`example`) com o `answer`, e "✓ Igual à forma correta" só em `exact`. Região `aria-live="polite"`.
+- A resposta só entra no DOM depois do clique. Respondido e fechado, o cartão mostra só a tentativa e a resposta.
+- Correção antiga (sem `answer`): sem campo; mostra o `fix` como na versão 2.
+- Tentativas e respostas abertas ficam no `localStorage` por correção (`redigiai.tentativas.{id}`, com `try/catch`). Nada vai para a API.
+- Na folha do celular, o cartão já vem aberto.
+- `why`, `answer`, `askLabel` e os pedaços do exemplo são sempre texto, nunca HTML.
+
+**Critérios (`CriterionCard`)**
+- "Em palavras simples" (`plainExplanation`) logo abaixo da escada.
+- "Como ficaria no seu texto" (`example`): `lineLabel` + " · um exemplo, não a única forma"; `remove` riscado em vermelho, `add` com fundo e traço verdes. Aberto no critério do `mainIssue`; nos outros, atrás de "Ver como ficaria no seu texto ▾".
+- Critério 4: "Escreva … no lugar de …" só depois de "Mostrar as formas corretas" (`aria-pressed`).
+
+**Ordem por importância (`AnnotationPanel` + `annotations.ts`)**
+- Seletor "Ordem": "Por importância" (padrão) | "Por linha", com `aria-pressed`. Sem `annotationGroups` (correção antiga ou nota zero), só "Por linha" e o seletor some.
+- "Por importância" segue `annotationGroups`, com cabeçalho por grupo ("Corrija primeiro", "Depois", "Ajustes de escrita" no critério 4, e o selo "até +N"). Grupo sem cartão visível não mostra cabeçalho.
+- Os que funcionaram ficam recolhidos em "✓ N trechos que funcionaram" (`aria-expanded`); abrem com o filtro "Funcionaram" ou ao clicar num pino verde.
+- Contador, Anterior/Próximo e j/k seguem a ordem atual e contam só os cartões visíveis (sem os recolhidos). A tela abre no primeiro cartão de "Por importância".
+
+**Testes:** `correction.test.tsx` (cartão fechado e aberto, resposta antes e depois do clique, `exact` × `example`, correção antiga, as duas ordens, recolhimento, critérios) e `e2e/correction.spec.ts` em 1440 e 360 px (Enter revela a resposta, pino verde abre os recolhidos, troca de ordem no Anterior/Próximo, sem rolagem lateral com o cartão aberto).
