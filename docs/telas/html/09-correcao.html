@@ -118,17 +118,60 @@ a{color:#2346C9}a:hover{color:#16308F}
 @media (max-width:980px){.wrap{padding-left:16px;padding-right:16px}.panel{position:static}.ladder{grid-template-columns:1fr}.maprow{grid-template-columns:28px minmax(0,1fr) auto 48px}.maprow .meter{display:none}}
 @media (max-width:620px){.lines{grid-template-columns:32px minmax(0,1fr)}.lines .tx{font-size:21px;padding:0 12px 0 10px}.lines .par{text-indent:20px}}
 
+.folha{--fs:22px;--lh:40px;overflow-x:auto;overscroll-behavior-x:contain}
+.folha .lines{grid-template-columns:44px minmax(max-content,1fr);min-width:100%}
+.folha .lines .ln{position:sticky;left:0;z-index:1;background-color:#FFFFFF;line-height:var(--lh)}
+.folha .lines .tx{font-size:var(--fs);line-height:var(--lh);white-space:pre;overflow:visible;padding-right:24px}
+.folha .lines .tx.vazia{color:transparent}
+.folha .lines .tx.par{text-indent:0;padding-left:14px}
+.fit-hint{display:none;font-size:12.5px;color:#56627A;padding:8px 14px;border-top:1px solid #EEF1F6;background:#FBFCFE}
+@media (max-width:620px){.folha{--fs:16px;--lh:32px}.folha .lines .tx{background-image:repeating-linear-gradient(to bottom,transparent 0 31px,#D5DEEC 31px 32px)}.folha .lines .ln{background-image:repeating-linear-gradient(to bottom,transparent 0 31px,#D5DEEC 31px 32px)}.fit-hint{display:block}}
+
+[hidden]{display:none!important}
+.ann .crit-tag{margin-left:auto;font-size:12px;font-weight:700;color:#3B4559;background:#EEF1F6;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.ann .why{font-size:14.5px;line-height:1.5;padding:10px 12px;border-left:3px solid #9DB1EE;background:#F7F9FD;border-radius:0 10px 10px 0}
+.ann .why b,.ans .lab{display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:#2346C9;margin-bottom:2px}
+.try{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px dashed #DCE3EF;cursor:auto}
+.try label{font-size:14px;font-weight:700;color:#0E1B33}
+.try-in{height:42px;padding:0 12px;border:1px solid #C9D3E5;border-radius:10px;font:inherit;font-size:15px;width:100%;box-sizing:border-box;background:#FFFFFF;color:#0E1B33}
+.try-in:focus{outline:2px solid #2346C9;outline-offset:1px;border-color:#2346C9}
+.try-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-s{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #2346C9;background:#FFFFFF;color:#2346C9;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.ans{display:flex;flex-direction:column;gap:10px;padding:12px 14px;background:#F1F5FF;border-radius:10px;font-size:15px;line-height:1.45}
+.ans .lab.you{color:#56627A}
+.eq{display:inline-block;margin-top:2px;color:#17603B;font-weight:700;font-size:13px}
+.grp{display:flex;align-items:center;gap:10px;padding:8px 2px 0;font-size:14px}
+.grp .gain2{margin-left:auto;font-size:12.5px;font-weight:700;color:#A3271E;background:#FDECEA;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.seg{display:inline-flex;padding:3px;background:#EEF1F6;border-radius:999px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:999px;font:inherit;font-size:13.5px;font-weight:600;color:#46536B;cursor:pointer}
+.seg button.on{background:#FFFFFF;color:#0E1B33;box-shadow:0 1px 2px rgba(14,27,51,.14)}
+.fold-btn{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:12px 16px;border:1px dashed #A9D3BC;border-radius:14px;background:#F3FAF6;font:inherit;font-size:14.5px;font-weight:600;color:#17603B;cursor:pointer;text-align:left}
+.ann.folded{display:none}
+.plain{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;background:#F6F8FC;border:1px solid #E1E6F0;font-size:15.5px;line-height:1.55}
+.plain b,.ex b{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:#2346C9}
+.ex{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:#FFFFFF;border:1px solid #DCE3EF;font-size:15.5px;line-height:1.6}
+.ex .src{font-size:13px;color:#56627A}
+.ex .q{font-family:Newsreader,Georgia,serif;font-size:16.5px}
+.ex s{text-decoration-color:#C8372D;text-decoration-thickness:2px;color:#56627A}
+.ex .new{background:#E4F4EC;box-shadow:inset 0 -2px 0 #1F7A4C;border-radius:3px;padding:0 2px}
+.ann:not(.on) .why,.ann:not(.on) .try{display:none}
+.ann.done:not(.on) .try{display:flex;border-top:0;padding-top:0}
+.ann.done:not(.on) .try label,.ann.done:not(.on) .try-in{display:none}
+.ann .hint{display:none;font-size:13.5px;font-weight:600;color:#2346C9}
+.ann:not(.on):not(.done) .hint{display:block}
+.show-btn{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #D3DBEA;background:#FFFFFF;font:inherit;font-size:14px;font-weight:600;color:#0E1B33;cursor:pointer}
+
 </style>
 </head>
 <body>
-<div class="pg" style="min-height: 4700px">
+<div class="pg" style="min-height: 5440px">
 <header class="nav"><div class="in"><a class="logo" href="01-inicio.html"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="#2346C9"></rect><path d="M8 11h14M8 15.5h14M8 20h8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></path><path d="M18.5 21.5c1.6-1.2 3.2-3 4.2-5" stroke="#FFB4A8" stroke-width="2" fill="none" stroke-linecap="round"></path></svg>RedigiAI</a><nav class="links" aria-label="Principal"><a href="02-temas.html">Temas</a><a href="08-painel.html" class="on" aria-current="page">Minhas correções</a></nav><a class="av" href="10-perfil.html" aria-label="Meu perfil">A</a></div></header>
 <div class="wrap" style="padding-top: 28px; padding-bottom: 20px; display: flex; flex-direction: column; gap: 14px">
 <a href="08-painel.html" style="font-size: 14px; font-weight: 600; text-decoration: none">← Minhas correções</a>
 <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
 <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
-<h1 class="serif" style="margin: 0; font-size: 36px; line-height: 1.1">Fuvest – Dissertação – Algoritmos e o debate público</h1>
-<span class="mut" style="font-size: 14px">Enviada em 12/10 · 2ª versão · grade Fuvest 2027 (v1)</span>
+<h1 class="serif" style="margin: 0; font-size: 36px; line-height: 1.1">Fuvest – Dissertação em prosa – Redação de exemplo</h1>
+<span class="mut" style="font-size: 14px">Enviada em 12/10 · 1ª versão · grade Fuvest 2027 (v1)</span>
 </div>
 <div style="display: flex; gap: 10px; flex-wrap: wrap"><a class="btn ghost" href="#">Ver foto original</a><a class="btn pri" href="03-tipo-envio.html">Reescrever esta redação</a></div>
 </div>
@@ -137,105 +180,156 @@ a{color:#2346C9}a:hover{color:#16308F}
 <div class="card stack" style="display: grid; grid-template-columns: 220px minmax(0, 1fr) minmax(0, 1fr); overflow: hidden">
 <div style="padding: 26px 26px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid #E1E6F0">
 <span class="mut" style="font-size: 13.5px; font-weight: 600">Nota da grade</span>
-<span><span class="serif" style="font-size: 64px; line-height: 1">27</span><span class="mut" style="font-size: 22px"> / 40</span></span>
-<span class="chip s-ok" style="align-self: flex-start">+4 desde a 1ª versão</span>
+<span><span class="serif" style="font-size: 64px; line-height: 1">33</span><span class="mut" style="font-size: 22px"> / 40</span></span>
 </div>
 <div style="padding: 14px 14px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid #E1E6F0">
 <span class="mut" style="font-size: 13.5px; font-weight: 600; padding: 8px 12px 4px">Onde a nota foi ganha e perdida</span>
-<a class="maprow" href="#c1"><span class="num">1</span><span style="font-weight: 600; font-size: 15px">Tema e autoria</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">9<span class="mut" style="font-weight: 500"> / 12</span></span><span class="lost" style="text-align: right">−3</span></a><a class="maprow" href="#c2"><span class="num">2</span><span style="font-weight: 600; font-size: 15px">Tipo e gênero</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">6<span class="mut" style="font-weight: 500"> / 8</span></span><span class="lost" style="text-align: right">−2</span></a><a class="maprow" href="#c3"><span class="num bad">3</span><span style="font-weight: 600; font-size: 15px">Coesão e progressão</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">6<span class="mut" style="font-weight: 500"> / 12</span></span><span class="lost" style="text-align: right">−6</span></a><a class="maprow" href="#c4"><span class="num">4</span><span style="font-weight: 600; font-size: 15px">Escrita e vocabulário</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">6<span class="mut" style="font-weight: 500"> / 8</span></span><span class="lost" style="text-align: right">−2</span></a>
+<a class="maprow" href="#c1"><span class="num">1</span><span style="font-weight: 600; font-size: 15px">Tema e autoria</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">12<span class="mut" style="font-weight: 500"> / 12</span></span><span class="full" style="text-align: right">máx.</span></a><a class="maprow" href="#c2"><span class="num">2</span><span style="font-weight: 600; font-size: 15px">Tipo e gênero</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">6<span class="mut" style="font-weight: 500"> / 8</span></span><span class="lost" style="text-align: right">−2</span></a><a class="maprow" href="#c3"><span class="num">3</span><span style="font-weight: 600; font-size: 15px">Coesão e progressão</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">9<span class="mut" style="font-weight: 500"> / 12</span></span><span class="lost" style="text-align: right">−3</span></a><a class="maprow" href="#c4"><span class="num">4</span><span style="font-weight: 600; font-size: 15px">Escrita e vocabulário</span><span class="meter" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px">6<span class="mut" style="font-weight: 500"> / 8</span></span><span class="lost" style="text-align: right">−2</span></a>
 </div>
 <div style="padding: 26px; display: flex; flex-direction: column; gap: 14px; background: #FBFCFE">
 <span class="eyebrow">Comece por aqui</span>
-<p style="margin: 0; font-size: 18px; line-height: 1.5; font-weight: 500">O parágrafo das linhas 10 a 12 repete o anterior. Troque-o por uma consequência nova, apoiada na coletânea.</p>
-<span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span class="num bad">3</span><span style="font-size: 14px; font-weight: 600">Coesão e progressão · vale até +6 pontos</span></span>
+<p style="margin: 0; font-size: 18px; line-height: 1.5; font-weight: 500">O parágrafo das linhas 24 a 29 muda o foco para a elite e o governo. Feche-o ligando essa crítica de volta ao problema da informação.</p>
+<span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span class="num">3</span><span style="font-size: 14px; font-weight: 600">Coesão e progressão · vale até +3 pontos</span></span>
 <a class="btn pri" href="#texto" style="align-self: flex-start; min-height: 42px">Ver no texto</a>
-<p style="margin: 0; padding-top: 12px; border-top: 1px solid #E1E6F0; font-size: 14.5px; line-height: 1.5"><strong style="color: #17603B">✓ Mantenha:</strong> o dado do texto 2 sustenta a sua tese logo na introdução.</p>
+<p style="margin: 0; padding-top: 12px; border-top: 1px solid #E1E6F0; font-size: 14.5px; line-height: 1.5"><strong style="color: #17603B">✓ Mantenha:</strong> o repertório filosófico (Chauí e Husserl) sustenta os argumentos, não só enfeita o texto.</p>
 </div>
 </div>
 </section>
-<nav class="sec-nav" aria-label="Seções da correção"><div class="wrap"><a href="#texto" class="on" aria-current="true">Texto comentado <span class="cnt">8</span></a><a href="#criterios">Critérios</a><a href="#plano">Plano de reescrita</a><a href="#avaliar">Avaliar a correção</a></div></nav>
+<nav class="sec-nav" aria-label="Seções da correção"><div class="wrap"><a href="#texto" class="on" aria-current="true">Texto comentado <span class="cnt">9</span></a><a href="#criterios">Critérios</a><a href="#plano">Plano de reescrita</a><a href="#avaliar">Avaliar a correção</a></div></nav>
 <section id="texto" class="wrap" style="padding-top: 32px; display: flex; flex-direction: column; gap: 16px">
-<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
-<div style="display: flex; flex-direction: column; gap: 4px"><h2 class="serif h2">Texto comentado</h2><p class="mut" style="margin: 0">Clique num número para ver o apontamento. Os vermelhos tiraram pontos; os verdes funcionaram e valem manter.</p></div>
-</div>
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 class="serif h2">Texto comentado</h2><p class="mut" style="margin: 0">Sua redação exatamente como está na folha. Os apontamentos vêm na ordem do que mais aumenta a nota: comece pelo primeiro e tente corrigir antes de ver a resposta.</p></div>
 <div class="stack" style="display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 24px; align-items: start">
 <div class="paper">
 <div class="paper-h"><span style="font-weight: 600">Sua redação</span><span style="display: flex; gap: 16px; font-size: 13.5px" class="mut"><span style="display: inline-flex; align-items: center; gap: 6px"><span class="pin" style="margin: 0; vertical-align: 0">1</span>tirou pontos</span><span style="display: inline-flex; align-items: center; gap: 6px"><span class="pin g" style="margin: 0; vertical-align: 0">1</span>funcionou</span></span></div>
-<div class="lines"><span class="ln">01</span><span class="tx par" data-line="1">A tecnologia digital mudou a forma como as pessoas se informam</span><span class="ln">02</span><span class="tx" data-line="2">e participam do debate público. Hoje, boa parte dos brasileiros</span><span class="ln">03</span><span class="tx" data-line="3">lê notícias apenas pelas redes sociais, <span class="hg" data-ann="1">como mostra o texto 2 da</span></span><span class="ln">04</span><span class="tx" data-line="4"><span class="hg" data-ann="1">coletânea</span><button type="button" class="pin g" data-ann="1" aria-label="Apontamento 1">1</button>. <span class="hb" data-ann="2">Esse dado, revela</span><button type="button" class="pin" data-ann="2" aria-label="Apontamento 2">2</button> que poucas empresas controlam o que</span><span class="ln">05</span><span class="tx" data-line="5">milhões de pessoas leem todos os dias, sem que ninguém perceba.</span><span class="ln">06</span><span class="tx par" data-line="6">Os algoritmos das plataformas decidem o que cada usuário vê,</span><span class="ln">07</span><span class="tx" data-line="7">priorizando sempre o conteúdo que gera mais engajamento e tempo</span><span class="ln">08</span><span class="tx" data-line="8">de tela. <span class="hg" data-ann="3">Por isso,</span><button type="button" class="pin g" data-ann="3" aria-label="Apontamento 3">3</button> notícias falsas e indignadas circulam mais</span><span class="ln">09</span><span class="tx" data-line="9">rápido do que as verdadeiras, como alerta o texto 3.</span><span class="ln">10</span><span class="tx par" data-line="10"><span class="hb" data-ann="4">Além disso, os algoritmos também escolhem o que as pessoas</span></span><span class="ln">11</span><span class="tx" data-line="11"><span class="hb" data-ann="4">veem, e cada uma recebe só aquilo que gera mais engajamento.</span><button type="button" class="pin" data-ann="4" aria-label="Apontamento 4">4</button> Assim,</span><span class="ln">12</span><span class="tx" data-line="12"><span class="hb" data-ann="5">a gente</span><button type="button" class="pin" data-ann="5" aria-label="Apontamento 5">5</button> acaba vendo sempre as mesmas opiniões.</span><span class="ln">13</span><span class="tx par sel" data-line="13"><span class="hb on" data-ann="6">À partir</span><button type="button" class="pin on" data-ann="6" aria-label="Apontamento 6">6</button> desse controle, cabe perguntar quem deve regular</span><span class="ln">14</span><span class="tx" data-line="14">esse filtro invisível e com quais critérios. <span class="hg" data-ann="7">Em países europeus,</span></span><span class="ln">15</span><span class="tx" data-line="15"><span class="hg" data-ann="7">leis já obrigam as empresas a explicar como seus sistemas</span></span><span class="ln">16</span><span class="tx" data-line="16"><span class="hg" data-ann="7">recomendam conteúdo</span><button type="button" class="pin g" data-ann="7" aria-label="Apontamento 7">7</button>, o que mostra que a transparência é possível.</span><span class="ln">17</span><span class="tx par" data-line="17">Portanto, os algoritmos não são neutros: eles moldam o debate</span><span class="ln">18</span><span class="tx" data-line="18">público ao escolher o que merece atenção. <span class="hb" data-ann="8">Cabe à sociedade</span></span><span class="ln">19</span><span class="tx" data-line="19"><span class="hb" data-ann="8">discutir esse tema com seriedade</span><button type="button" class="pin" data-ann="8" aria-label="Apontamento 8">8</button>, para que a tecnologia sirva à</span><span class="ln">20</span><span class="tx" data-line="20">democracia e não o contrário.</span></div>
+<div class="folha" data-fit><div class="lines"><span class="ln">01</span><span class="tx" data-line="1">                         A crítica da informação pura</span><span class="ln">02</span><span class="tx" data-line="2"></span><span class="ln">03</span><span class="tx" data-line="3">      <span class="hg" data-ann="1">Vive-se, hoje, um contexto de acelerada transmissão de informações em larga escala</span><button type="button" class="pin g" data-ann="1" aria-label="Apontamento 1: funcionou, critério 1">1</button>. Tal</span><span class="ln">04</span><span class="tx" data-line="4">processo baseado, principalmente, na internet vem recebendo o nome de globalização, mundializa-</span><span class="ln">05</span><span class="tx" data-line="5">ção ou internacionalização do conhecimento; entretanto esse fenômeno não é excluído de suas contradições.</span><span class="ln">06</span><span class="tx" data-line="6">      A expansão dos dados e de sua divulgação gerou um conflito inerente: como garantir a veraci-</span><span class="ln">07</span><span class="tx" data-line="7">dade dos mesmos? Existe uma dúvida secular na ciência sobre o que é a verdade; a verdade já foi</span><span class="ln">08</span><span class="tx" data-line="8">simplesmente provar o falso por um apoio, já foi consequência de conhecimentos inatos, foi a</span><span class="ln">09</span><span class="tx" data-line="9">síntese das contradições e também o fruto da intencionalidade humana, então <span class="hb" data-ann="2">poderia-se</span><button type="button" class="pin" data-ann="2" aria-label="Apontamento 2: tirou pontos, critério 4">2</button> in-</span><span class="ln">10</span><span class="tx" data-line="10">ferir que tal conceito não existe. Mas, há um denominador comum em todas as concepções, o</span><span class="ln">11</span><span class="tx" data-line="11"><span class="hb" data-ann="3">respeito a norma</span><button type="button" class="pin" data-ann="3" aria-label="Apontamento 3: tirou pontos, critério 4">3</button> da não contradição e da logicidade dos argumentos, fatores <span class="hg" data-ann="4">que segundo Marile-</span></span><span class="ln">12</span><span class="tx" data-line="12"><span class="hg" data-ann="4">na Chauí promovem uma verdade mesmo que provisória</span><button type="button" class="pin g" data-ann="4" aria-label="Apontamento 4: funcionou, critério 1">4</button>.</span><span class="ln">13</span><span class="tx" data-line="13">      Assim vê-se a dificuldade de encontrar a essência da verdade. Será que os inúmeros autores de</span><span class="ln">14</span><span class="tx" data-line="14">textos pensaram em todos esses aspectos antes de publicar suas “compilações”? Destarte alguns especia-</span><span class="ln">15</span><span class="tx" data-line="15">listas <span class="hb" data-ann="5">crêem</span><button type="button" class="pin" data-ann="5" aria-label="Apontamento 5: tirou pontos, critério 4">5</button> que apenas autores universitários ou renomados seriam fonte do “indubitável”, mas o fato</span><span class="ln">16</span><span class="tx" data-line="16">de terem estudado intensamente não lhes garante a lógica “ideal” e também não retira sua parcela de</span><span class="ln">17</span><span class="tx" data-line="17">intencionalidade explicada pela <span class="hg" data-ann="6">fenomenologia de Husserl</span><button type="button" class="pin g" data-ann="6" aria-label="Apontamento 6: funcionou, critério 1">6</button>; outros afirmam que a responsabilidade é do</span><span class="ln">18</span><span class="tx" data-line="18">leitor, e aí tem-se outro problema: a capacidade do leitor de visualizar o real e o inventado.</span><span class="ln">19</span><span class="tx" data-line="19">      Ao mesmo tempo <span class="hb" data-ann="7">que criam-se</span><button type="button" class="pin" data-ann="7" aria-label="Apontamento 7: tirou pontos, critério 4">7</button> sites informativos, noticiários populares convive-se com a ausên-</span><span class="ln">20</span><span class="tx" data-line="20">cia de acesso à internet de quase 95% da população mundial, fato que desmistifica a ideologia de</span><span class="ln">21</span><span class="tx" data-line="21">integração global e que é agravado pela falta de acesso à educação de qualidade pela maioria dessa</span><span class="ln">22</span><span class="tx" data-line="22">população. Assim se a verdade é dúbia aos “letrados”, filósofos e especialistas o que dizer dos sub-</span><span class="ln">23</span><span class="tx" data-line="23">jugados, segregados, que obtêm o acesso a informação parcial e nem mesmo estão preparados para ela?</span><span class="ln">24</span><span class="tx" data-line="24">      Enquanto a hipocrisia da sociedade e de sua elite não for superada, a comodidade é geral, a</span><span class="ln">25</span><span class="tx" data-line="25">massa recebe parte dos fatos, os interpreta vagamente segundo os preceitos da “grande mídia” e cla-</span><span class="ln">26</span><span class="tx" data-line="26">ma pela liberdade, pelo acesso amplo e inclusão digital. O governo bondoso dá-lhes a “cultura</span><span class="ln">27</span><span class="tx" data-line="27">necessária” e ganha o voto. Antes de discutir a informação deve-se discutir seus erros e toda</span><span class="ln">28</span><span class="tx" data-line="28">a dinâmica social. Os hipócritas <span class="hb" data-ann="8">que como eu falam</span><button type="button" class="pin" data-ann="8" aria-label="Apontamento 8: tirou pontos, critério 2">8</button> da verdade e da informação vivem no irreal,</span><span class="ln">29</span><span class="tx sel" data-line="29"><span class="hb on" data-ann="9">isolados em sua “torre de marfim” e são em si um erro</span><button type="button" class="pin on" data-ann="9" aria-label="Apontamento 9: tirou pontos, critério 3">9</button>.</span><span class="ln">30</span><span class="tx" data-line="30">      Portanto ao falar-se de informação, sua dinâmica e expansão deve-se observar sua profun-</span></div></div><div class="fit-hint">A folha tem a mesma quebra de linhas da sua redação. Deslize para o lado para ler as linhas longas.</div>
 </div>
 <aside class="panel" aria-label="Apontamentos">
-<div class="stepper"><button type="button" data-step="-1">← Anterior</button><span><strong>6</strong> <span class="mut">de 8 apontamentos</span></span><button type="button" data-step="1">Próximo →</button></div>
+<div class="stepper"><button type="button" data-step="-1">← Anterior</button><span><strong>1</strong> <span class="mut">de 6 apontamentos</span></span><button type="button" data-step="1">Próximo →</button></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap"><span class="mut" style="font-size: 13.5px; font-weight: 600">Ordem</span><div class="seg" role="group" aria-label="Ordem dos apontamentos"><button type="button" class="on" data-order="imp" aria-pressed="true">Por importância</button><button type="button" data-order="line" aria-pressed="false">Por linha</button></div></div>
 <div class="filters" role="group" aria-label="Filtrar apontamentos">
-<button type="button" class="fchip on" data-fkind="all">Todos <span class="mut" style="font-weight: 500">8</span></button>
-<button type="button" class="fchip" data-fkind="bad"><span class="d" style="background: #C8372D"></span>Tiraram pontos <span style="font-weight: 500">5</span></button>
-<button type="button" class="fchip" data-fkind="good"><span class="d" style="background: #1F7A4C"></span>Funcionaram <span style="font-weight: 500">3</span></button>
+<button type="button" class="fchip on" data-fkind="all" aria-pressed="true">Todos <span class="mut" style="font-weight: 500">9</span></button>
+<button type="button" class="fchip" data-fkind="bad" aria-pressed="false"><span class="d" style="background: #C8372D"></span>Tiraram pontos <span style="font-weight: 500">6</span></button>
+<button type="button" class="fchip" data-fkind="good" aria-pressed="false"><span class="d" style="background: #1F7A4C"></span>Funcionaram <span style="font-weight: 500">3</span></button>
 </div>
-<div class="filters" role="group" aria-label="Filtrar por critério"><button type="button" class="fchip" data-fcrit="1"><span class="num" style="width: 20px; height: 20px; font-size: 11px">1</span>Tema e autoria</button><button type="button" class="fchip" data-fcrit="2"><span class="num" style="width: 20px; height: 20px; font-size: 11px">2</span>Tipo e gênero</button><button type="button" class="fchip" data-fcrit="3"><span class="num" style="width: 20px; height: 20px; font-size: 11px">3</span>Coesão e progressão</button><button type="button" class="fchip" data-fcrit="4"><span class="num" style="width: 20px; height: 20px; font-size: 11px">4</span>Escrita e vocabulário</button></div>
-<div class="anns" style="display: flex; flex-direction: column; gap: 10px"><button type="button" class="ann" data-ann="1" data-kind="good" data-crit="1">
-<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">1</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linhas 3 e 4</span><span style="margin-left: auto" class="num" title="Critério 1">1</span></span>
-<span class="quote">“como mostra o texto 2 da coletânea”</span>
+<div class="filters" role="group" aria-label="Filtrar por critério"><button type="button" class="fchip" data-fcrit="1" aria-pressed="false"><span class="num" style="width: 20px; height: 20px; font-size: 11px">1</span>Tema e autoria</button><button type="button" class="fchip" data-fcrit="2" aria-pressed="false"><span class="num" style="width: 20px; height: 20px; font-size: 11px">2</span>Tipo e gênero</button><button type="button" class="fchip" data-fcrit="3" aria-pressed="false"><span class="num" style="width: 20px; height: 20px; font-size: 11px">3</span>Coesão e progressão</button><button type="button" class="fchip" data-fcrit="4" aria-pressed="false"><span class="num" style="width: 20px; height: 20px; font-size: 11px">4</span>Escrita e vocabulário</button></div>
+<div class="anns" style="display: flex; flex-direction: column; gap: 10px"><div class="grp" data-grp="1" data-imp="100" data-line="0"><span class="num" style="width: 22px; height: 22px; font-size: 12px">3</span><span><strong>Corrija primeiro</strong> <span class="mut">· Coesão e progressão</span></span><span class="gain2">até +3</span></div><article class="ann on" data-ann="9" data-kind="bad" data-crit="3" data-grp="1" data-imp="101" data-line="90" tabindex="0" aria-label="Apontamento 9">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">9</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 29</span><span class="crit-tag">C3 · Coesão e progressão</span></span>
+<span class="quote">“isolados em sua “torre de marfim” e são em si um erro”</span>
 
-<span style="font-size: 15px; line-height: 1.5">O dado do texto 2 sustenta a sua tese logo na introdução.</span>
+<span style="font-size: 15px; line-height: 1.5">O parágrafo das linhas 24 a 29 critica a elite e o governo e termina aqui sem voltar ao problema da informação.</span>
+<div class="why"><b>Por quê</b>Todo parágrafo de desenvolvimento precisa terminar ligado à tese. Sem essa ponte, o leitor não sabe por que aquele argumento está ali.</div>
+<div class="try">
+<label for="try9">Escreva a frase que fecha o parágrafo</label>
+<input id="try9" class="try-in" type="text" autocomplete="off" spellcheck="false" placeholder="Escreva a sua versão" value="">
+<div class="try-row"><button type="button" class="btn-s" data-reveal>Ver resposta</button><span class="mut" style="font-size: 13px">Tente antes de ver. Ninguém corrige a sua tentativa.</span></div>
+<div class="ans" data-fix="" hidden><div hidden><span class="lab you">Você escreveu</span><span class="you-t"></span></div><div><span class="lab">Uma forma possível</span>isolados em sua “torre de marfim” e são em si um erro, pois mantêm a população presa a uma informação parcial.</div></div>
+</div>
+<span class="hint">Tente corrigir →</span>
+</article><div class="grp" data-grp="2" data-imp="200" data-line="0"><span class="num" style="width: 22px; height: 22px; font-size: 12px">2</span><span><strong>Depois</strong> <span class="mut">· Tipo e gênero</span></span><span class="gain2">até +2</span></div><article class="ann" data-ann="8" data-kind="bad" data-crit="2" data-grp="2" data-imp="202" data-line="80" tabindex="0" aria-label="Apontamento 8">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">8</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 28</span><span class="crit-tag">C2 · Tipo e gênero</span></span>
+<span class="quote">“que como eu falam”</span>
 
-</button><button type="button" class="ann" data-ann="2" data-kind="bad" data-crit="4">
-<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">2</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 4</span><span style="margin-left: auto" class="num bad" title="Critério 4">4</span></span>
-<span class="quote">“<s>Esse dado, revela</s>”</span>
-<span style="font-size: 13px; font-weight: 600">Regra: Vírgula entre sujeito e verbo</span>
-<span style="font-size: 15px; line-height: 1.5">Vírgula separando sujeito e verbo.</span>
-<span class="fix"><b>Escreva</b><span>Esse dado revela</span></span>
-</button><button type="button" class="ann" data-ann="3" data-kind="good" data-crit="3">
-<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">3</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linha 8</span><span style="margin-left: auto" class="num" title="Critério 3">3</span></span>
-<span class="quote">“Por isso,”</span>
+<span style="font-size: 15px; line-height: 1.5">A primeira pessoa aparece só aqui e quebra o registro impessoal mantido no resto da dissertação.</span>
+<div class="why"><b>Por quê</b>Na dissertação, o ponto de vista aparece pelos argumentos, não pelo “eu”. Usar a primeira pessoa num só trecho quebra o registro do texto inteiro.</div>
+<div class="try">
+<label for="try8">Como você reescreveria este trecho?</label>
+<input id="try8" class="try-in" type="text" autocomplete="off" spellcheck="false" placeholder="Escreva a sua versão" value="">
+<div class="try-row"><button type="button" class="btn-s" data-reveal>Ver resposta</button><span class="mut" style="font-size: 13px">Tente antes de ver. Ninguém corrige a sua tentativa.</span></div>
+<div class="ans" data-fix="" hidden><div hidden><span class="lab you">Você escreveu</span><span class="you-t"></span></div><div><span class="lab">Uma forma possível</span>Os hipócritas que falam da verdade e da informação vivem no irreal</div></div>
+</div>
+<span class="hint">Tente corrigir →</span>
+</article><div class="grp" data-grp="3" data-imp="300" data-line="0"><span class="num" style="width: 22px; height: 22px; font-size: 12px">4</span><span><strong>Ajustes de escrita</strong> <span class="mut">· Escrita e vocabulário</span></span><span class="gain2">até +2</span></div><article class="ann" data-ann="2" data-kind="bad" data-crit="4" data-grp="3" data-imp="303" data-line="20" tabindex="0" aria-label="Apontamento 2">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">2</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 9</span><span class="crit-tag">C4 · Escrita e vocabulário</span></span>
+<span class="quote">“poderia-se”</span>
+<span style="font-size: 13px; font-weight: 600">Regra: Colocação pronominal</span>
+<span style="font-size: 15px; line-height: 1.5">Com o verbo no futuro do pretérito, o pronome não vem depois do verbo.</span>
+<div class="why"><b>Por quê</b>Na norma-padrão, o pronome nunca vem depois de verbo no futuro do pretérito (-ria) ou no futuro do presente (-rá). Ou ele vai para o meio do verbo, ou para antes dele.</div>
+<div class="try">
+<label for="try2">Como você escreveria?</label>
+<input id="try2" class="try-in" type="text" autocomplete="off" spellcheck="false" placeholder="Escreva a sua versão" value="">
+<div class="try-row"><button type="button" class="btn-s" data-reveal>Ver resposta</button><span class="mut" style="font-size: 13px">Tente antes de ver. Ninguém corrige a sua tentativa.</span></div>
+<div class="ans" data-fix="poder-se-ia" hidden><div hidden><span class="lab you">Você escreveu</span><span class="you-t"></span></div><div><span class="lab">Forma correta</span>poder-se-ia <span class="eq" hidden>✓ Igual à forma correta</span></div></div>
+</div>
+<span class="hint">Tente corrigir →</span>
+</article><article class="ann" data-ann="7" data-kind="bad" data-crit="4" data-grp="3" data-imp="304" data-line="70" tabindex="0" aria-label="Apontamento 7">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">7</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 19</span><span class="crit-tag">C4 · Escrita e vocabulário</span></span>
+<span class="quote">“que criam-se”</span>
+<span style="font-size: 13px; font-weight: 600">Regra: Colocação pronominal</span>
+<span style="font-size: 15px; line-height: 1.5">A palavra “que” atrai o pronome para antes do verbo.</span>
+<div class="why"><b>Por quê</b>Palavras como “que”, “não”, “quando” e “se” puxam o pronome para antes do verbo.</div>
+<div class="try">
+<label for="try7">Como você escreveria?</label>
+<input id="try7" class="try-in" type="text" autocomplete="off" spellcheck="false" placeholder="Escreva a sua versão" value="">
+<div class="try-row"><button type="button" class="btn-s" data-reveal>Ver resposta</button><span class="mut" style="font-size: 13px">Tente antes de ver. Ninguém corrige a sua tentativa.</span></div>
+<div class="ans" data-fix="que se criam" hidden><div hidden><span class="lab you">Você escreveu</span><span class="you-t"></span></div><div><span class="lab">Forma correta</span>que se criam <span class="eq" hidden>✓ Igual à forma correta</span></div></div>
+</div>
+<span class="hint">Tente corrigir →</span>
+</article><article class="ann done" data-ann="3" data-kind="bad" data-crit="4" data-grp="3" data-imp="305" data-line="30" tabindex="0" aria-label="Apontamento 3">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">3</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 11</span><span class="crit-tag">C4 · Escrita e vocabulário</span></span>
+<span class="quote">“respeito a norma”</span>
+<span style="font-size: 13px; font-weight: 600">Regra: Crase obrigatória ausente</span>
+<span style="font-size: 15px; line-height: 1.5">Falta um sinal obrigatório entre “respeito” e “norma”.</span>
+<div class="why"><b>Por quê</b>“Respeito” pede a preposição “a”, e “norma” é feminina e pede o artigo “a”. Preposição + artigo = crase. Teste: troque por uma palavra masculina. Se ficar “respeito ao princípio”, há crase.</div>
+<div class="try">
+<label for="try3">Como você escreveria?</label>
+<input id="try3" class="try-in" type="text" autocomplete="off" spellcheck="false" placeholder="Escreva a sua versão" value="respeito à norma">
+<div class="try-row" hidden><button type="button" class="btn-s" data-reveal>Ver resposta</button><span class="mut" style="font-size: 13px">Tente antes de ver. Ninguém corrige a sua tentativa.</span></div>
+<div class="ans" data-fix="respeito à norma"><div><span class="lab you">Você escreveu</span><span class="you-t">respeito à norma</span></div><div><span class="lab">Forma correta</span>respeito à norma <span class="eq">✓ Igual à forma correta</span></div></div>
+</div>
+<span class="hint">Tente corrigir →</span>
+</article><article class="ann" data-ann="5" data-kind="bad" data-crit="4" data-grp="3" data-imp="306" data-line="50" tabindex="0" aria-label="Apontamento 5">
+<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">5</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 15</span><span class="crit-tag">C4 · Escrita e vocabulário</span></span>
+<span class="quote">“crêem”</span>
+<span style="font-size: 13px; font-weight: 600">Regra: Acentuação gráfica</span>
+<span style="font-size: 15px; line-height: 1.5">Esta forma perdeu o acento com o Acordo Ortográfico.</span>
+<div class="why"><b>Por quê</b>O Acordo Ortográfico tirou o acento das formas terminadas em “-eem”: creem, leem, veem, deem.</div>
+<div class="try">
+<label for="try5">Como você escreveria?</label>
+<input id="try5" class="try-in" type="text" autocomplete="off" spellcheck="false" placeholder="Escreva a sua versão" value="">
+<div class="try-row"><button type="button" class="btn-s" data-reveal>Ver resposta</button><span class="mut" style="font-size: 13px">Tente antes de ver. Ninguém corrige a sua tentativa.</span></div>
+<div class="ans" data-fix="creem" hidden><div hidden><span class="lab you">Você escreveu</span><span class="you-t"></span></div><div><span class="lab">Forma correta</span>creem <span class="eq" hidden>✓ Igual à forma correta</span></div></div>
+</div>
+<span class="hint">Tente corrigir →</span>
+</article><button type="button" class="fold-btn" data-fold aria-expanded="false" data-imp="900" data-line="0"><span>✓ 3 trechos que funcionaram</span><span class="fl" style="font-size: 13.5px">Mostrar</span></button><article class="ann folded" data-ann="1" data-kind="good" data-crit="1" data-grp="9" data-imp="1001" data-line="10" tabindex="0" aria-label="Apontamento 1">
+<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">1</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linha 3</span><span class="crit-tag">C1 · Tema e autoria</span></span>
+<span class="quote">“Vive-se, hoje, um contexto de acelerada transmissão de informações em larga escala”</span>
 
-<span style="font-size: 15px; line-height: 1.5">Conectivo certo: liga a causa (o algoritmo) à consequência (notícias falsas circulam mais).</span>
+<span style="font-size: 15px; line-height: 1.5">A introdução situa o tema no presente e anuncia a contradição que o texto vai discutir.</span>
 
-</button><button type="button" class="ann" data-ann="4" data-kind="bad" data-crit="3">
-<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">4</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linhas 10 e 11</span><span style="margin-left: auto" class="num bad" title="Critério 3">3</span></span>
-<span class="quote">“Além disso, os algoritmos também escolhem o que as pessoas veem…”</span>
 
-<span style="font-size: 15px; line-height: 1.5">Este parágrafo repete a ideia das linhas 6 a 8: não traz informação nova.</span>
+</article><article class="ann folded" data-ann="4" data-kind="good" data-crit="1" data-grp="9" data-imp="1004" data-line="40" tabindex="0" aria-label="Apontamento 4">
+<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">4</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linhas 11 e 12</span><span class="crit-tag">C1 · Tema e autoria</span></span>
+<span class="quote">“segundo Marilena Chauí promovem uma verdade mesmo que provisória”</span>
 
-</button><button type="button" class="ann" data-ann="5" data-kind="bad" data-crit="4">
-<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">5</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 12</span><span style="margin-left: auto" class="num bad" title="Critério 4">4</span></span>
-<span class="quote">“<s>a gente</s>”</span>
-<span style="font-size: 13px; font-weight: 600">Regra: Marca de oralidade</span>
-<span style="font-size: 15px; line-height: 1.5">Marca de oralidade no registro formal.</span>
-<span class="fix"><b>Escreva</b><span>nós / os usuários</span></span>
-</button><button type="button" class="ann on" data-ann="6" data-kind="bad" data-crit="4">
-<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">6</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linha 13</span><span style="margin-left: auto" class="num bad" title="Critério 4">4</span></span>
-<span class="quote">“<s>À partir</s>”</span>
-<span style="font-size: 13px; font-weight: 600">Regra: Crase antes de verbo</span>
-<span style="font-size: 15px; line-height: 1.5">“A” antes de verbo nunca leva crase.</span>
-<span class="fix"><b>Escreva</b><span>A partir</span></span>
-</button><button type="button" class="ann" data-ann="7" data-kind="good" data-crit="1">
-<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">7</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linhas 14 a 16</span><span style="margin-left: auto" class="num" title="Critério 1">1</span></span>
-<span class="quote">“Em países europeus, leis já obrigam…”</span>
+<span style="font-size: 15px; line-height: 1.5">Repertório filosófico pertinente, usado para sustentar o argumento, não só citado.</span>
 
-<span style="font-size: 15px; line-height: 1.5">Repertório próprio, além da coletânea: mostra autoria.</span>
 
-</button><button type="button" class="ann" data-ann="8" data-kind="bad" data-crit="2">
-<span class="top"><span class="pin" style="margin: 0" aria-hidden="true">8</span><span class="kind bad">↓ Tirou pontos</span><span>·</span><span>Linhas 18 e 19</span><span style="margin-left: auto" class="num bad" title="Critério 2">2</span></span>
-<span class="quote">“Cabe à sociedade discutir esse tema com seriedade”</span>
+</article><article class="ann folded" data-ann="6" data-kind="good" data-crit="1" data-grp="9" data-imp="1006" data-line="60" tabindex="0" aria-label="Apontamento 6">
+<span class="top"><span class="pin g" style="margin: 0" aria-hidden="true">6</span><span class="kind good">✓ Funcionou</span><span>·</span><span>Linha 17</span><span class="crit-tag">C1 · Tema e autoria</span></span>
+<span class="quote">“fenomenologia de Husserl”</span>
 
-<span style="font-size: 15px; line-height: 1.5">Conclusão genérica: não responde à pergunta que você mesmo fez na linha 13.</span>
+<span style="font-size: 15px; line-height: 1.5">Mais um repertório próprio, ligado à ideia de intencionalidade das linhas 9 e 17.</span>
 
-</button></div>
+
+</article></div>
 </aside>
 </div>
 </section>
 <section id="criterios" class="wrap" style="padding-top: 48px; display: flex; flex-direction: column; gap: 16px">
-<div style="display: flex; flex-direction: column; gap: 4px"><h2 class="serif h2">Critérios</h2><p class="mut" style="margin: 0">Cada critério mostra o seu nível, o que a grade pede para o próximo e o que fazer para chegar lá.</p></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 class="serif h2">Critérios</h2><p class="mut" style="margin: 0">Cada critério mostra o seu nível, o que a grade pede para o próximo, o que isso quer dizer e como ficaria no seu texto.</p></div>
 <div class="stack" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start"><article id="c1" class="crit">
 <div style="display: flex; align-items: flex-start; gap: 12px">
 <span class="num" style="width: 32px; height: 32px; font-size: 15px">1</span>
 <div style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><h3 class="h3">Tema e autoria</h3><span class="mut" style="font-size: 13.5px">Compreensão e desenvolvimento do tema, uso da coletânea e autoria · peso 3</span></div>
-<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums">9<span class="mut" style="font-size: 15px; font-weight: 500"> / 12</span></span><span class="lost">−3 pontos</span></div>
+<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums">12<span class="mut" style="font-size: 15px; font-weight: 500"> / 12</span></span><span class="full">Nota máxima</span></div>
 </div>
-<div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 3 de 4</span></div>
-<div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Abordagem adequada do tema, com uso produtivo da coletânea e repertório próprio, com fortes indícios de autoria.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 4</span><q>Abordagem aprimorada do tema, com apropriação consistente da coletânea e repertório próprio, com indícios robustos de autoria.</q></div></div>
-<p style="margin: 0; font-size: 15.5px; line-height: 1.6">A tese está clara desde a introdução e o texto 2 é usado como prova, não como resumo. O exemplo europeu das linhas 14 a 16 é seu, mas aparece só de passagem.</p>
-<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15.5px">Transforme o exemplo europeu das linhas 14 a 16 no argumento central de um parágrafo e ligue-o ao dado do texto 2.</span></div>
-<a href="#texto" style="font-size: 14.5px; font-weight: 600">Ver 2 apontamentos no texto →</a>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span><span style="font-size: 14px; font-weight: 600">Nível 4 de 4</span></div>
+<div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Abordagem aprimorada do tema, com apropriação consistente da coletânea e repertório próprio, com indícios robustos de autoria.</q></div></div>
+
+<p style="margin: 0; font-size: 15.5px; line-height: 1.6">O texto discute a relação entre informação e verdade com repertório próprio (Chauí, Husserl) e posição crítica clara do início ao fim.</p>
+
+
+<a href="#texto" data-fcrit-go="1" style="font-size: 14.5px; font-weight: 600">Ver 3 apontamentos no texto →</a>
 </article><article id="c2" class="crit">
 <div style="display: flex; align-items: flex-start; gap: 12px">
 <span class="num" style="width: 32px; height: 32px; font-size: 15px">2</span>
@@ -244,20 +338,24 @@ a{color:#2346C9}a:hover{color:#16308F}
 </div>
 <div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 3 de 4</span></div>
 <div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Atendimento adequado: tipo e gênero claramente identificáveis, mesmo que falte algum traço específico.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 4</span><q>Atendimento pleno, com domínio evidente da estrutura composicional do tipo e do gênero escolhidos.</q></div></div>
-<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Introdução com tese, desenvolvimento e conclusão estão presentes. Falta o traço que fecha a dissertação: a conclusão não responde à pergunta da linha 13.</p>
-<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15.5px">Reescreva a conclusão (linhas 17 a 20) dizendo quem deve regular os algoritmos e com que critério.</span></div>
-<a href="#texto" style="font-size: 14.5px; font-weight: 600">Ver 1 apontamento no texto →</a>
+<div class="plain"><b>Em palavras simples</b><span>Para o nível 4, o texto precisa manter a forma da dissertação do começo ao fim. Hoje ela só se quebra num ponto: o “eu” da linha 28.</span></div>
+<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Dissertação completa, com tese, desenvolvimento e conclusão. A primeira pessoa da linha 28 rompe o registro impessoal do restante.</p>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15.5px">Reescreva a linha 28 sem a primeira pessoa, mantendo o registro impessoal do resto do texto.</span></div>
+<button type="button" class="show-btn" data-show>Ver como ficaria no seu texto ▾</button><div hidden><div class="ex"><b>Como ficaria no seu texto</b><span class="src">Linha 28 · um exemplo, não a única forma</span><span class="q">Os hipócritas <s>que como eu falam</s> <span class="new">que falam</span> da verdade e da informação vivem no irreal…</span></div></div>
+<a href="#texto" data-fcrit-go="2" style="font-size: 14.5px; font-weight: 600">Ver 1 apontamento no texto →</a>
 </article><article id="c3" class="crit">
 <div style="display: flex; align-items: flex-start; gap: 12px">
-<span class="num bad" style="width: 32px; height: 32px; font-size: 15px">3</span>
+<span class="num" style="width: 32px; height: 32px; font-size: 15px">3</span>
 <div style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><h3 class="h3">Coesão e progressão</h3><span class="mut" style="font-size: 13.5px">Recursos linguísticos (coesão e coerência) e progressão textual · peso 3</span></div>
-<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums">6<span class="mut" style="font-size: 15px; font-weight: 500"> / 12</span></span><span class="lost">−6 pontos</span></div>
+<div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums">9<span class="mut" style="font-size: 15px; font-weight: 500"> / 12</span></span><span class="lost">−3 pontos</span></div>
 </div>
-<div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 2 de 4</span></div>
-<div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Articulação satisfatória, com poucos recursos de coesão e coerência e algumas falhas de composição.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 3</span><q>Boa articulação, com recursos adequados de coesão e coerência e raras falhas de composição.</q></div></div>
-<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Os conectivos funcionam, mas o parágrafo das linhas 10 a 12 repete o das linhas 6 a 8: o texto para de avançar no meio.</p>
-<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15.5px">Troque o parágrafo das linhas 10 a 12 por uma consequência nova, como o efeito das bolhas de opinião sobre o voto, apoiada na coletânea.</span></div>
-<a href="#texto" style="font-size: 14.5px; font-weight: 600">Ver 2 apontamentos no texto →</a>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 3 de 4</span></div>
+<div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Boa articulação, com recursos adequados de coesão e coerência e raras falhas de composição.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 4</span><q>Excelente articulação, com recursos refinados de coesão e coerência e composição consistente.</q></div></div>
+<div class="plain"><b>Em palavras simples</b><span>Para o nível 4, todo parágrafo precisa voltar à tese. O das linhas 24 a 29 critica a elite e o governo, mas não diz o que isso tem a ver com a informação.</span></div>
+<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Os conectivos (“Assim”, “Destarte”, “Portanto”) organizam bem o texto, mas o parágrafo das linhas 24 a 29 muda o foco para a elite e o governo sem ligar de volta ao problema da informação.</p>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9">O que corrigir</span><span style="font-size: 15.5px">Feche o parágrafo das linhas 24 a 29 com uma frase que ligue a hipocrisia da elite à forma como a informação chega à população.</span></div>
+<div class="ex"><b>Como ficaria no seu texto</b><span class="src">Fim do parágrafo, linha 29 · um exemplo, não a única forma</span><span class="q">…isolados em sua “torre de marfim” e são em si um erro<span class="new">, pois mantêm a população presa a uma informação parcial</span>.</span></div>
+<a href="#texto" data-fcrit-go="3" style="font-size: 14.5px; font-weight: 600">Ver 1 apontamento no texto →</a>
 </article><article id="c4" class="crit">
 <div style="display: flex; align-items: flex-start; gap: 12px">
 <span class="num" style="width: 32px; height: 32px; font-size: 15px">4</span>
@@ -266,16 +364,18 @@ a{color:#2346C9}a:hover{color:#16308F}
 </div>
 <div style="display: flex; align-items: center; gap: 12px"><span class="meter lg" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span style="font-size: 14px; font-weight: 600">Nível 3 de 4</span></div>
 <div class="ladder"><div class="rung now"><span class="lab">Seu nível</span><q>Rompe raramente as convenções da escrita, com bom domínio da norma-padrão e do vocabulário.</q></div><div class="rung next"><span class="lab">Para chegar ao nível 4</span><q>Rompe as convenções apenas de forma mínima e ocasional, com excelente domínio da norma-padrão e do vocabulário.</q></div></div>
-<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Três desvios em 20 linhas, cada um de uma regra diferente.</p>
-<div style="display: flex; flex-direction: column; gap: 2px; padding: 4px 16px 6px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9; padding-top: 10px">O que corrigir · desvios por regra</span><ul style="margin: 0; padding: 0; list-style: none; font-size: 15px"><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">2</span><span><strong>Vírgula entre sujeito e verbo</strong> · linha 4<br><span class="mut">Escreva</span> “Esse dado revela” <span class="mut">no lugar de</span> “Esse dado, revela”.</span></li><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">5</span><span><strong>Marca de oralidade</strong> · linha 12<br><span class="mut">Escreva</span> “nós / os usuários” <span class="mut">no lugar de</span> “a gente”.</span></li><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">6</span><span><strong>Crase antes de verbo</strong> · linha 13<br><span class="mut">Escreva</span> “A partir” <span class="mut">no lugar de</span> “À partir”.</span></li></ul></div>
-<a href="#texto" style="font-size: 14.5px; font-weight: 600">Ver 3 apontamentos no texto →</a>
+<div class="plain"><b>Em palavras simples</b><span>Para o nível 4, os desvios precisam ser quase nenhum. Seus 4 desvios vêm de só 3 regras: colocação pronominal, crase e acentuação. Dominar essas três resolve o critério.</span></div>
+<p style="margin: 0; font-size: 15.5px; line-height: 1.6">Vocabulário preciso e variado. Quatro desvios pontuais de colocação pronominal, crase e acentuação.</p>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 4px 16px 12px; background: #F1F5FF; border-radius: 12px"><span style="font-size: 13px; font-weight: 700; color: #2346C9; padding-top: 10px">O que corrigir · desvios por regra</span><ul style="margin: 0; padding: 0; list-style: none; font-size: 15px"><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">2</span><span style="flex: 1"><strong>Colocação pronominal</strong> · linha 9 · <span style="font-family: Caveat, cursive; font-size: 19px; color: #1C2F6E">“poderia-se”</span><span class="fx" hidden><br><span class="mut">Escreva</span> “poder-se-ia”.</span></span></li><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">3</span><span style="flex: 1"><strong>Crase obrigatória ausente</strong> · linha 11 · <span style="font-family: Caveat, cursive; font-size: 19px; color: #1C2F6E">“respeito a norma”</span><span class="fx" hidden><br><span class="mut">Escreva</span> “respeito à norma”.</span></span></li><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">5</span><span style="flex: 1"><strong>Acentuação gráfica</strong> · linha 15 · <span style="font-family: Caveat, cursive; font-size: 19px; color: #1C2F6E">“crêem”</span><span class="fx" hidden><br><span class="mut">Escreva</span> “creem”.</span></span></li><li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid #EEF1F6"><span class="pin" style="margin: 0; flex-shrink: 0">7</span><span style="flex: 1"><strong>Colocação pronominal</strong> · linha 19 · <span style="font-family: Caveat, cursive; font-size: 19px; color: #1C2F6E">“que criam-se”</span><span class="fx" hidden><br><span class="mut">Escreva</span> “que se criam”.</span></span></li></ul><button type="button" class="show-btn" data-showfx style="margin-top: 4px">Mostrar as formas corretas</button></div>
+
+<a href="#texto" data-fcrit-go="4" style="font-size: 14.5px; font-weight: 600">Ver 4 apontamentos no texto →</a>
 </article></div>
 </section>
 <section id="plano" class="wrap" style="padding-top: 48px">
 <div style="background: #0E1B33; color: #FFFFFF; border-radius: 22px; padding: 36px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 36px; align-items: start" class="stack">
 <div style="display: flex; flex-direction: column; gap: 16px">
 <div style="display: flex; flex-direction: column; gap: 6px"><span class="eyebrow" style="color: #9DB1EE">Plano de reescrita</span><h2 class="serif h2" style="color: #FFFFFF">Três passos, na ordem que mais aumenta a nota</h2></div>
-<label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 1</span><span class="gain">até +6 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Troque o parágrafo das linhas 10 a 12 por uma consequência nova, como o efeito das bolhas de opinião sobre o voto, apoiada na coletânea.</span></span></label><label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 2</span><span class="gain">até +3 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Transforme o exemplo europeu das linhas 14 a 16 no argumento central de um parágrafo e ligue-o ao dado do texto 2.</span></span></label><label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 3</span><span class="gain">até +2 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Reescreva a conclusão dizendo quem deve regular os algoritmos e com que critério.</span></span></label>
+<label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 1</span><span class="gain">até +3 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Feche o parágrafo das linhas 24 a 29 com uma frase que ligue a hipocrisia da elite à forma como a informação chega à população.</span></span></label><label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 2</span><span class="gain">até +2 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Reescreva a linha 28 sem a primeira pessoa, mantendo o registro impessoal do texto.</span></span></label><label class="todo"><input type="checkbox"><span style="display: flex; flex-direction: column; gap: 6px; flex: 1"><span style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; color: #9DB1EE">Passo 3</span><span class="gain">até +2 pontos</span></span><span style="font-size: 16.5px; line-height: 1.5">Corrija a colocação pronominal das linhas 9 e 19, a crase da linha 11 e o acento da linha 15.</span></span></label>
 </div>
 <div style="display: flex; flex-direction: column; gap: 12px; padding: 22px; background: rgba(255,255,255,.06); border-radius: 16px">
 <span style="font-weight: 600; font-size: 17px">Reescreva com o plano ao lado</span>
@@ -300,38 +400,107 @@ a{color:#2346C9}a:hover{color:#16308F}
 </div>
 <script>
 (function(){
-  var cards=[].slice.call(document.querySelectorAll('.ann[data-ann]'));
-  if(!cards.length) return;
-  var kind='all', crit=null, cur=null;
-  function visible(){return cards.filter(function(c){return !c.classList.contains('hide')});}
+  var list=document.querySelector('.anns'); if(!list) return;
+  var kind='all', crit=null, cur=null, order=document.querySelector('[data-order]')?'imp':'line', open=false;
+  function cards(){return [].slice.call(list.querySelectorAll('.ann[data-ann]'));}
+  function visible(){return cards().filter(function(c){return !c.classList.contains('hide')&&!c.classList.contains('folded')});}
   function select(n, from){
-    cur=n;
-    document.querySelectorAll('[data-ann]').forEach(function(el){el.classList.toggle('on', el.getAttribute('data-ann')===String(n));});
+    cur=String(n);
+    document.querySelectorAll('[data-ann]').forEach(function(el){el.classList.toggle('on', el.getAttribute('data-ann')===cur);});
     document.querySelectorAll('.tx.sel').forEach(function(el){el.classList.remove('sel')});
-    var span=document.querySelector('.hb[data-ann="'+n+'"],.hg[data-ann="'+n+'"]');
+    var span=document.querySelector('.hb[data-ann="'+cur+'"],.hg[data-ann="'+cur+'"]');
     if(span){var tx=span.closest('.tx'); if(tx) tx.classList.add('sel'); if(from==='card') span.scrollIntoView({block:'center',behavior:'smooth'});}
-    var card=document.querySelector('.ann[data-ann="'+n+'"]');
-    if(card && from!=='card') card.scrollIntoView({block:'nearest',behavior:'smooth'});
+    var card=list.querySelector('.ann[data-ann="'+cur+'"]');
+    if(card && card.classList.contains('folded')){open=true; apply();}
+    if(card && from==='text') card.scrollIntoView({block:'nearest',behavior:'smooth'});
     var v=visible(), i=v.indexOf(card), st=document.querySelector('.stepper strong'); if(st) st.textContent=i+1;
     var tot=document.querySelector('.stepper .mut'); if(tot) tot.textContent='de '+v.length+' apontamentos';
   }
+  function apply(){
+    cards().forEach(function(c){
+      var ok=(kind==='all'||c.getAttribute('data-kind')===kind)&&(!crit||c.getAttribute('data-crit')===crit);
+      c.classList.toggle('hide',!ok);
+      c.classList.toggle('folded', order==='imp' && c.getAttribute('data-kind')==='good' && !open && kind!=='good');
+      document.querySelectorAll('.pin[data-ann="'+c.getAttribute('data-ann')+'"],.hb[data-ann="'+c.getAttribute('data-ann')+'"],.hg[data-ann="'+c.getAttribute('data-ann')+'"]').forEach(function(el){el.classList.toggle('dim',!ok)});
+    });
+    list.querySelectorAll('.grp').forEach(function(g){
+      var has=cards().some(function(c){return c.getAttribute('data-grp')===g.getAttribute('data-grp')&&!c.classList.contains('hide')});
+      g.hidden=(order!=='imp')||!has;
+    });
+    var fb=list.querySelector('[data-fold]');
+    if(fb){var goods=cards().filter(function(c){return c.getAttribute('data-kind')==='good'&&!c.classList.contains('hide')}).length;
+      fb.hidden=(order!=='imp')||kind==='good'||!goods; fb.setAttribute('aria-expanded',open); fb.querySelector('.fl').textContent=open?'Esconder':'Mostrar';}
+  }
+  function reorder(){
+    var key=order==='imp'?'data-imp':'data-line';
+    [].slice.call(list.children).sort(function(a,b){return (+a.getAttribute(key)||0)-(+b.getAttribute(key)||0)}).forEach(function(e){list.appendChild(e)});
+  }
+  function reveal(card){
+    var inp=card.querySelector('.try-in'), ans=card.querySelector('.ans'); if(!ans) return;
+    var v=inp?inp.value.trim():'', youRow=ans.querySelector('.you-t');
+    if(youRow){youRow.textContent=v; youRow.parentNode.hidden=!v;}
+    var eq=ans.querySelector('.eq'), fix=ans.getAttribute('data-fix')||'';
+    function norm(s){return s.toLowerCase().replace(/[“”"'.,…]/g,'').replace(/\s+/g,' ').trim();}
+    if(eq) eq.hidden=!(v&&fix&&norm(v)===norm(fix));
+    ans.hidden=false; card.classList.add('done'); var row=card.querySelector('.try-row'); if(row) row.hidden=true;
+  }
   document.addEventListener('click',function(e){
+    var rv=e.target.closest('[data-reveal]'); if(rv){reveal(rv.closest('.ann')); return;}
+    var sh=e.target.closest('[data-show]'); if(sh){sh.nextElementSibling.hidden=false; sh.hidden=true; return;}
+    var sf=e.target.closest('[data-showfx]'); if(sf){var box=sf.parentNode, on=sf.getAttribute('aria-pressed')!=='true'; box.querySelectorAll('.fx').forEach(function(x){x.hidden=!on}); sf.setAttribute('aria-pressed',on); sf.textContent=on?'Esconder as formas corretas':'Mostrar as formas corretas'; return;}
+    if(e.target.closest('.try')){var c0=e.target.closest('.ann'); if(c0&&c0.getAttribute('data-ann')!==cur) select(c0.getAttribute('data-ann'),'try'); return;}
+    var fd=e.target.closest('[data-fold]'); if(fd){open=!open; apply(); return;}
+    var od=e.target.closest('[data-order]'); if(od){order=od.getAttribute('data-order'); document.querySelectorAll('[data-order]').forEach(function(b){var on=b===od; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on)}); reorder(); apply(); var v0=visible(); if(v0.length) select(v0[0].getAttribute('data-ann'),'filter'); return;}
+    var go=e.target.closest('[data-fcrit-go]'); if(go){var b=document.querySelector('[data-fcrit="'+go.getAttribute('data-fcrit-go')+'"]'); if(b && !b.classList.contains('on')) b.click(); return;}
     var t=e.target.closest('.pin[data-ann],.hb[data-ann],.hg[data-ann],.ann[data-ann]');
     if(t && !t.classList.contains('dim')){select(t.getAttribute('data-ann'), t.classList.contains('ann')?'card':'text');return;}
     var s=e.target.closest('[data-step]');
-    if(s){var v=visible(); if(!v.length) return; var i=v.findIndex(function(c){return c.getAttribute('data-ann')===String(cur)}); i=(i+parseInt(s.getAttribute('data-step'),10)+v.length)%v.length; select(v[i].getAttribute('data-ann'),'card'); return;}
+    if(s){var v=visible(); if(!v.length) return; var i=v.findIndex(function(c){return c.getAttribute('data-ann')===cur}); i=(i+parseInt(s.getAttribute('data-step'),10)+v.length)%v.length; select(v[i].getAttribute('data-ann'),'card'); return;}
     var fk=e.target.closest('[data-fkind]'), fc=e.target.closest('[data-fcrit]');
-    if(fk){kind=fk.getAttribute('data-fkind'); document.querySelectorAll('[data-fkind]').forEach(function(b){b.classList.toggle('on',b===fk)});}
-    if(fc){var c=fc.getAttribute('data-fcrit'); crit=(crit===c)?null:c; document.querySelectorAll('[data-fcrit]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-fcrit')===crit)});}
-    if(fk||fc){
-      cards.forEach(function(c){var ok=(kind==='all'||c.getAttribute('data-kind')===kind)&&(!crit||c.getAttribute('data-crit')===crit); c.classList.toggle('hide',!ok);
-        document.querySelectorAll('.pin[data-ann="'+c.getAttribute('data-ann')+'"],.hb[data-ann="'+c.getAttribute('data-ann')+'"],.hg[data-ann="'+c.getAttribute('data-ann')+'"]').forEach(function(el){el.classList.toggle('dim',!ok)});});
-      var v=visible(); if(v.length) select(v[0].getAttribute('data-ann'),'filter');
-    }
+    if(fk){kind=fk.getAttribute('data-fkind'); document.querySelectorAll('[data-fkind]').forEach(function(b){b.classList.toggle('on',b===fk); b.setAttribute('aria-pressed',b===fk)});}
+    if(fc){var c=fc.getAttribute('data-fcrit'); crit=(crit===c)?null:c; document.querySelectorAll('[data-fcrit]').forEach(function(b){var on=b.getAttribute('data-fcrit')===crit; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on)});}
+    if(fk||fc){apply(); var v2=visible(); if(v2.length) select(v2[0].getAttribute('data-ann'),'filter');}
   });
-  document.addEventListener('keydown',function(e){if(e.target.closest('input,textarea'))return; if(e.key==='j'||e.key==='ArrowDown'&&e.altKey){document.querySelector('[data-step="1"]').click();} if(e.key==='k'){document.querySelector('[data-step="-1"]').click();}});
+  document.addEventListener('keydown',function(e){
+    var inp=e.target.closest('.try-in'); if(inp && e.key==='Enter'){e.preventDefault(); reveal(inp.closest('.ann')); return;}
+    if(e.target.closest('input,textarea'))return;
+    if(e.key==='j'){document.querySelector('[data-step="1"]').click();} if(e.key==='k'){document.querySelector('[data-step="-1"]').click();}
+  });
   document.querySelectorAll('[role="radio"]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[role="radio"]').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)}); var s=document.querySelector('#avaliar .btn.ghost'); if(s){s.disabled=false;s.className='btn pri';s.style.alignSelf='flex-start'}})});
-  var first=document.querySelector('.ann.on')||cards[0]; if(first) select(first.getAttribute('data-ann'),'init');
+  apply();
+  var first=list.querySelector('.ann.on')||visible()[0]; if(first) select(first.getAttribute('data-ann'),'init');
+})();
+(function(){
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-view]'); if(!b) return;
+    var v=b.getAttribute('data-view');
+    document.querySelectorAll('[data-view]').forEach(function(x){var on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-selected',on)});
+    document.querySelectorAll('[data-view-panel]').forEach(function(p){p.hidden=p.getAttribute('data-view-panel')!==v});
+  });
+  // filtros também no modo trechos
+  document.addEventListener('click',function(e){
+    var fk=e.target.closest('[data-fkind]'), fc=e.target.closest('[data-fcrit]'); if(!fk&&!fc) return;
+    setTimeout(function(){
+      var kind=(document.querySelector('[data-fkind].on')||{}).getAttribute? document.querySelector('[data-fkind].on').getAttribute('data-fkind'):'all';
+      var c=document.querySelector('[data-fcrit].on'); var crit=c?c.getAttribute('data-fcrit'):null;
+      document.querySelectorAll('.snip').forEach(function(s){var ok=(kind==='all'||s.getAttribute('data-kind')===kind)&&(!crit||s.getAttribute('data-crit')===crit); s.style.display=ok?'':'none';});
+    },0);
+  });
+})();
+// Ajuste da letra: a linha mais longa da folha cabe inteira na largura disponível (mínimo 16px; abaixo disso, rolagem lateral)
+(function(){
+  function fit(){
+    document.querySelectorAll('[data-fit]').forEach(function(f){
+      if(window.matchMedia('(max-width:620px)').matches){f.style.removeProperty('--fs');return;}
+      var lines=f.querySelectorAll('.tx'); if(!lines.length) return;
+      f.style.setProperty('--fs','22px');
+      var avail=f.clientWidth-44-40, widest=0;
+      lines.forEach(function(l){widest=Math.max(widest,l.scrollWidth-38);});
+      if(widest>avail){var fs=Math.max(16,Math.floor(22*avail/widest));f.style.setProperty('--fs',fs+'px');}
+    });
+  }
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fit); else fit();
+  window.addEventListener('resize',fit);
 })();
 </script>
 </body>
