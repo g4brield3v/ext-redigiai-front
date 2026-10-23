@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "e2e": "playwright test",
-    "build:e2e": "tsc --noEmit && vite build --outDir dist-e2e",
+    "build:e2e": "tsc --noEmit && vite build --mode e2e --outDir dist-e2e",
     "preview:e2e": "vite preview --outDir dist-e2e --port 4173 --strictPort",
     "sync:api": "node scripts/sync-api.mjs"
   },

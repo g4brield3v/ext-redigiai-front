@@ -29,6 +29,9 @@ const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefine
 
 // O SDK do Clerk só é carregado quando a chave está configurada.
 const ClerkAuthProvider = lazy(() => import('../features/auth/ClerkAuthProvider'));
+// Só no build dos testes de navegador (`--mode e2e`): a sessão é injetada pelo próprio teste. O build de produção
+// nem inclui este código, e o vite.config.ts recusa o build que o contiver.
+const E2eAuthProvider = import.meta.env.MODE === 'e2e' ? lazy(() => import('../features/auth/E2eAuthProvider')) : null;
 const SsoCallbackPage = lazy(() => import('../features/auth/ClerkCallbacks').then((m) => ({ default: m.SsoCallbackPage })));
 // A correção de exemplo traz os próprios dados e só é carregada por quem abre /exemplo.
 const ExampleCorrectionPage = lazy(() => import('../features/correcao/ExampleCorrectionPage'));
@@ -70,6 +73,13 @@ function ScrollManager() {
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
+  if (E2eAuthProvider) {
+    return (
+      <Suspense fallback={null}>
+        <E2eAuthProvider>{children}</E2eAuthProvider>
+      </Suspense>
+    );
+  }
   // Sem a chave do Clerk, só a página inicial funciona e o login fica indisponível.
   return clerkKey ? (
     <Suspense fallback={null}>

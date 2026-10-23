@@ -12,7 +12,7 @@ import { AnnotationCard, AnnotationPanel, AnnotationStepper } from './Annotation
 import { AnnotationSheet } from './AnnotationSheet';
 import styles from './CorrectionPage.module.css';
 import { CriterionCard } from './CriterionCard';
-import { EssayLines } from './EssayLines';
+import { EssayFlow } from './EssayFlow';
 import { ResultSummary } from './ResultSummary';
 import { RewritePlan } from './RewritePlan';
 import { ZeroResult } from './ZeroResult';
@@ -358,7 +358,7 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
                 </span>
               )}
             </div>
-            <EssayLines lines={correction.lines} annotations={visible} selectedId={selectedId} onSelect={(id) => select(id, 'text')} />
+            <EssayFlow lines={correction.lines} annotations={visible} selectedId={selectedId} onSelect={(id) => select(id, 'text')} />
           </div>
           <aside className={styles.panel} aria-label="Apontamentos">
             <AnnotationPanel

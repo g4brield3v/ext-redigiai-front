@@ -482,40 +482,77 @@
   gap: 6px;
 }
 
-.lines {
+/* A redação em texto corrido: um parágrafo por fileira, com a margem do parágrafo à esquerda, sobre a pauta. */
+.flow {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-columns: 52px minmax(0, 1fr);
 }
 
-.lineNumber {
-  font-size: 11.5px;
-  color: #9aa6bc;
-  text-align: right;
+.flowMargin {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   padding-right: 10px;
-  line-height: 40px;
   border-right: 1px solid var(--margin-red);
-  font-variant-numeric: tabular-nums;
   background-image: repeating-linear-gradient(to bottom, transparent 0 39px, var(--line) 39px 40px);
 }
 
-/* O texto quebra linha, sempre sobre a pauta: nada do que o aluno escreveu é cortado. */
-.lineText {
+.flowParagraph {
+  height: 40px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 40px;
+  color: #56627a;
+}
+
+.flowRange {
+  height: 40px;
+  font-size: 11px;
+  line-height: 40px;
+  color: #7a869c;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Nada do que o aluno escreveu é cortado: o parágrafo quebra linha onde couber, sempre sobre a pauta de 40 px. */
+.flowText {
+  margin: 0;
+  padding: 0 22px 0 16px;
   font-family: var(--font-hand);
   font-size: 23px;
-  color: var(--ink);
   line-height: 40px;
-  padding: 0 20px 0 14px;
-  background-image: repeating-linear-gradient(to bottom, transparent 0 39px, var(--line) 39px 40px);
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.paragraph {
+  color: var(--ink);
   text-indent: 30px;
+  /* Justificado, como no Word: a última linha do parágrafo fica à esquerda. */
+  text-align: justify;
+  overflow-wrap: anywhere;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 39px, var(--line) 39px 40px);
 }
 
-.lineSelected {
-  background-color: #f5f8ff;
+/* O número da linha da folha, no ponto em que ela começa. O line-height 0 não deixa o número mexer na pauta. */
+.flowLineNumber {
+  position: relative;
+  top: -9px;
+  margin: 0 3px 0 1px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 0;
+  color: #9aa6bc;
+  font-variant-numeric: tabular-nums;
+  text-indent: 0;
+}
+
+.flowLineSelected {
+  background-color: #eef3ff;
+  border-radius: 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.flowLineNumberSelected {
+  color: var(--blue);
+  font-weight: 700;
 }
 
 .issue {
@@ -1266,16 +1303,17 @@
 }
 
 @media (max-width: 620px) {
-  .lines {
-    grid-template-columns: 32px minmax(0, 1fr);
+  .flow {
+    grid-template-columns: 40px minmax(0, 1fr);
   }
 
-  .lineText {
+  .flowMargin {
+    padding-right: 6px;
+  }
+
+  .flowText {
     font-size: 21px;
     padding: 0 12px 0 10px;
-  }
-
-  .paragraph {
     text-indent: 20px;
   }
 

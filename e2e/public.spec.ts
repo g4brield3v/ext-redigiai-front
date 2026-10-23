@@ -54,7 +54,7 @@ test.describe('Início', () => {
     await page.getByRole('link', { name: 'Abrir uma correção completa →' }).click();
 
     await expect(page).toHaveURL(`/entrar?next=${encodeURIComponent('/exemplo')}`);
-    await expect(page.getByRole('dialog', { name: 'Entre para enviar sua redação' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Acesse sua conta' })).toBeVisible();
   });
 
   // Tela interna: desde 20/10/2026 exige login; volta com a sessão de teste do Clerk (etapa 5d).
@@ -220,7 +220,7 @@ test.describe('rotas logadas', () => {
       await page.goto(path);
 
       await expect(page).toHaveURL(`/entrar?next=${encodeURIComponent(path)}`);
-      await expect(page.getByRole('dialog', { name: 'Entre para enviar sua redação' })).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Acesse sua conta' })).toBeVisible();
     });
   }
 

@@ -1,15 +1,15 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { exampleLines } from '../src/features/correcao/example';
 import { horizontalOverflow, interceptCatalog } from './catalog';
+import { signIn } from './session';
 
-// Tela da correção (docs/06-tela-correcao.md) sobre a correção de exemplo, que é pública.
-// Em telas largas os apontamentos ficam no painel ao lado; nas estreitas, abrem numa folha inferior.
-
-// Tela interna: desde 20/10/2026 exige login; volta com a sessão de teste do Clerk (etapa 5d).
-test.skip(true, 'A correção de exemplo exige login desde 20/10/2026.');
+// Tela da correção (docs/06-tela-correcao.md) sobre a correção de exemplo, que exige login: a sessão é a de teste,
+// injetada por signIn. Em telas largas os apontamentos ficam no painel ao lado; nas estreitas, numa folha inferior.
 
 test.beforeEach(async ({ page }) => {
   await interceptCatalog(page);
+  await signIn(page);
   await page.goto('/exemplo');
 });
 
@@ -104,6 +104,43 @@ test('no celular, tocar num número abre o apontamento numa folha inferior', asy
   await sheet(page).getByRole('button', { name: 'Fechar' }).click();
   await expect(sheet(page)).toBeHidden();
   expect(await horizontalOverflow(page)).toBe(0);
+});
+
+test('cada linha da folha está inteira no texto corrido e a página não rola para os lados', async ({ page }) => {
+  const lines = page.locator('[data-line]');
+  await expect(lines).toHaveCount(exampleLines.length);
+
+  // O texto de cada linha, sem os números dos apontamentos e da linha: tem que ser exatamente o que o aluno escreveu.
+  const texts = await lines.evaluateAll((elements) =>
+    elements.map((element) => {
+      const copy = element.cloneNode(true) as Element;
+      copy.querySelectorAll('button, [aria-hidden="true"]').forEach((extra) => extra.remove());
+      return copy.textContent;
+    }),
+  );
+  expect(texts).toEqual(exampleLines.map((line) => line.text));
+  expect(await horizontalOverflow(page)).toBe(0);
+});
+
+test('clicar no número de um apontamento seleciona o cartão', async ({ page }) => {
+  await pin(page, 6).click();
+
+  if (wide(page)) {
+    await expect(panel(page).locator('[data-annotation-card="6"]')).toHaveAttribute('aria-pressed', 'true');
+  } else {
+    await expect(sheet(page)).toContainText('Regra: Crase antes de verbo');
+  }
+  await expect(pin(page, 6)).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('o número da linha não quebra a pauta (cada parágrafo tem altura múltipla de 40 px)', async ({ page }) => {
+  const paragraphs = page.locator('#texto p:has([data-line])');
+  await expect(paragraphs).toHaveCount(5);
+
+  const heights = await paragraphs.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().height));
+  for (const height of heights) {
+    expect(height % 40).toBeCloseTo(0, 1);
+  }
 });
 
 test('os passos marcados no plano continuam marcados ao voltar', async ({ page }) => {

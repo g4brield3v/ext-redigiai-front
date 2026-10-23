@@ -15,7 +15,7 @@ O aluno precisa sair da tela sabendo **uma coisa a corrigir primeiro**, **onde**
 
 | Problema visto | Correção |
 |---|---|
-| Linhas da redação cortadas no fim (`white-space: nowrap; overflow: hidden`) | O texto quebra linha. Cada linha da folha pode ocupar mais de uma linha visual, sempre sobre a pauta (fundo com `repeating-linear-gradient` de 40 px). **Nenhum texto do aluno pode ser cortado.** |
+| Linhas da redação cortadas no fim (`white-space: nowrap; overflow: hidden`) | Texto corrido em parágrafos, com o número de cada linha da folha no ponto em que ela começa, sempre sobre a pauta (fundo com `repeating-linear-gradient` de 40 px). **Nenhum texto do aluno pode ser cortado.** |
 | Comentários da margem cortados ("A tese trata do imaginár…") | A margem sai da folha. Os comentários viram cartões no painel lateral, ligados ao texto por números. |
 | Aspas aparecendo como `\"A vida é bela\"` | Bug de dupla serialização JSON no backend (o texto da IA foi gravado já com escape). Corrigir na origem e adicionar teste: nenhum campo de texto da correção pode conter `\"`. |
 | Três cartões do mesmo peso no topo, sem dizer por onde começar | Bloco de resultado com nota, mapa de pontos por critério e **um único "Comece por aqui"**. |
@@ -31,7 +31,7 @@ O aluno precisa sair da tela sabendo **uma coisa a corrigir primeiro**, **onde**
    - **"Comece por aqui":** o `main_issue` da correção em 18 px; critério e "vale até +X pontos"; botão "Ver no texto", que rola até o texto e seleciona o primeiro apontamento desse critério. Abaixo, separado por linha: "✓ Mantenha:" + `strengths`.
 3. **Navegação de seções**, fixa no topo ao rolar: "Texto comentado (N)", "Critérios", "Plano de reescrita", "Avaliar a correção". A seção visível fica destacada.
 4. **Texto comentado** (duas colunas: folha + painel de 400 px fixo ao rolar):
-   - **Folha:** número da linha à esquerda (coluna de 44 px, borda rosa da margem); texto em Caveat 23 px, `line-height` 40 px, sobre a pauta; recuo de parágrafo com `text-indent` (não `padding`).
+   - **Folha em texto corrido** (decisão de 22/10/2026): a redação em parágrafos. Uma linha com `indent` abre um parágrafo novo (a primeira linha sempre abre o primeiro); as linhas se juntam com um espaço, e uma linha terminada em "-" se junta à seguinte sem espaço, com o hífen visível. O texto do aluno nunca muda. Grid `52px minmax(0,1fr)`: cada parágrafo é uma fileira, com a margem à esquerda e um `<p>` à direita. Na margem (`aria-hidden`), "§N" (12 px, peso 700) e, abaixo, o intervalo de linhas ("1–7", 11 px, números tabulares), alinhados à direita, com a borda rosa da margem; cada item tem 40 px. No texto (Caveat 23 px, `line-height` 40 px, `text-indent` 30 px, justificado como no Word, com a última linha do parágrafo à esquerda), cada linha da folha é um `<span data-line title="Linha N">` que começa pelo número da linha, dentro do texto, no ponto em que ela começa (Schibsted Grotesk 11 px, peso 600, #9AA6BC, `line-height: 0` para não mexer na pauta, `aria-hidden`). As linhas do apontamento selecionado ganham fundo #EEF3FF (`box-decoration-break: clone`), e o número delas fica azul. Até 620 px: grid `40px minmax(0,1fr)`, texto de 21 px com `text-indent` de 20 px.
    - **Trechos marcados:** "tirou pontos" = fundo vermelho claro + sublinhado ondulado vermelho; "funcionou" = fundo verde claro + traço verde embaixo. Um trecho pode atravessar várias linhas.
    - **Número (pino):** círculo de 20 px com o número do apontamento logo depois do trecho, vermelho ou verde. O trecho e o pino são clicáveis.
    - **Painel de apontamentos:**
@@ -88,6 +88,6 @@ O front não calcula pontos, perdas nem ganhos: só exibe.
 
 ## 8. Testes
 
-- Unitários dos componentes: `ResultSummary`, `ScoreMap`, `EssayLines` (trecho atravessando linhas, recuo de parágrafo, linha longa que quebra), `AnnotationPanel` (filtros, Anterior/Próximo circular), `CriterionCard` (com e sem próximo nível, critério 4), `RewritePlan`, `ZeroResult`.
+- Unitários dos componentes: `ResultSummary`, `ScoreMap`, `EssayFlow` (parágrafos pelo recuo, junção das linhas e do hífen, trecho atravessando linhas, números fora do nome acessível), `AnnotationPanel` (filtros, Anterior/Próximo circular), `CriterionCard` (com e sem próximo nível, critério 4), `RewritePlan`, `ZeroResult`.
 - Playwright: clicar num pino seleciona o cartão e vice-versa; filtro "Tiraram pontos" + critério 4 mostra só os desvios de escrita; nota zero não mostra critérios; nenhuma linha da redação cortada (comparar `scrollWidth` e `clientWidth` de cada linha).
 - Comparação visual com os PNG em 1440 px e 390 px.

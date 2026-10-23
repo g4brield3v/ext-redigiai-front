@@ -28,7 +28,7 @@ src/api/         schema.d.ts (gerado, não editar à mão) e provisional-types.t
 src/components/  componentes do design system
 src/features/    uma pasta por área (home, propostas, proposta, admin, envio, revisao, correcao, painel, perfil, checkout, auth)
 src/routes/      rotas e provedores
-e2e/             Playwright (telas públicas)
+e2e/             Playwright (telas públicas e a correção, com a sessão de teste de e2e/session.ts)
 docs/            especificação do front e telas aprovadas
 Caddyfile        servidor de produção: rotas do React e cabeçalhos de segurança
 Dockerfile
@@ -43,7 +43,8 @@ npm ci && npm run dev        # http://localhost:5173 (precisa da API em VITE_API
 npm run sync:api             # copia o openapi.json do repositório do back-end (pasta ao lado)
 npm run gen:api              # regenera src/api/schema.d.ts a partir do openapi.json
 npm test && npm run typecheck && npm run lint
-npx playwright test          # telas públicas em 1440 px e 360 px, sobre um build próprio (dist-e2e)
+npx playwright test          # em 1440 px e 360 px, sobre um build próprio (dist-e2e, --mode e2e, com sessão de teste)
+CAPTURE_DIR=pasta npx playwright test e2e/captures.spec.ts   # capturas da redação na correção (texto corrido)
 npm run build                # build de produção em dist/
 ```
 

@@ -1,8 +1,9 @@
 import { defineConfig } from '@playwright/test';
 
 // As telas precisam funcionar de 360 px a 1440 px (docs/02-frontend.md, princípio 9).
-// Os testes cobrem as telas públicas sobre um build próprio (dist-e2e); as respostas da API são
-// interceptadas dentro de cada teste. As telas logadas são testadas com o Vitest (src/**/*.test.tsx).
+// Os testes rodam sobre um build próprio (dist-e2e, --mode e2e); as respostas da API são interceptadas dentro de
+// cada teste. As telas logadas usam a sessão de teste que o próprio teste injeta (e2e/session.ts), que só existe
+// nesse build. As demais telas logadas são testadas com o Vitest (src/**/*.test.tsx).
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
