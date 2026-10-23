@@ -593,6 +593,8 @@
   line-height: 40px;
   color: var(--ink);
   text-indent: 30px;
+  /* Justificado, como no Word: a última linha do parágrafo fica à esquerda. */
+  text-align: justify;
   overflow-wrap: anywhere;
   background-image: repeating-linear-gradient(to bottom, transparent 0 39px, var(--line) 39px 40px);
 }
