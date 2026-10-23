@@ -6,7 +6,7 @@ import { renderApp } from '../../test/helpers';
 import { AnnotationPanel } from './AnnotationPanel';
 import { CorrectionView } from './CorrectionPage';
 import { CriterionCard } from './CriterionCard';
-import { EssayLines } from './EssayLines';
+import { EssaySheet } from './EssaySheet';
 import { ResultSummary, ScoreMap } from './ResultSummary';
 import { RewritePlan } from './RewritePlan';
 import { ZeroResult } from './ZeroResult';
@@ -116,10 +116,10 @@ describe('ScoreMap', () => {
   });
 });
 
-describe('EssayLines', () => {
+describe('EssaySheet (modo "Como na folha")', () => {
   it('marca o trecho em todas as linhas que ele atravessa e põe um botão numerado no fim', async () => {
     const onSelect = vi.fn();
-    const { container } = render(<EssayLines lines={correction.lines} annotations={correction.annotations} selectedId={4} onSelect={onSelect} />);
+    const { container } = render(<EssaySheet lines={correction.lines} annotations={correction.annotations} selectedId={4} onSelect={onSelect} />);
 
     const spans = container.querySelectorAll('[data-annotation="4"]');
     expect([...spans].map((span) => span.closest('[data-line]')?.getAttribute('data-line'))).toEqual(['10', '11']);
@@ -137,7 +137,7 @@ describe('EssayLines', () => {
   it('mantém o recuo de parágrafo e o texto inteiro de uma linha longa', () => {
     const long = 'palavra '.repeat(40).trim();
     const { container } = render(
-      <EssayLines lines={[{ number: 1, text: long, indent: true }, { number: 2, text: 'fim', indent: false }]} annotations={[]} selectedId={null} onSelect={vi.fn()} />,
+      <EssaySheet lines={[{ number: 1, text: long, indent: true }, { number: 2, text: 'fim', indent: false }]} annotations={[]} selectedId={null} onSelect={vi.fn()} />,
     );
 
     const first = container.querySelector('[data-line="1"]')!;
@@ -148,7 +148,7 @@ describe('EssayLines', () => {
 
   it('apontamento escondido pelo filtro vira texto comum', () => {
     const visible = visibleAnnotations(correction.annotations, { kind: 'good', criterion: null });
-    const { container } = render(<EssayLines lines={correction.lines} annotations={visible} selectedId={null} onSelect={vi.fn()} />);
+    const { container } = render(<EssaySheet lines={correction.lines} annotations={visible} selectedId={null} onSelect={vi.fn()} />);
 
     expect(container.querySelector('[data-annotation="4"]')).toBeNull();
     expect(screen.queryByRole('button', { name: /^Apontamento 4:/ })).toBeNull();

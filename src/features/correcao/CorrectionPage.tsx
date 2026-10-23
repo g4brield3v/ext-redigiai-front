@@ -12,7 +12,9 @@ import { AnnotationCard, AnnotationPanel, AnnotationStepper } from './Annotation
 import { AnnotationSheet } from './AnnotationSheet';
 import styles from './CorrectionPage.module.css';
 import { CriterionCard } from './CriterionCard';
-import { EssayLines } from './EssayLines';
+import { EssayFlow } from './EssayFlow';
+import { EssaySheet } from './EssaySheet';
+import { EssayViewToggle, useEssayView } from './EssayViewToggle';
 import { ResultSummary } from './ResultSummary';
 import { RewritePlan } from './RewritePlan';
 import { ZeroResult } from './ZeroResult';
@@ -212,6 +214,9 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
   const [filters, setFilters] = useState<Filters>(noFilters);
   const [sheet, setSheet] = useState<'one' | 'list' | null>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
+  // Trocar de modo não mexe na seleção nem nos filtros: os dois modos leem o mesmo estado.
+  const [essayView, setEssayView] = useEssayView();
+  const Essay = essayView === 'flow' ? EssayFlow : EssaySheet;
 
   const visible = visibleAnnotations(correction.annotations, filters);
   const selected = visible.find((annotation) => annotation.id === selectedId);
@@ -341,6 +346,7 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
           <div className={styles.paper}>
             <div className={styles.paperHead}>
               <span className={styles.paperTitle}>Sua redação</span>
+              <EssayViewToggle view={essayView} onChange={setEssayView} />
               {zero ? (
                 <span className={cx('muted', styles.legend)}>
                   Mostrando {correction.lines.length} de {correction.sheetLines} linhas
@@ -358,7 +364,7 @@ export function CorrectionView({ correction, back, example = false }: ViewProps)
                 </span>
               )}
             </div>
-            <EssayLines lines={correction.lines} annotations={visible} selectedId={selectedId} onSelect={(id) => select(id, 'text')} />
+            <Essay lines={correction.lines} annotations={visible} selectedId={selectedId} onSelect={(id) => select(id, 'text')} />
           </div>
           <aside className={styles.panel} aria-label="Apontamentos">
             <AnnotationPanel

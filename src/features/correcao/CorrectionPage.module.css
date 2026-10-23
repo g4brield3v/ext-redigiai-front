@@ -518,6 +518,111 @@
   background-color: #f5f8ff;
 }
 
+/* Seletor do modo da redação, no cabeçalho do quadro "Sua redação". */
+.viewToggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: #eef1f6;
+  border-radius: 999px;
+}
+
+.viewToggle button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.viewToggle button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--navy);
+  box-shadow: 0 0 0 1px var(--border-input);
+}
+
+.viewToggle button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* Modo "Texto corrido": um parágrafo por fileira, com a margem do parágrafo à esquerda, sobre a mesma pauta. */
+.flow {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+}
+
+.flowMargin {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-right: 10px;
+  border-right: 1px solid var(--margin-red);
+  background-image: repeating-linear-gradient(to bottom, transparent 0 39px, var(--line) 39px 40px);
+}
+
+.flowParagraph {
+  height: 40px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 40px;
+  color: #56627a;
+}
+
+.flowRange {
+  height: 40px;
+  font-size: 11px;
+  line-height: 40px;
+  color: #7a869c;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Nada do que o aluno escreveu é cortado: o parágrafo quebra linha onde couber, sempre sobre a pauta de 40 px. */
+.flowText {
+  margin: 0;
+  padding: 0 22px 0 16px;
+  font-family: var(--font-hand);
+  font-size: 23px;
+  line-height: 40px;
+  color: var(--ink);
+  text-indent: 30px;
+  overflow-wrap: anywhere;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 39px, var(--line) 39px 40px);
+}
+
+/* O número da linha da folha, no ponto em que ela começa. O line-height 0 não deixa o número mexer na pauta. */
+.flowLineNumber {
+  position: relative;
+  top: -9px;
+  margin: 0 3px 0 1px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 0;
+  color: #9aa6bc;
+  font-variant-numeric: tabular-nums;
+  text-indent: 0;
+}
+
+.flowLineSelected {
+  background-color: #eef3ff;
+  border-radius: 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.flowLineNumberSelected {
+  color: var(--blue);
+  font-weight: 700;
+}
+
 .issue {
   background: rgba(200, 55, 45, 0.07);
   text-decoration: underline wavy var(--correction);
@@ -1276,6 +1381,40 @@
   }
 
   .paragraph {
+    text-indent: 20px;
+  }
+
+  /* A legenda desce para uma linha própria; o seletor fica à direita do título. */
+  .paperHead {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .paperHead .viewToggle {
+    margin-left: auto;
+  }
+
+  .paperHead .legend {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .viewToggle button {
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .flow {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .flowMargin {
+    padding-right: 6px;
+  }
+
+  .flowText {
+    font-size: 21px;
+    padding: 0 12px 0 10px;
     text-indent: 20px;
   }
 
