@@ -44,7 +44,7 @@ npm run sync:api             # copia o openapi.json do repositório do back-end 
 npm run gen:api              # regenera src/api/schema.d.ts a partir do openapi.json
 npm test && npm run typecheck && npm run lint
 npx playwright test          # em 1440 px e 360 px, sobre um build próprio (dist-e2e, --mode e2e, com sessão de teste)
-CAPTURE_DIR=pasta npx playwright test e2e/captures.spec.ts   # capturas da redação na correção, nos dois modos
+CAPTURE_DIR=pasta npx playwright test e2e/captures.spec.ts   # capturas da redação na correção (texto corrido)
 npm run build                # build de produção em dist/
 ```
 

@@ -1,16 +1,24 @@
 import { Fragment } from 'react';
+import type { Annotation, TranscriptionLine } from '../../api/provisional-types';
 import styles from './CorrectionPage.module.css';
-import type { EssayViewProps } from './EssaySheet';
 import { LinePieces, inSelection } from './LinePieces';
 import { essayParagraphs, lineJoiner } from './essayParagraphs';
 import { cx } from './parts';
 
+type EssayFlowProps = {
+  lines: TranscriptionLine[];
+  /** Só os apontamentos visíveis pelos filtros; os demais aparecem como texto comum. */
+  annotations: Annotation[];
+  selectedId: number | null;
+  onSelect: (id: number) => void;
+};
+
 /**
- * Modo "Texto corrido": a redação em parágrafos, como o aluno a escreveu, sem a quebra da folha. O número de cada
+ * A redação em texto corrido: em parágrafos, como o aluno a escreveu, sem a quebra da folha. O número de cada
  * linha da folha aparece dentro do texto, no ponto em que ela começa (como o número de um versículo), e a margem
  * mostra o parágrafo e o intervalo de linhas. O texto do aluno não muda: as linhas só se juntam.
  */
-export function EssayFlow({ lines, annotations, selectedId, onSelect }: EssayViewProps) {
+export function EssayFlow({ lines, annotations, selectedId, onSelect }: EssayFlowProps) {
   const selected = annotations.find((annotation) => annotation.id === selectedId);
 
   return (

@@ -1,9 +1,7 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { TranscriptionLine } from '../../api/provisional-types';
-import { renderApp } from '../../test/helpers';
-import { CorrectionView } from './CorrectionPage';
 import { EssayFlow } from './EssayFlow';
 import { visibleAnnotations } from './annotations';
 import { exampleCorrection as correction } from './example';
@@ -22,7 +20,7 @@ function twoParagraphs(): TranscriptionLine[] {
   return Array.from({ length: 14 }, (_, index) => ({ number: index + 1, text: `linha ${index + 1}`, indent: index === 0 || index === 7 }));
 }
 
-describe('EssayFlow (modo "Texto corrido")', () => {
+describe('EssayFlow (redação em texto corrido)', () => {
   it('monta os parágrafos pelo recuo, com o parágrafo e o intervalo de linhas na margem', () => {
     const { container } = render(<EssayFlow lines={twoParagraphs()} annotations={[]} selectedId={null} onSelect={vi.fn()} />);
 
@@ -106,60 +104,5 @@ describe('EssayFlow (modo "Texto corrido")', () => {
     numbers.forEach((number) => expect(number).toHaveAttribute('aria-hidden', 'true'));
     expect(pin(4)).toHaveAccessibleName('Apontamento 4: tirou pontos, critério 3');
     expect(pin(1)).toHaveAccessibleName('Apontamento 1: funcionou, critério 1');
-  });
-});
-
-describe('Seletor do modo da redação', () => {
-  const back = { to: '/painel', label: 'Minhas correções' };
-  const toggle = () => within(screen.getByRole('group', { name: 'Como mostrar a redação' }));
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-    localStorage.clear();
-  });
-
-  it('começa no texto corrido, alterna os modos sem perder a seleção nem o filtro e guarda a escolha', async () => {
-    renderApp(<CorrectionView correction={correction} back={back} />);
-
-    expect(toggle().getByRole('button', { name: 'Texto corrido' })).toHaveAttribute('aria-pressed', 'true');
-    expect(document.querySelectorAll('.flowText')).not.toHaveLength(0);
-
-    await userEvent.click(pin(6));
-    await userEvent.click(screen.getByRole('button', { name: /Tiraram pontos/ }));
-    await userEvent.click(toggle().getByRole('button', { name: 'Como na folha' }));
-
-    expect(toggle().getByRole('button', { name: 'Como na folha' })).toHaveAttribute('aria-pressed', 'true');
-    expect(document.querySelectorAll('.flowText')).toHaveLength(0);
-    expect(document.querySelectorAll('.lineText')).toHaveLength(correction.lines.length);
-    expect(pin(6)).toHaveAttribute('aria-pressed', 'true');
-    // O filtro "Tiraram pontos" continua: os verdes não aparecem na folha.
-    expect(screen.queryByRole('button', { name: /^Apontamento 1:/ })).toBeNull();
-    expect(localStorage.getItem('redigiai:essay-view')).toBe('sheet');
-
-    await userEvent.click(toggle().getByRole('button', { name: 'Texto corrido' }));
-    expect(localStorage.getItem('redigiai:essay-view')).toBe('flow');
-    expect(pin(6)).toHaveAttribute('aria-pressed', 'true');
-  });
-
-  it('abre no modo guardado neste navegador', () => {
-    localStorage.setItem('redigiai:essay-view', 'sheet');
-    renderApp(<CorrectionView correction={correction} back={back} />);
-
-    expect(toggle().getByRole('button', { name: 'Como na folha' })).toHaveAttribute('aria-pressed', 'true');
-    expect(document.querySelectorAll('.lineText')).toHaveLength(correction.lines.length);
-  });
-
-  it('sem armazenamento no navegador, começa no texto corrido e alterna igual', async () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
-      throw new Error('bloqueado');
-    });
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new Error('bloqueado');
-    });
-    renderApp(<CorrectionView correction={correction} back={back} />);
-
-    expect(toggle().getByRole('button', { name: 'Texto corrido' })).toHaveAttribute('aria-pressed', 'true');
-    await userEvent.click(toggle().getByRole('button', { name: 'Como na folha' }));
-    expect(toggle().getByRole('button', { name: 'Como na folha' })).toHaveAttribute('aria-pressed', 'true');
   });
 });

@@ -6,7 +6,6 @@ import { renderApp } from '../../test/helpers';
 import { AnnotationPanel } from './AnnotationPanel';
 import { CorrectionView } from './CorrectionPage';
 import { CriterionCard } from './CriterionCard';
-import { EssaySheet } from './EssaySheet';
 import { ResultSummary, ScoreMap } from './ResultSummary';
 import { RewritePlan } from './RewritePlan';
 import { ZeroResult } from './ZeroResult';
@@ -113,47 +112,6 @@ describe('ScoreMap', () => {
 
     await userEvent.click(rows[2]!);
     expect(onShowCriterion).toHaveBeenCalledWith(3);
-  });
-});
-
-describe('EssaySheet (modo "Como na folha")', () => {
-  it('marca o trecho em todas as linhas que ele atravessa e põe um botão numerado no fim', async () => {
-    const onSelect = vi.fn();
-    const { container } = render(<EssaySheet lines={correction.lines} annotations={correction.annotations} selectedId={4} onSelect={onSelect} />);
-
-    const spans = container.querySelectorAll('[data-annotation="4"]');
-    expect([...spans].map((span) => span.closest('[data-line]')?.getAttribute('data-line'))).toEqual(['10', '11']);
-    expect(screen.getAllByRole('button', { name: 'Apontamento 4: tirou pontos, critério 3' })).toHaveLength(1);
-    expect(pin(4)).toHaveAttribute('aria-pressed', 'true');
-    expect(pin(1)).toHaveAccessibleName('Apontamento 1: funcionou, critério 1');
-    // A seleção não depende só da cor: as duas linhas do trecho ficam destacadas.
-    expect(container.querySelectorAll('.lineSelected')).toHaveLength(2);
-
-    await userEvent.click(pin(6));
-    await userEvent.click(spans[0]!);
-    expect(onSelect.mock.calls).toEqual([[6], [4]]);
-  });
-
-  it('mantém o recuo de parágrafo e o texto inteiro de uma linha longa', () => {
-    const long = 'palavra '.repeat(40).trim();
-    const { container } = render(
-      <EssaySheet lines={[{ number: 1, text: long, indent: true }, { number: 2, text: 'fim', indent: false }]} annotations={[]} selectedId={null} onSelect={vi.fn()} />,
-    );
-
-    const first = container.querySelector('[data-line="1"]')!;
-    expect(first).toHaveClass('lineText', 'paragraph');
-    expect(first.textContent).toBe(long);
-    expect(container.querySelector('[data-line="2"]')).not.toHaveClass('paragraph');
-  });
-
-  it('apontamento escondido pelo filtro vira texto comum', () => {
-    const visible = visibleAnnotations(correction.annotations, { kind: 'good', criterion: null });
-    const { container } = render(<EssaySheet lines={correction.lines} annotations={visible} selectedId={null} onSelect={vi.fn()} />);
-
-    expect(container.querySelector('[data-annotation="4"]')).toBeNull();
-    expect(screen.queryByRole('button', { name: /^Apontamento 4:/ })).toBeNull();
-    expect(container.querySelector('[data-line="10"]')!.textContent).toBe(correction.lines[9]!.text);
-    expect(screen.getAllByRole('button')).toHaveLength(3);
   });
 });
 

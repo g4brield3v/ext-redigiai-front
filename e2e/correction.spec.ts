@@ -106,42 +106,34 @@ test('no celular, tocar num número abre o apontamento numa folha inferior', asy
   expect(await horizontalOverflow(page)).toBe(0);
 });
 
-const showAs = (page: Page, mode: 'Texto corrido' | 'Como na folha') =>
-  page.getByRole('group', { name: 'Como mostrar a redação' }).getByRole('button', { name: mode }).click();
+test('cada linha da folha está inteira no texto corrido e a página não rola para os lados', async ({ page }) => {
+  const lines = page.locator('[data-line]');
+  await expect(lines).toHaveCount(exampleLines.length);
 
-for (const mode of ['Texto corrido', 'Como na folha'] as const) {
-  test(`${mode}: cada linha está inteira e a página não rola para os lados`, async ({ page }) => {
-    await showAs(page, mode);
-    const lines = page.locator('[data-line]');
-    await expect(lines).toHaveCount(exampleLines.length);
+  // O texto de cada linha, sem os números dos apontamentos e da linha: tem que ser exatamente o que o aluno escreveu.
+  const texts = await lines.evaluateAll((elements) =>
+    elements.map((element) => {
+      const copy = element.cloneNode(true) as Element;
+      copy.querySelectorAll('button, [aria-hidden="true"]').forEach((extra) => extra.remove());
+      return copy.textContent;
+    }),
+  );
+  expect(texts).toEqual(exampleLines.map((line) => line.text));
+  expect(await horizontalOverflow(page)).toBe(0);
+});
 
-    // O texto de cada linha, sem os números dos apontamentos e da linha: tem que ser exatamente o que o aluno escreveu.
-    const texts = await lines.evaluateAll((elements) =>
-      elements.map((element) => {
-        const copy = element.cloneNode(true) as Element;
-        copy.querySelectorAll('button, [aria-hidden="true"]').forEach((extra) => extra.remove());
-        return copy.textContent;
-      }),
-    );
-    expect(texts).toEqual(exampleLines.map((line) => line.text));
-    expect(await horizontalOverflow(page)).toBe(0);
-  });
+test('clicar no número de um apontamento seleciona o cartão', async ({ page }) => {
+  await pin(page, 6).click();
 
-  test(`${mode}: clicar no número de um apontamento seleciona o cartão`, async ({ page }) => {
-    await showAs(page, mode);
-    await pin(page, 6).click();
+  if (wide(page)) {
+    await expect(panel(page).locator('[data-annotation-card="6"]')).toHaveAttribute('aria-pressed', 'true');
+  } else {
+    await expect(sheet(page)).toContainText('Regra: Crase antes de verbo');
+  }
+  await expect(pin(page, 6)).toHaveAttribute('aria-pressed', 'true');
+});
 
-    if (wide(page)) {
-      await expect(panel(page).locator('[data-annotation-card="6"]')).toHaveAttribute('aria-pressed', 'true');
-    } else {
-      await expect(sheet(page)).toContainText('Regra: Crase antes de verbo');
-    }
-    await expect(pin(page, 6)).toHaveAttribute('aria-pressed', 'true');
-  });
-}
-
-test('texto corrido: o número da linha não quebra a pauta (cada parágrafo tem altura múltipla de 40 px)', async ({ page }) => {
-  await showAs(page, 'Texto corrido');
+test('o número da linha não quebra a pauta (cada parágrafo tem altura múltipla de 40 px)', async ({ page }) => {
   const paragraphs = page.locator('#texto p:has([data-line])');
   await expect(paragraphs).toHaveCount(5);
 
@@ -149,20 +141,6 @@ test('texto corrido: o número da linha não quebra a pauta (cada parágrafo tem
   for (const height of heights) {
     expect(height % 40).toBeCloseTo(0, 1);
   }
-});
-
-test('trocar de modo mantém o apontamento selecionado e a escolha fica guardada', async ({ page }) => {
-  await pin(page, 6).click();
-  if (!wide(page)) {
-    // No celular, o número abre a folha inferior; fechada, a seleção continua.
-    await page.keyboard.press('Escape');
-    await expect(sheet(page)).toBeHidden();
-  }
-  await showAs(page, 'Como na folha');
-  await expect(pin(page, 6)).toHaveAttribute('aria-pressed', 'true');
-
-  await page.reload();
-  await expect(page.getByRole('button', { name: 'Como na folha' })).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('os passos marcados no plano continuam marcados ao voltar', async ({ page }) => {

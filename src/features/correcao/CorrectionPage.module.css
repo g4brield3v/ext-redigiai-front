@@ -482,77 +482,7 @@
   gap: 6px;
 }
 
-.lines {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-}
-
-.lineNumber {
-  font-size: 11.5px;
-  color: #9aa6bc;
-  text-align: right;
-  padding-right: 10px;
-  line-height: 40px;
-  border-right: 1px solid var(--margin-red);
-  font-variant-numeric: tabular-nums;
-  background-image: repeating-linear-gradient(to bottom, transparent 0 39px, var(--line) 39px 40px);
-}
-
-/* O texto quebra linha, sempre sobre a pauta: nada do que o aluno escreveu é cortado. */
-.lineText {
-  font-family: var(--font-hand);
-  font-size: 23px;
-  color: var(--ink);
-  line-height: 40px;
-  padding: 0 20px 0 14px;
-  background-image: repeating-linear-gradient(to bottom, transparent 0 39px, var(--line) 39px 40px);
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.paragraph {
-  text-indent: 30px;
-}
-
-.lineSelected {
-  background-color: #f5f8ff;
-}
-
-/* Seletor do modo da redação, no cabeçalho do quadro "Sua redação". */
-.viewToggle {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  background: #eef1f6;
-  border-radius: 999px;
-}
-
-.viewToggle button {
-  min-height: 32px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  font: inherit;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--muted);
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.viewToggle button[aria-pressed='true'] {
-  background: var(--surface);
-  color: var(--navy);
-  box-shadow: 0 0 0 1px var(--border-input);
-}
-
-.viewToggle button:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 2px;
-}
-
-/* Modo "Texto corrido": um parágrafo por fileira, com a margem do parágrafo à esquerda, sobre a mesma pauta. */
+/* A redação em texto corrido: um parágrafo por fileira, com a margem do parágrafo à esquerda, sobre a pauta. */
 .flow {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
@@ -1373,39 +1303,6 @@
 }
 
 @media (max-width: 620px) {
-  .lines {
-    grid-template-columns: 32px minmax(0, 1fr);
-  }
-
-  .lineText {
-    font-size: 21px;
-    padding: 0 12px 0 10px;
-  }
-
-  .paragraph {
-    text-indent: 20px;
-  }
-
-  /* A legenda desce para uma linha própria; o seletor fica à direita do título. */
-  .paperHead {
-    padding: 12px 14px;
-    gap: 10px;
-  }
-
-  .paperHead .viewToggle {
-    margin-left: auto;
-  }
-
-  .paperHead .legend {
-    order: 3;
-    flex-basis: 100%;
-  }
-
-  .viewToggle button {
-    padding: 0 10px;
-    font-size: 13px;
-  }
-
   .flow {
     grid-template-columns: 40px minmax(0, 1fr);
   }
